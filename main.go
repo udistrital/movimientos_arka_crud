@@ -7,13 +7,21 @@ import (
 	"github.com/astaxie/beego/orm"
 	"github.com/astaxie/beego/plugins/cors"
 	_ "github.com/lib/pq"
+	"github.com/udistrital/auditoria"
+	apistatus "github.com/udistrital/utils_oas/apiStatusLib"
 	"github.com/udistrital/utils_oas/customerror"
 )
 
 func main() {
-	orm.Debug = true
-	orm.RegisterDataBase("default", "postgres", beego.AppConfig.String("sqlconn"))
+	orm.RegisterDataBase("default", "postgres", "postgres://"+
+		beego.AppConfig.String("PGuser")+":"+
+		beego.AppConfig.String("PGpass")+"@"+
+		beego.AppConfig.String("PGurls")+":"+
+		beego.AppConfig.String("PGport")+"/"+
+		beego.AppConfig.String("PGdb")+"?sslmode=disable&search_path="+
+		beego.AppConfig.String("PGschemas")+"")
 	if beego.BConfig.RunMode == "dev" {
+		orm.Debug = true
 		beego.BConfig.WebConfig.DirectoryIndex = true
 		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
 	}
@@ -30,7 +38,9 @@ func main() {
 		AllowCredentials: true,
 	}))
 
+	//logs.SetLogger(logs.AdapterFile, `{"filename":"/var/log/beego/catalogo_elementos_crud/catalogo_elementos_crud.log"}`)
+	apistatus.Init()
+	auditoria.InitMiddleware()
 	beego.ErrorController(&customerror.CustomErrorController{})
-
 	beego.Run()
 }

@@ -170,5 +170,3 @@ ALTER TABLE movimientos_arka.movimiento ADD CONSTRAINT fk_movimiento_padre FOREI
 REFERENCES movimientos_arka.movimiento (id) MATCH FULL
 ON DELETE CASCADE ON UPDATE CASCADE;
 -- ddl-end --
-
-
