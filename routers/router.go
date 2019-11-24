@@ -45,6 +45,12 @@ func init() {
 				&controllers.ElementosMovimientoController{},
 			),
 		),
+
+		beego.NSNamespace("/tr_salida",
+			beego.NSInclude(
+				&controllers.TrSalidaController{},
+			),
+		),
 	)
 	beego.AddNamespace(ns)
 }

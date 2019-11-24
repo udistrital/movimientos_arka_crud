@@ -879,6 +879,37 @@
                     }
                 }
             }
+        },
+        "/tr_salida/": {
+            "post": {
+                "tags": [
+                    "tr_salida"
+                ],
+                "description": "create Tr_salida",
+                "operationId": "TrSalidaController.Create",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body for Tr_salida content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Tr_salida"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.Tr_salida"
+                        }
+                    },
+                    "403": {
+                        "description": "body is empty"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1057,6 +1088,10 @@
                     "$ref": "#/definitions/models.Movimiento"
                 }
             }
+        },
+        "models.Tr_salida": {
+            "title": "Tr_salida",
+            "type": "object"
         }
     },
     "tags": [
@@ -1079,6 +1114,10 @@
         {
             "name": "elementos_movimiento",
             "description": "ElementosMovimientoController operations for ElementosMovimiento\n"
+        },
+        {
+            "name": "tr_salida",
+            "description": "TrSalidaController operations for Tr_salida\n"
         }
     ]
 }
