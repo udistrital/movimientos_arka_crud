@@ -1,18 +1,3 @@
--- Database generated with pgModeler (PostgreSQL Database Modeler).
--- pgModeler  version: 0.9.2-beta
--- PostgreSQL version: 9.5
--- Project Site: pgmodeler.io
--- Model Author: ---
-
-
--- Database creation must be done outside a multicommand file.
--- These commands were put in this file only as a convenience.
--- -- object: new_database | type: DATABASE --
--- -- DROP DATABASE IF EXISTS new_database;
--- CREATE DATABASE new_database;
--- -- ddl-end --
--- 
-
 -- object: movimientos_arka | type: SCHEMA --
 -- DROP SCHEMA IF EXISTS movimientos_arka CASCADE;
 CREATE SCHEMA movimientos_arka;
@@ -170,3 +155,8 @@ ALTER TABLE movimientos_arka.movimiento ADD CONSTRAINT fk_movimiento_padre FOREI
 REFERENCES movimientos_arka.movimiento (id) MATCH FULL
 ON DELETE CASCADE ON UPDATE CASCADE;
 -- ddl-end --
+
+-- Permisos de usuario
+GRANT USAGE ON SCHEMA movimientos_arka TO desarrollooas;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA movimientos_arka TO desarrollooas;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA movimientos_arka TO desarrollooas;
