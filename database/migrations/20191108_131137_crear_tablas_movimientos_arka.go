@@ -24,14 +24,14 @@ func init() {
 // Run the migrations
 func (m *CrearTablasMovimientosArka_20191108_131137) Up() {
 	// use m.SQL("CREATE TABLE ...") to make schema update
-	file, err := ioutil.ReadFile("../scripts/crear_tablas_movimientos_arka.up.sql")
+	file, err := ioutil.ReadFile("../scripts/20191108_131137_crear_tablas_movimientos_arka.up.sql")
 
 	if err != nil {
 		// handle error
 		fmt.Println(err)
 	}
 
-	requests := strings.Split(string(file), ";\n")
+	requests := strings.Split(string(file), ";")
 
 	for _, request := range requests {
 		fmt.Println(request)
@@ -43,14 +43,14 @@ func (m *CrearTablasMovimientosArka_20191108_131137) Up() {
 // Reverse the migrations
 func (m *CrearTablasMovimientosArka_20191108_131137) Down() {
 	// use m.SQL("DROP TABLE ...") to reverse schema update
-	file, err := ioutil.ReadFile("../scripts/crear_tablas_movimientos_arka.down.sql")
+	file, err := ioutil.ReadFile("../scripts/20191108_131137_crear_tablas_movimientos_arka.down.sql")
 
 	if err != nil {
 		// handle error
 		fmt.Println(err)
 	}
 
-	requests := strings.Split(string(file), ";\n")
+	requests := strings.Split(string(file), ";")
 
 	for _, request := range requests {
 		fmt.Println(request)
