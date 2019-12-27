@@ -111,7 +111,7 @@ func GetTransaccionSalida(id int) (Salida []map[string]interface{}, err error) {
 					"Activo":            	elemento.Activo,
 					"FechaCreacion":     	elemento.FechaCreacion,
 					"FechaModificacion": 	elemento.FechaModificacion,
-					"MovimientoId":      	elemento.MovimientoId,
+					// "MovimientoId":      	elemento.MovimientoId,
 				})
 			}
 			Salida = append(Salida, map[string]interface{}{

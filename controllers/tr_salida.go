@@ -19,7 +19,7 @@ type TrSalidaController struct {
 // URLMapping ...
 func (c *TrSalidaController) URLMapping() {
 	c.Mapping("Post", c.Post)
-	c.Mapping("Get", c.Get)
+	c.Mapping("Get", c.GetOne)
 }
 
 // GetOne ...
