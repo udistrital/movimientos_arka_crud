@@ -52,10 +52,13 @@ func AddTransaccionSalida(n *SalidaGeneral) (err error) {
 			fmt.Println("ok2")
 
 			if m.Salida.MovimientoPadreId != nil {
-				entrada := Movimiento{Id : m.Salida.MovimientoPadreId.Id}
-				if err := o.Read(entrada) ; err == nil {
+				fmt.Println(m.Salida.MovimientoPadreId)
+				var entrada Movimiento
+
+				if _, err := o.QueryTable(new(Movimiento)).RelatedSel().Filter("Activo",true).Filter("Id",m.Salida.MovimientoPadreId.Id).All(&entrada) ; err == nil {
+					fmt.Println(entrada)
 					entrada.EstadoMovimientoId.Id = 4
-					if _, err := o.Update(entrada, "EstadoMovimientoId"); err != nil {
+					if _, err := o.Update(&entrada, "EstadoMovimientoId"); err != nil {
 						panic(err.Error())
 					}
 				}
@@ -71,7 +74,7 @@ func AddTransaccionSalida(n *SalidaGeneral) (err error) {
 }
 
 // AddTransaccionProduccionAcademica Transacción para registrar toda la información de un grupo asociándolo a un catálogo
-func GetTransaccionSalida(id int) (Salida []map[string]interface{}, err error) {
+func GetTransaccionSalida(id int) (Salida map[string]interface{}, err error) {
 	o := orm.NewOrm()
 	err = o.Begin()
 
@@ -89,6 +92,7 @@ func GetTransaccionSalida(id int) (Salida []map[string]interface{}, err error) {
 	}()
 		fmt.Println("ok")
 
+	
 	var elementos []ElementosMovimiento
 	var Elementos []map[string]interface{}
 
@@ -114,10 +118,11 @@ func GetTransaccionSalida(id int) (Salida []map[string]interface{}, err error) {
 					// "MovimientoId":      	elemento.MovimientoId,
 				})
 			}
-			Salida = append(Salida, map[string]interface{}{
-				"Salida":		v,
-				"Elementos":	Elementos,
-			})
+			Salida = map[string]interface{}{
+				"Salida": v,
+				"Elementos": Elementos,
+			}
+			
 			return Salida, nil
 		}
 	} else {
