@@ -20,7 +20,7 @@ func init() {
 // Run the migrations
 func (m *AgregarMovimientoAperturaKardex_20200117_143500) Up() {
 	// use m.SQL("CREATE TABLE ...") to make schema update
-	m.SQL("INSERT INTO movimientos_arka.formato_tipo_movimiento (nombre, formato, descripcion, codigo_abreviacion, numero_orden, fecha_creacion, fecha_modificacion, activo) VALUES ('Apertura de Kardex', '{ \"MetodoValoracion\": \"number\", \"CantidadMinima\": \"number\", \"CantidadMaxima\": \"number\" }', 'Formato para realizar la apertura de kardex de un elemento', 'AP_KDX', 10.0, now(), now(), true);")
+	m.SQL("INSERT INTO movimientos_arka.formato_tipo_movimiento (id, nombre, formato, descripcion, codigo_abreviacion, numero_orden, fecha_creacion, fecha_modificacion, activo) VALUES (10,'Apertura de Kardex', '{ \"MetodoValoracion\": \"number\", \"CantidadMinima\": \"number\", \"CantidadMaxima\": \"number\" }', 'Formato para realizar la apertura de kardex de un elemento', 'AP_KDX', 10.0, now(), now(), true);")
 
 }
 
