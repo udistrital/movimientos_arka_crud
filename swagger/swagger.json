@@ -880,6 +880,66 @@
                 }
             }
         },
+        "/tr_kardex/": {
+            "post": {
+                "tags": [
+                    "tr_kardex"
+                ],
+                "description": "create SalidaGeneral",
+                "operationId": "TrkardexController.Create",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body for SalidaGeneral content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.KardexGeneral"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.KardexGeneral"
+                        }
+                    },
+                    "403": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
+        "/tr_kardex/{id}": {
+            "get": {
+                "tags": [
+                    "tr_kardex"
+                ],
+                "description": "get SoporteMovimiento by id",
+                "operationId": "TrkardexController.Get One",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "The key for staticblock",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.Movimiento"
+                        }
+                    },
+                    "404": {
+                        "description": "not found resource"
+                    }
+                }
+            }
+        },
         "/tr_salida/": {
             "post": {
                 "tags": [
@@ -1058,6 +1118,18 @@
                 }
             }
         },
+        "models.KardexGeneral": {
+            "title": "KardexGeneral",
+            "type": "object",
+            "properties": {
+                "Movimiento": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.TrKardex"
+                    }
+                }
+            }
+        },
         "models.Movimiento": {
             "title": "Movimiento",
             "type": "object",
@@ -1134,6 +1206,21 @@
                 }
             }
         },
+        "models.TrKardex": {
+            "title": "TrKardex",
+            "type": "object",
+            "properties": {
+                "Elementos": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ElementosMovimiento"
+                    }
+                },
+                "Kardex": {
+                    "$ref": "#/definitions/models.Movimiento"
+                }
+            }
+        },
         "models.TrSalida": {
             "title": "TrSalida",
             "type": "object",
@@ -1174,6 +1261,10 @@
         {
             "name": "tr_salida",
             "description": "TrSalidaController operations for Tr_salida\n"
+        },
+        {
+            "name": "tr_kardex",
+            "description": "TrkardexController operations for Tr_Kardex\n"
         }
     ]
 }
