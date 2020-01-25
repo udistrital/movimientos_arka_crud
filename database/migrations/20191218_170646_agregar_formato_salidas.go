@@ -27,6 +27,6 @@ func (m *AgregarFormatoSalidas_20191218_170646) Up() {
 // Reverse the migrations
 func (m *AgregarFormatoSalidas_20191218_170646) Down() {
 	// use m.SQL("DROP TABLE ...") to reverse schema update
-	m.SQL("DELETE FROM movimientos_arka.estado_movimiento WHERE codigo_abreviacion = 'SAL';")
+	m.SQL("DELETE FROM movimientos_arka.formato_tipo_movimiento WHERE codigo_abreviacion = 'SAL';")
 
 }
