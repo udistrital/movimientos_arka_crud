@@ -19,6 +19,7 @@ type TrkardexController struct {
 // URLMapping ...
 func (c *TrkardexController) URLMapping() {
 	c.Mapping("Post", c.Post)
+	c.Mapping("Post", c.PostRespuestaSolicitud)
 	c.Mapping("Get", c.GetOne)
 }
 
@@ -56,6 +57,64 @@ func (c *TrkardexController) Post() {
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
 		fmt.Println(v);
 		if err := models.AddTransaccionKardex(&v); err == nil {
+			c.Ctx.Output.SetStatus(201)
+			c.Data["json"] = v
+		} else {
+			logs.Error(err)
+			//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
+			c.Data["system"] = err
+			c.Abort("400")
+		}
+	} else {
+		logs.Error(err)
+		//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
+		c.Data["system"] = err
+		c.Abort("400")
+	}
+	c.ServeJSON()
+}
+
+// Post ...
+// @Title Create
+// @Description create SalidaGeneral
+// @Param	body		body 	models.KardexGeneral	true		"body for SalidaGeneral content"
+// @Success 201 {object} models.KardexGeneral
+// @Failure 403 body is empty
+// @router /responder_solicitud/ [post]
+func (c *TrkardexController) PostRespuestaSolicitud() {
+	var v models.KardexGeneral
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
+		fmt.Println(v);
+		if err := models.ResponderSolicitud(&v); err == nil {
+			c.Ctx.Output.SetStatus(201)
+			c.Data["json"] = v
+		} else {
+			logs.Error(err)
+			//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
+			c.Data["system"] = err
+			c.Abort("400")
+		}
+	} else {
+		logs.Error(err)
+		//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
+		c.Data["system"] = err
+		c.Abort("400")
+	}
+	c.ServeJSON()
+}
+
+// Post ...
+// @Title Create
+// @Description create SalidaGeneral
+// @Param	body		body 	models.Movimiento	true		"body for SalidaGeneral content"
+// @Success 201 {object} models.Movimiento
+// @Failure 403 body is empty
+// @router /rechazar_solicitud/ [post]
+func (c *TrkardexController) PostRechazarSolicitud() {
+	var v models.Movimiento
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
+		fmt.Println(v);
+		if err := models.RechazarSolicitud(&v); err == nil {
 			c.Ctx.Output.SetStatus(201)
 			c.Data["json"] = v
 		} else {

@@ -130,3 +130,77 @@ func GetTransaccionKardex(id int) (Salida map[string]interface{}, err error) {
 	}
 }
 
+func ResponderSolicitud(Solicitud *KardexGeneral) (err error) {
+
+	o := orm.NewOrm()
+	err = o.Begin()
+
+	if err != nil {
+		return
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			o.Rollback()
+			logs.Error(r)
+		} else {
+			o.Commit()
+		}
+	}()
+		fmt.Println("ok")
+
+	if err := AddTransaccionKardex(Solicitud); err == nil {
+		id := Solicitud.Movimiento[0].Kardex.MovimientoPadreId
+		
+		var elemento__ Movimiento
+		fmt.Println("asdkjsdfhsdlfkghsldfkjghlsdkf")
+		fmt.Println(id)
+		fmt.Println(id.EstadoMovimientoId)
+		fmt.Println(id)
+		if _, err := o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id",id.Id).All(&elemento__) ; err == nil {
+			fmt.Println(elemento__)
+			
+			elemento__.EstadoMovimientoId = id.EstadoMovimientoId
+			elemento__.Detalle = id.Detalle
+			if _, err := o.Update(&elemento__, "EstadoMovimientoId", "Detalle"); err != nil {
+				panic(err.Error())
+			}
+		}
+
+	}
+	return
+
+}
+
+func RechazarSolicitud(id *Movimiento) (err error) {
+	o := orm.NewOrm()
+	err = o.Begin()
+
+	if err != nil {
+		return
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			o.Rollback()
+			logs.Error(r)
+		} else {
+			o.Commit()
+		}
+	}()
+		fmt.Println("ok")
+
+		var elemento__ Movimiento
+	if _, err := o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id",id.Id).All(&elemento__) ; err == nil {
+		fmt.Println(elemento__)
+		
+		elemento__.EstadoMovimientoId = id.EstadoMovimientoId
+		elemento__.Detalle = id.Detalle
+		if _, err := o.Update(&elemento__, "EstadoMovimientoId", "Detalle"); err != nil {
+			panic(err.Error())
+		}
+	} else {
+		panic(err.Error())
+	}
+	return
+}
