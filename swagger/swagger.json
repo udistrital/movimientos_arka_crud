@@ -911,6 +911,68 @@
                 }
             }
         },
+        "/tr_kardex/rechazar_solicitud/": {
+            "post": {
+                "tags": [
+                    "tr_kardex"
+                ],
+                "description": "create SalidaGeneral",
+                "operationId": "TrkardexController.Create",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body for SalidaGeneral content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Movimiento"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.Movimiento"
+                        }
+                    },
+                    "403": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
+        "/tr_kardex/responder_solicitud/": {
+            "post": {
+                "tags": [
+                    "tr_kardex"
+                ],
+                "description": "create SalidaGeneral",
+                "operationId": "TrkardexController.Create",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body for SalidaGeneral content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.KardexGeneral"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.KardexGeneral"
+                        }
+                    },
+                    "403": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
         "/tr_kardex/{id}": {
             "get": {
                 "tags": [
