@@ -388,8 +388,8 @@ func iSendRequestToWhereBodyIsMultipartformdataWithThisParamsAndTheFileLocatedAt
 }
 
 func FeatureContext(s *godog.Suite) {
-	s.Step(`^I send "(*)" request to "(*)" where body is multipart\/form-data with this params "(*)" and the file "(*)" located at "(*)"$`, iSendRequestToWhereBodyIsMultipartformdataWithThisParamsAndTheFileLocatedAt)
-	s.Step(`^I send "(*)" request to "(*)" where body is json "(*)"$`, iSendRequestToWhereBodyIsJson)
-	s.Step(`^the response code should be "(*)"$`, theResponseCodeShouldBe)
-	s.Step(`^the response should match json "(*)"$`, theResponseShouldMatchJson)
+	s.Step(`^I send "([^"]*)" request to "([^"]*)" where body is multipart\/form-data with this params "([^"]*)" and the file "([^"]*)" located at "([^"]*)"$`, iSendRequestToWhereBodyIsMultipartformdataWithThisParamsAndTheFileLocatedAt)
+	s.Step(`^I send "([^"]*)" request to "([^"]*) where body is json "([^"]*)"$`, iSendRequestToWhereBodyIsJson)
+	s.Step(`^the response code should be "([^"]*)"$`, theResponseCodeShouldBe)
+	s.Step(`^the response should match json "([^"]*)"$`, theResponseShouldMatchJson)
 }
