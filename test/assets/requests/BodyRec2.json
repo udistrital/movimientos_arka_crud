@@ -1,10 +1,1 @@
-{
-    "Id": 5,
-    "Nombre": "Prueba_test",
-    "Descripcion": "string",
-    "CodigoAbreviacion": "string",
-    "Activo": true,
-    "NumeroOrden": 1,
-    "FechaCreacion": "2019-11-01T12:54:14.186229413-05:00",
-    "FechaModificacion": "2019-11-01T12:54:14.186229413-05:00"
-}
+{"Id":100,"Nombre":"","Formato":"{}","Descripcion":"","CodigoAbreviacion":"","NumeroOrden":0,"FechaCreacion":"2019-08-23T08:42:45.426405-05:00","FechaModificacion":"2019-08-23T08:42:45.426405-05:00","Activo":false}

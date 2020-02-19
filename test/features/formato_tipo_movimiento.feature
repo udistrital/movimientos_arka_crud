@@ -27,12 +27,12 @@ Scenario Outline: To probe response route /formato_tipo_movimiento      Probe me
     |method |route                                 |bodyreq                          |codres           |bodyres                         |                                                 
     |GET    |/v1/formato_tipo_movimiento           |./assets/requests/empty.json     |200 OK           |./assets/responses/Vok2.json    |
     |POST   |/v1/formato_tipo_movimiento           |./assets/requests/empty.json     |400 Bad Request  |./assets/responses/Ierr6.json   |
-    |POST   |/v1/formato_tipo_movimiento           |./assets/requests/BodyGen1.json  |201 Created      |./assets/responses/Vok1.json    |
+    |POST   |/v1/formato_tipo_movimiento           |./assets/requests/BodyRec3.json  |201 Created      |./assets/responses/Vok3.json    |
     |POST   |/v1/formato_tipo_movimiento           |./assets/requests/Nt1.json       |400 Bad Request  |./assets/responses/Ierr1.json   |
     |POST   |/v1/formato_tipo_movimiento           |./assets/requests/Nt2.json       |400 Bad Request  |./assets/responses/Ierr2.json   |
     |POST   |/v1/formato_tipo_movimiento           |./assets/requests/Nt3.json       |400 Bad Request  |./assets/responses/Ierr3.json   |
     |POST   |/v1/formato_tipo_movimiento           |./assets/requests/Nt4.json       |400 Bad Request  |./assets/responses/Ierr4.json   |
     |POST   |/v1/formato_tipo_movimiento           |./assets/requests/Nt5.json       |400 Bad Request  |./assets/responses/Ierr5.json   | 
-    |PUT    |/v1/formato_tipo_movimiento           |./assets/requests/BodyRec2.json  |200 OK           |./assets/responses/Vok1.json    |
-    |GETID  |/v1/formato_tipo_movimiento           |./assets/requests/BodyGen1.json  |200 OK           |./assets/responses/Vok1.json    |
+    |PUT    |/v1/formato_tipo_movimiento           |./assets/requests/BodyRec4.json  |200 OK           |./assets/responses/Vok3.json    |
+    |GETID  |/v1/formato_tipo_movimiento           |./assets/requests/BodyGen5.json  |200 OK           |./assets/responses/Vok3.json    |
     |DELETE |/v1/formato_tipo_movimiento           |./assets/requests/empty.json     |200 OK           |./assets/responses/Ino.json     |
