@@ -232,4 +232,58 @@ func init() {
             Filters: nil,
             Params: nil})
 
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:TrSalidaController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:TrSalidaController"],
+        beego.ControllerComments{
+            Method: "Post",
+            Router: `/`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:TrSalidaController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:TrSalidaController"],
+        beego.ControllerComments{
+            Method: "GetOne",
+            Router: `/:id`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:TrkardexController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:TrkardexController"],
+        beego.ControllerComments{
+            Method: "Post",
+            Router: `/`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:TrkardexController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:TrkardexController"],
+        beego.ControllerComments{
+            Method: "GetOne",
+            Router: `/:id`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:TrkardexController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:TrkardexController"],
+        beego.ControllerComments{
+            Method: "PostRechazarSolicitud",
+            Router: `/rechazar_solicitud/`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:TrkardexController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:TrkardexController"],
+        beego.ControllerComments{
+            Method: "PostRespuestaSolicitud",
+            Router: `/responder_solicitud/`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
 }

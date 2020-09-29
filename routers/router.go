@@ -8,9 +8,9 @@
 package routers
 
 import (
-	"github.com/udistrital/movimientos_arka_crud/controllers"
-
 	"github.com/astaxie/beego"
+
+	"github.com/udistrital/movimientos_arka_crud/controllers"
 )
 
 func init() {
@@ -43,6 +43,17 @@ func init() {
 		beego.NSNamespace("/elementos_movimiento",
 			beego.NSInclude(
 				&controllers.ElementosMovimientoController{},
+			),
+		),
+
+		beego.NSNamespace("/tr_salida",
+			beego.NSInclude(
+				&controllers.TrSalidaController{},
+			),
+		),
+		beego.NSNamespace("/tr_kardex",
+			beego.NSInclude(
+				&controllers.TrkardexController{},
 			),
 		),
 	)
