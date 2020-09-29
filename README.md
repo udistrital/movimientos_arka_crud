@@ -77,7 +77,7 @@ Pruebas unitarias
 | [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/movimientos_arka_crud/status.svg?ref=refs/heads/develop)](https://hubci.portaloas.udistrital.edu.co/udistrital/movimientos_arka_crud) | [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/movimientos_arka_crud/status.svg?ref=refs/heads/release/0.0.1)](https://hubci.portaloas.udistrital.edu.co/udistrital/movimientos_arka_crud) | [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/movimientos_arka_crud/status.svg)](https://hubci.portaloas.udistrital.edu.co/udistrital/movimientos_arka_crud) |
 
 ## Modelo de Datos
-[Modelo de Datos API CRUD Movimientos Arka ](https://user-images.githubusercontent.com/14035745/93823393-5e0c2600-fc27-11ea-8e7f-7373cf931631.png)
+[Modelo de Datos API CRUD Movimientos Arka ](https://github.com/udistrital/movimientos_arka_crud/blob/develop/Modelo_datos_movimientos_arka.PNG)
 
 ## Licencia
 
