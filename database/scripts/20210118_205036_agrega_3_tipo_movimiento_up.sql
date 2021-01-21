@@ -1,3 +1,17 @@
+-- Lo siguiente debería ser una forma segura de resetear el serial
+-- (Referencia: https://stackoverflow.com/a/244265/3180052)
+BEGIN;
+LOCK TABLE movimientos_arka.formato_tipo_movimiento IN EXCLUSIVE MODE;
+SELECT setval(
+    pg_get_serial_sequence('movimientos_arka.formato_tipo_movimiento','id'),
+    COALESCE((SELECT MAX(id)+1 FROM movimientos_arka.formato_tipo_movimiento), 14),
+    false);
+COMMIT;
+-- Lo anterior equivale a (también funciona pero no es tan seguro):
+-- ALTER SEQUENCE movimientos_arka.formato_tipo_movimiento_id_seq RESTART WITH 14
+-- Otras formas de alterar secuencias:
+-- https://stackoverflow.com/questions/8745051/postgres-manually-alter-sequence
+
 INSERT INTO movimientos_arka.formato_tipo_movimiento (nombre,
     formato,
     descripcion,
