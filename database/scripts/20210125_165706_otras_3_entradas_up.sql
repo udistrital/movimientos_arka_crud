@@ -8,10 +8,10 @@ VALUES
 'Formato para guardar una Entrada por Intangibles adquiridos',
 'EIA', 18.0, now(), now(), true),
 ('Intangibles desarrollados',
-'{"acta_recibido_id": "number", "consecutivo":"string",  "documento_contable_id":"number","contrato_id":"number", "vigencia_contrato":"number","importacion":"boolean","amortizacion":"number","vida_util":"number"}',
+'{ "acta_recibido_id": "number", "consecutivo": "string",  "documento_contable_id": "number", "contrato_id": "number", "vigencia_contrato": "number" }',
 'Formato para guardar una Entrada de Intangibles Desarrollados',
 'EID', 19.0, now(), now(), true),
 ('Provisional',
-'{"acta_recibido_id": "number", "consecutivo":"string",  "documento_contable_id":"number","contrato_id":"number", "vigencia_contrato":"number","importacion":"boolean","amortizacion":"number","vida_util":"number"}',
+'{ "acta_recibido_id": "number", "consecutivo": "string",  "documento_contable_id": "number", "contrato_id": "number", "vigencia_contrato": "number" }',
 'Formato para guardar una Entrada de Bienes Entregados de Manera Provisional',
 'EBEMP', 20.0, now(), now(), true);
