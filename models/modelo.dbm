@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+CAUTION: Do not modify this file unless you know what you are doing.
+         Unexpected results may occur if the code is changed deliberately.
+-->
+<dbmodel pgmodeler-ver="0.9.1" last-position="0,138" last-zoom="1"
+	 default-schema="public" default-owner="postgres">
+<role name="desarrollooas"
+      superuser="true"
+      createdb="true"
+      replication="true"
+      createrole="true"
+      inherit="true"
+      login="true"
+      encrypted="true"
+      password="********">
+</role>
+
+<database name="bd_oas" encoding="UTF8" lc-collate="en_US.UTF-8" lc-ctype="en_US.UTF-8" is-template="false" allow-conns="true">
+	<role name="postgres"/>
+	<tablespace name="pg_default"/>
+</database>
+
+<schema name="public" rect-visible="true" fill-color="#e1e1e1" sql-disabled="true">
+</schema>
+
+<schema name="movimientos_arka" rect-visible="true" fill-color="#888a85">
+	<role name="postgres"/>
+</schema>
+
+<sequence name="movimiento_id_seq"
+	 start="1" increment="1"
+	 min-value="1" max-value="2147483647"
+	 cache="1" cycle="false">
+	<schema name="movimientos_arka"/>
+	<role name="postgres"/>
+</sequence>
+
+<table name="movimiento">
+	<schema name="movimientos_arka"/>
+	<role name="postgres"/>
+	<position x="120" y="440"/>
+	<column name="id" not-null="true" sequence="movimientos_arka.movimiento_id_seq">
+		<type name="integer" length="0"/>
+		<comment><![CDATA[Identificador de la tabla movimiento]]></comment>
+	</column>
+	<column name="observacion">
+		<type name="character varying" length="500"/>
+	</column>
+	<column name="detalle" not-null="true">
+		<type name="json" length="0"/>
+	</column>
+	<column name="fecha_creacion" not-null="true">
+		<type name="timestamp" length="0"/>
+	</column>
+	<column name="fecha_modificacion" not-null="true">
+		<type name="timestamp" length="0"/>
+	</column>
+	<column name="activo" not-null="true">
+		<type name="boolean" length="0"/>
+	</column>
+	<column name="movimiento_padre_id">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="formato_tipo_movimiento_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="estado_movimiento_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<constraint name="pk_movimiento" type="pk-constr" table="movimientos_arka.movimiento">
+		<columns names="id" ref-type="src-columns"/>
+		<comment><![CDATA[Llave primaria de la tabla movimiento]]></comment>
+	</constraint>
+</table>
+
+<sequence name="estado_movimiento_id_seq"
+	 start="1" increment="1"
+	 min-value="1" max-value="2147483647"
+	 cache="1" cycle="false">
+	<schema name="movimientos_arka"/>
+	<role name="postgres"/>
+</sequence>
+
+<table name="estado_movimiento">
+	<schema name="movimientos_arka"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Tabla para almacenar los posibles estados por los que puede pasar un movimiento de almacén]]></comment>
+	<position x="180" y="760"/>
+	<column name="id" not-null="true" sequence="movimientos_arka.estado_movimiento_id_seq">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="nombre" not-null="true">
+		<type name="character varying" length="20"/>
+		<comment><![CDATA[Nombre del estado del movimiento]]></comment>
+	</column>
+	<column name="activo" not-null="true">
+		<type name="boolean" length="0"/>
+	</column>
+	<column name="fecha_creacion" not-null="true">
+		<type name="timestamp" length="0"/>
+	</column>
+	<column name="fecha_modificacion" not-null="true">
+		<type name="timestamp" length="0"/>
+	</column>
+	<column name="descripcion" not-null="true">
+		<type name="character varying" length="300"/>
+		<comment><![CDATA[Descripcion del estado del movimiento]]></comment>
+	</column>
+	<constraint name="pk_estado_movimiento" type="pk-constr" table="movimientos_arka.estado_movimiento">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<sequence name="soporte_movimiento_id_seq"
+	 start="1" increment="1"
+	 min-value="1" max-value="2147483647"
+	 cache="1" cycle="false">
+	<schema name="movimientos_arka"/>
+	<role name="postgres"/>
+</sequence>
+
+<table name="soporte_movimiento">
+	<schema name="movimientos_arka"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Tabla que almacena los documentos/soportes relacionados a un movimiento, ej: factura, concepto técnico de la red de datos, denuncio, entre otros.]]></comment>
+	<position x="900" y="720"/>
+	<column name="id" not-null="true" sequence="movimientos_arka.soporte_movimiento_id_seq">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="documento_id" not-null="true">
+		<type name="integer" length="0"/>
+		<comment><![CDATA[Referencia al API de documentos del Core]]></comment>
+	</column>
+	<column name="activo" not-null="true">
+		<type name="boolean" length="0"/>
+	</column>
+	<column name="fecha_creacion" not-null="true">
+		<type name="timestamp" length="0"/>
+	</column>
+	<column name="fecha_modificacion" not-null="true">
+		<type name="timestamp" length="0"/>
+	</column>
+	<column name="movimiento_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<constraint name="pk_soporte_movimiento" type="pk-constr" table="movimientos_arka.soporte_movimiento">
+		<columns names="id" ref-type="src-columns"/>
+		<comment><![CDATA[Llave primaria de la tabla soporte_movimiento]]></comment>
+	</constraint>
+</table>
+
+<sequence name="elementos_movimiento_id_seq"
+	 start="1" increment="1"
+	 min-value="1" max-value="2147483647"
+	 cache="1" cycle="false">
+	<schema name="movimientos_arka"/>
+	<role name="postgres"/>
+</sequence>
+
+<table name="elementos_movimiento">
+	<schema name="movimientos_arka"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Tabla que almacena los elementos relacionados con un movimiento de almacén]]></comment>
+	<position x="880" y="180"/>
+	<column name="id" not-null="true" sequence="movimientos_arka.elementos_movimiento_id_seq">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="elemento_acta_id" not-null="true">
+		<type name="integer" length="0"/>
+		<comment><![CDATA[Referencia al elemento del acta de recibido]]></comment>
+	</column>
+	<column name="unidad" not-null="true">
+		<type name="numeric" length="6" precision="2"/>
+	</column>
+	<column name="valor_unitario" not-null="true">
+		<type name="numeric" length="20" precision="7"/>
+	</column>
+	<column name="valor_total" not-null="true">
+		<type name="numeric" length="20" precision="7"/>
+	</column>
+	<column name="saldo_cantidad" not-null="true">
+		<type name="numeric" length="5" precision="2"/>
+	</column>
+	<column name="saldo_valor" not-null="true">
+		<type name="numeric" length="20" precision="7"/>
+	</column>
+	<column name="activo" not-null="true">
+		<type name="boolean" length="0"/>
+	</column>
+	<column name="fecha_creacion" not-null="true">
+		<type name="timestamp" length="0"/>
+		<comment><![CDATA[Fecha de creación del registro]]></comment>
+	</column>
+	<column name="fecha_modificacion" not-null="true">
+		<type name="timestamp" length="0"/>
+		<comment><![CDATA[Fecha de la última modificación del registro]]></comment>
+	</column>
+	<column name="movimiento_id">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="elemento_catalogo_id">
+		<type name="integer" length="0"/>
+	</column>
+	<constraint name="pk_elementos_movimiento" type="pk-constr" table="movimientos_arka.elementos_movimiento">
+		<columns names="id" ref-type="src-columns"/>
+		<comment><![CDATA[Llave primaria de la tabla elementos_movimiento]]></comment>
+	</constraint>
+</table>
+
+<sequence name="formato_tipo_movimiento_id_seq"
+	 start="1" increment="1"
+	 min-value="1" max-value="2147483647"
+	 cache="1" cycle="false">
+	<schema name="movimientos_arka"/>
+	<role name="postgres"/>
+</sequence>
+
+<table name="formato_tipo_movimiento">
+	<schema name="movimientos_arka"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Tabla para parametrizar los campos de la entrada en el JSON.]]></comment>
+	<position x="920" y="500"/>
+	<column name="id" not-null="true" sequence="movimientos_arka.formato_tipo_movimiento_id_seq">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="nombre" not-null="true">
+		<type name="character varying" length="50"/>
+	</column>
+	<column name="formato" not-null="true">
+		<type name="json" length="0"/>
+		<comment><![CDATA[Campos necesarios para cada tipo movimiento especificado en un JSON]]></comment>
+	</column>
+	<column name="descripcion">
+		<type name="character varying" length="0"/>
+	</column>
+	<column name="codigo_abreviacion">
+		<type name="character varying" length="50"/>
+	</column>
+	<column name="numero_orden">
+		<type name="numeric" length="5" precision="2"/>
+	</column>
+	<column name="fecha_creacion" not-null="true">
+		<type name="timestamp" length="0"/>
+		<comment><![CDATA[Campo para almacenar la fecha en que se realiza el registro. Permite llevar una trazabilidad.]]></comment>
+	</column>
+	<column name="fecha_modificacion" not-null="true">
+		<type name="timestamp" length="0"/>
+		<comment><![CDATA[Campo para almacenar las fechas en que se realizan cambios. Permite llevar una trazabilidad.]]></comment>
+	</column>
+	<column name="activo" not-null="true">
+		<type name="boolean" length="0"/>
+	</column>
+	<constraint name="pk_tipo_entrada" type="pk-constr" table="movimientos_arka.formato_tipo_movimiento">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<constraint name="fk_movimiento_formato_tipo_movimiento" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="CASCADE" del-action="RESTRICT" ref-table="movimientos_arka.formato_tipo_movimiento" table="movimientos_arka.movimiento">
+	<columns names="formato_tipo_movimiento_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="fk_movimiento_estado_movimiento" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="CASCADE" del-action="RESTRICT" ref-table="movimientos_arka.estado_movimiento" table="movimientos_arka.movimiento">
+	<columns names="estado_movimiento_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="fk_movimiento_padre" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="CASCADE" del-action="CASCADE" ref-table="movimientos_arka.movimiento" table="movimientos_arka.movimiento">
+	<columns names="movimiento_padre_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="fk_soporte_movimiento_movimiento" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="CASCADE" del-action="RESTRICT" ref-table="movimientos_arka.movimiento" table="movimientos_arka.soporte_movimiento">
+	<columns names="movimiento_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="fk_elementos_movimiento_movimiento" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="CASCADE" del-action="SET NULL" ref-table="movimientos_arka.movimiento" table="movimientos_arka.elementos_movimiento">
+	<columns names="movimiento_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<relationship name="rel_movimiento_formato_tipo_movimiento" type="relfk"
+	 custom-color="#8525d8"
+	 src-table="movimientos_arka.movimiento"
+	 dst-table="movimientos_arka.formato_tipo_movimiento" reference-fk="fk_movimiento_formato_tipo_movimiento"
+	 src-required="false" dst-required="false">
+	<label ref-type="name-label">
+		<position x="51.9547" y="3.23934"/>
+	</label>
+</relationship>
+
+<relationship name="rel_movimiento_estado_movimiento" type="relfk"
+	 custom-color="#636095"
+	 src-table="movimientos_arka.movimiento"
+	 dst-table="movimientos_arka.estado_movimiento" reference-fk="fk_movimiento_estado_movimiento"
+	 src-required="false" dst-required="false">
+	<label ref-type="name-label">
+		<position x="-50.9412" y="15.5522"/>
+	</label>
+</relationship>
+
+<relationship name="rel_movimiento_movimiento" type="relfk"
+	 custom-color="#c78f2c"
+	 src-table="movimientos_arka.movimiento"
+	 dst-table="movimientos_arka.movimiento" reference-fk="fk_movimiento_padre"
+	 src-required="false" dst-required="false">
+	<line>
+		<position x="543.73" y="518.417"/>
+	<position x="543.73" y="429"/>
+	<position x="395.153" y="429"/>
+	</line>
+	<label ref-type="name-label">
+		<position x="-63.3353" y="3.85"/>
+	</label>
+</relationship>
+
+<relationship name="rel_soporte_movimiento_movimiento" type="relfk"
+	 custom-color="#3ef48c"
+	 src-table="movimientos_arka.soporte_movimiento"
+	 dst-table="movimientos_arka.movimiento" reference-fk="fk_soporte_movimiento_movimiento"
+	 src-required="false" dst-required="false">
+	<label ref-type="dst-label">
+		<position x="0" y="0"/>
+	</label>
+	<label ref-type="name-label">
+		<position x="47.9547" y="18.2393"/>
+	</label>
+</relationship>
+
+<relationship name="rel_elementos_movimiento_movimiento" type="relfk"
+	 custom-color="#67e130"
+	 src-table="movimientos_arka.elementos_movimiento"
+	 dst-table="movimientos_arka.movimiento" reference-fk="fk_elementos_movimiento_movimiento"
+	 src-required="false" dst-required="false">
+	<label ref-type="name-label">
+		<position x="-4.0453" y="-99.2607"/>
+	</label>
+</relationship>
+
+<permission>
+	<object name="movimientos_arka" type="schema"/>
+	<roles names="postgres"/>
+	<privileges create="true" usage="true"/>
+</permission>
+<permission>
+	<object name="movimientos_arka" type="schema"/>
+	<roles names="desarrollooas"/>
+	<privileges usage="true"/>
+</permission>
+<permission>
+	<object name="movimientos_arka.movimiento" type="table"/>
+	<roles names="postgres"/>
+	<privileges select="true" delete="true" insert="true" update="true" truncate="true" references="true" trigger="true"/>
+</permission>
+<permission>
+	<object name="movimientos_arka.movimiento" type="table"/>
+	<roles names="desarrollooas"/>
+	<privileges select="true" delete="true" insert="true" update="true"/>
+</permission>
+<permission>
+	<object name="movimientos_arka.estado_movimiento" type="table"/>
+	<roles names="postgres"/>
+	<privileges select="true" delete="true" insert="true" update="true" truncate="true" references="true" trigger="true"/>
+</permission>
+<permission>
+	<object name="movimientos_arka.estado_movimiento" type="table"/>
+	<roles names="desarrollooas"/>
+	<privileges select="true" delete="true" insert="true" update="true"/>
+</permission>
+<permission>
+	<object name="movimientos_arka.soporte_movimiento" type="table"/>
+	<roles names="postgres"/>
+	<privileges select="true" delete="true" insert="true" update="true" truncate="true" references="true" trigger="true"/>
+</permission>
+<permission>
+	<object name="movimientos_arka.soporte_movimiento" type="table"/>
+	<roles names="desarrollooas"/>
+	<privileges select="true" delete="true" insert="true" update="true"/>
+</permission>
+<permission>
+	<object name="movimientos_arka.elementos_movimiento" type="table"/>
+	<roles names="postgres"/>
+	<privileges select="true" delete="true" insert="true" update="true" truncate="true" references="true" trigger="true"/>
+</permission>
+<permission>
+	<object name="movimientos_arka.elementos_movimiento" type="table"/>
+	<roles names="desarrollooas"/>
+	<privileges select="true" delete="true" insert="true" update="true"/>
+</permission>
+<permission>
+	<object name="movimientos_arka.formato_tipo_movimiento" type="table"/>
+	<roles names="postgres"/>
+	<privileges select="true" delete="true" insert="true" update="true" truncate="true" references="true" trigger="true"/>
+</permission>
+<permission>
+	<object name="movimientos_arka.formato_tipo_movimiento" type="table"/>
+	<roles names="desarrollooas"/>
+	<privileges select="true" delete="true" insert="true" update="true"/>
+</permission>
+</dbmodel>
