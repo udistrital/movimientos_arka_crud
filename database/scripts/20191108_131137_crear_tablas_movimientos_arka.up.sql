@@ -157,6 +157,6 @@ ON DELETE CASCADE ON UPDATE CASCADE;
 -- ddl-end --
 
 -- Permisos de usuario
-GRANT USAGE ON SCHEMA movimientos_arka TO test;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA movimientos_arka TO test;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA movimientos_arka TO test;
+GRANT USAGE ON SCHEMA movimientos_arka TO desarrollooas;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA movimientos_arka TO desarrollooas;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA movimientos_arka TO desarrollooas;
