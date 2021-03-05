@@ -78,7 +78,7 @@ Pruebas unitarias
 
 ## Modelo de Datos
 [Modelo de Datos MOVIMIENTOS ARKA CRUD](https://drive.google.com/drive/u/2/folders/1VXw4sg2JiGH8PvLzff3J2gmW5igcq4V6)\
-[PGModeler](models.modelo.dbm) - [SVG](models.modelo.svg)
+[PGModeler](models/modelo.dbm) - [SVG](models.modelo.svg)
 
 
 ## Licencia
