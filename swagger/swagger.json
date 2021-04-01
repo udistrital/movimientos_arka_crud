@@ -618,6 +618,35 @@
                 }
             }
         },
+        "/movimiento/entrada/{acta_recibido_id}": {
+            "get": {
+                "tags": [
+                    "movimiento"
+                ],
+                "description": "get Movimiento by acta_recibido_id",
+                "operationId": "MovimientoController.Get By Acta",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "acta_recibido_id",
+                        "description": "id del acta asociada a la entrada",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.Movimiento"
+                        }
+                    },
+                    "404": {
+                        "description": "not found resource"
+                    }
+                }
+            }
+        },
         "/movimiento/{id}": {
             "get": {
                 "tags": [
