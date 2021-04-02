@@ -1,9 +1,11 @@
 package models
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -155,4 +157,34 @@ func DeleteMovimiento(id int) (err error) {
 		}
 	}
 	return
+}
+
+// GetEntradaByActa retrieves all Movimiento matches an specific acta_recibido_id. Returns empty list if
+// no records exist
+func GetEntradaByActa(acta_recibido_id int) (ml []interface{}, err error) {
+
+	o := orm.NewOrm()
+	var l []Movimiento
+	var scr = "\"acta_recibido_id\":" + strconv.Itoa(acta_recibido_id)
+	_, err = o.QueryTable(new(Movimiento)).RelatedSel().Filter("EstadoMovimientoId__Nombre__in", "Entrada Aceptada", "Entrada Con Salida").Filter("detalle__contains", scr).All(&l)
+	if len(l) == 0 {
+		m := make(map[string]interface{})
+		ml = append(ml, m)
+	} else if len(l) == 1 {
+		ml = append(ml, l[0])
+	} else {
+		for _, v := range l {
+			var data map[string]interface{}
+			if err := json.Unmarshal([]byte(fmt.Sprintf("%v", v.Detalle)), &data); err == nil {
+				if float64(acta_recibido_id) == data["acta_recibido_id"] {
+					ml = append(ml, v)
+					return ml, err
+				}
+			} else {
+				fmt.Println(err)
+			}
+		}
+	}
+
+	return ml, err
 }

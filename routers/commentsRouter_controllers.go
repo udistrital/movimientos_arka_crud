@@ -187,6 +187,15 @@ func init() {
             Filters: nil,
             Params: nil})
 
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:MovimientoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:MovimientoController"],
+        beego.ControllerComments{
+            Method: "GetMovimientoByActa",
+            Router: "/entrada/:acta_recibido_id",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:SoporteMovimientoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:SoporteMovimientoController"],
         beego.ControllerComments{
             Method: "Post",
