@@ -169,7 +169,11 @@ func GetEntradaByActa(acta_recibido_id int) (entrada []Movimiento, err error) {
 
 	o := orm.NewOrm()
 	_, err = o.Raw(query_estado, estados).QueryRows(&estadoMovimiento)
-	_, err = o.Raw(query_movimiento, acta_recibido_id, estadoMovimiento).QueryRows(&movimientos)
+	if num, err := o.Raw(query_movimiento, acta_recibido_id, estadoMovimiento).QueryRows(&movimientos); err != nil {
+		return nil, err
+	} else if num == 0 {
+		movimientos = make([]Movimiento, 0)
+	}
 
-	return movimientos, err
+	return movimientos, nil
 }
