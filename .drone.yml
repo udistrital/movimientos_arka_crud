@@ -50,14 +50,15 @@ steps:
 - name: go_build
   image: golang:1.14
   commands:
-  - go mod init
   - go get -t
   - GOOS=linux GOARCH=amd64 go build -o main
   when:
     branch:
     - develop
-    - release/*
+    - feature/*
+    - hotfix/*
     - master
+    - release/*
     event:
     - push
 
@@ -77,6 +78,8 @@ steps:
   when:
     branch:
     - develop
+    - hotfix/*
+    - feature/*
     - release/*
     - master
     event:
@@ -147,6 +150,9 @@ steps:
     branch:
     - release/*
     - master
+    ref:
+      exclude:
+        - refs/tags/**
 
 - name: update_aws_ecs
   image: golang:1.9
@@ -182,6 +188,9 @@ steps:
     - master
     event:
     - push
+    ref:
+      exclude:
+        - refs/tags/**
 
 - name: notify_telegram
   image: appleboy/drone-telegram
