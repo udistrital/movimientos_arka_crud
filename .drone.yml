@@ -13,6 +13,7 @@ name: oas_api_ci
 steps:
 - name: check_readme
   image: jjvargass/qa_develoment:latest
+  failure: ignore
   commands:
   - python /app/check_readme.py
   when:
@@ -25,6 +26,7 @@ steps:
 
 - name: check_branch
   image: jjvargass/qa_develoment:latest
+  failure: ignore
   commands:
   - python /app/check_branch.py -H ${DRONE_GIT_HTTP_URL}
   when:
@@ -37,6 +39,7 @@ steps:
 
 - name: check_commits
   image: jjvargass/qa_develoment:latest
+  failure: ignore
   commands:
   - python /app/check_commits.py
   when:
@@ -63,6 +66,7 @@ steps:
     - push
 
 - name: go_run_test
+  failure: ignore
   image: golang:1.14
   commands:
   - go get -t
