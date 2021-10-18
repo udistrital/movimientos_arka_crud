@@ -14,13 +14,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/astaxie/beego"
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/colors"
-	"github.com/astaxie/beego"
 
 	"github.com/udistrital/utils_oas/request"
 )
-
 
 //@opt opciones de godog
 var opt = godog.Options{Output: colors.Colored(os.Stdout)}
@@ -81,9 +80,8 @@ func deleteFile(path string) {
 //@run_bee activa el servicio de la api para realizar los test
 func run_bee() {
 	var resultado map[string]interface{}
-	
 
-	parametros := "MOVIMIENTOS_ARKA_CRUD_PGPORT=" + beego.AppConfig.String("PGport") +" MOVIMIENTOS_ARKA_CRUD_HTTP_PORT=" + beego.AppConfig.String("httpport") + " MOVIMIENTOS_ARKA_CRUD_PGUSER=" + beego.AppConfig.String("PGuser") + " MOVIMIENTOS_ARKA_CRUD_PGPASS=" + beego.AppConfig.String("PGpass") + " MOVIMIENTOS_ARKA_CRUD_PGURLS=" + beego.AppConfig.String("PGurls") + " MOVIMIENTOS_ARKA_CRUD_PGDB=" + beego.AppConfig.String("PGdb") + " MOVIMIENTOS_ARKA_CRUD_PGSCHEMA=" + beego.AppConfig.String("PGschemas") + " bee run"
+	parametros := "MOVIMIENTOS_ARKA_CRUD_PGPORT=" + beego.AppConfig.String("PGport") + " MOVIMIENTOS_ARKA_CRUD_HTTP_PORT=" + beego.AppConfig.String("httpport") + " MOVIMIENTOS_ARKA_CRUD_PGUSER=" + beego.AppConfig.String("PGuser") + " MOVIMIENTOS_ARKA_CRUD_PGPASS=" + beego.AppConfig.String("PGpass") + " MOVIMIENTOS_ARKA_CRUD_PGURLS=" + beego.AppConfig.String("PGurls") + " MOVIMIENTOS_ARKA_CRUD_PGDB=" + beego.AppConfig.String("PGdb") + " MOVIMIENTOS_ARKA_CRUD_PGSCHEMA=" + beego.AppConfig.String("PGschemas") + " bee run"
 	file, err := os.Create("script.sh")
 	if err != nil {
 		log.Fatal("Cannot create file", err)
@@ -152,7 +150,7 @@ func gen_files() {
 	fmt.Println("Genera los archivos")
 	t := time.Now()
 
-	nombre := "Prueba_test"// t.Format(especificacion) //se cambia para que cumpla con la especificacion de varying(20)
+	nombre := "Prueba_test" // t.Format(especificacion) //se cambia para que cumpla con la especificacion de varying(20)
 	atributo := Parametrica{
 		Nombre:            nombre,
 		Descripcion:       "string",
@@ -169,5 +167,3 @@ func gen_files() {
 	ioutil.WriteFile("./assets/requests/BodyGen3.json", rankingsJson, 0644)
 	ioutil.WriteFile("./assets/requests/BodyGen4.json", rankingsJson, 0644)
 }
-
-
