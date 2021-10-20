@@ -138,7 +138,7 @@ func (c *FormatoTipoMovimientoController) GetAll() {
 		c.Abort("404")
 	} else {
 		if l == nil {
-			l = append(l, map[string]interface{}{})
+			l = []interface{}{}
 		}
 		c.Data["json"] = l
 	}
