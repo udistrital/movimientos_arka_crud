@@ -30,7 +30,7 @@ func (m *EstadosEntradas_20211013_204842) Up() {
 		fmt.Println(err)
 	}
 
-	requests := strings.Split(string(file), ";")
+	requests := strings.Split(string(file), ";\n")
 
 	for _, request := range requests {
 		fmt.Println(request)
@@ -49,7 +49,7 @@ func (m *EstadosEntradas_20211013_204842) Down() {
 		fmt.Println(err)
 	}
 
-	requests := strings.Split(string(file), ";")
+	requests := strings.Split(string(file), ";\n")
 
 	for _, request := range requests {
 		fmt.Println(request)
