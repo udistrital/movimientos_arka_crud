@@ -1,14 +1,10 @@
-workspace:
-  base: /go
-  path: src/github.com/udistrital/${DRONE_REPO##udistrital/}
-  when:
-      branch:
-      - develop
-      - release/*
-      - master
-
 kind: pipeline
 name: oas_api_ci
+
+trigger:
+  event:
+    exclude:
+      - tag
 
 steps:
 - name: check_readme
