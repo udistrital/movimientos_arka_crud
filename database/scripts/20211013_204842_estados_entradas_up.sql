@@ -12,7 +12,7 @@
 BEGIN;
 LOCK TABLE movimientos_arka.estado_movimiento IN EXCLUSIVE MODE;
 SELECT setval(
-    'movimientos.estado_movimiento_id_seq',
+    'movimientos_arka.estado_movimiento_id_seq',
     COALESCE((SELECT MAX(id)+1 FROM movimientos_arka.estado_movimiento), 15),
     false);
 COMMIT;
