@@ -15,14 +15,10 @@ type SalidaGeneral struct {
 	Salidas []*TrSalida
 }
 
-// AddTransaccionProduccionAcademica Transacción para registrar toda la información de un grupo asociándolo a un catálogo
+// AddTransaccionSalida Transacción para registrar todas las salidas asociadas a una entrada
 func AddTransaccionSalida(n *SalidaGeneral) (err error) {
 	o := orm.NewOrm()
 	err = o.Begin()
-
-	if err != nil {
-		return
-	}
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -32,42 +28,31 @@ func AddTransaccionSalida(n *SalidaGeneral) (err error) {
 			o.Commit()
 		}
 	}()
-		fmt.Println("ok")
+	if err != nil {
+		return
+	}
 
+	var estado EstadoMovimiento
+	if _, err = o.QueryTable(new(EstadoMovimiento)).RelatedSel().Filter("Nombre", "Entrada Con Salida").All(&estado); err != nil {
+		panic(err.Error())
+	}
+	n.Salidas[0].Salida.MovimientoPadreId.EstadoMovimientoId = &estado
+	if _, err = o.Update(n.Salidas[0].Salida.MovimientoPadreId, "EstadoMovimientoId"); err != nil {
+		panic(err.Error())
+	}
 
 	for _, m := range n.Salidas {
-
-
-		fmt.Println(m.Salida.Detalle)
 		if idSalida, err := o.Insert(m.Salida); err == nil {
-			fmt.Println(idSalida)
-			mov := Movimiento{Id : int(idSalida)}
+			mov := Movimiento{Id: int(idSalida)}
 			for _, elemento := range m.Elementos {
 				elemento.MovimientoId = &mov
-				fmt.Println("elemento" ,elemento)
 				if _, err := o.Insert(elemento); err != nil {
 					panic(err.Error())
 				}
 			}
-			fmt.Println("ok2")
-
-			if m.Salida.MovimientoPadreId != nil {
-				fmt.Println(m.Salida.MovimientoPadreId)
-				var entrada Movimiento
-
-				if _, err := o.QueryTable(new(Movimiento)).RelatedSel().Filter("Activo",true).Filter("Id",m.Salida.MovimientoPadreId.Id).All(&entrada) ; err == nil {
-					fmt.Println(entrada)
-					entrada.EstadoMovimientoId.Id = 4
-					if _, err := o.Update(&entrada, "EstadoMovimientoId"); err != nil {
-						panic(err.Error())
-					}
-				}
-			}
-			
 		} else {
 			panic(err.Error())
 		}
-
 	}
 
 	return
