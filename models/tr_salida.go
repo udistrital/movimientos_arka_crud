@@ -1,7 +1,7 @@
 package models
 
 import (
-	"fmt"
+	"strconv"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
@@ -29,6 +29,7 @@ func AddTransaccionSalida(n *SalidaGeneral) (err error) {
 		}
 	}()
 	if err != nil {
+		logs.Error(err)
 		return
 	}
 
@@ -63,55 +64,37 @@ func GetTransaccionSalida(id int) (Salida map[string]interface{}, err error) {
 	o := orm.NewOrm()
 	err = o.Begin()
 
-	if err != nil {
-		return
-	}
-
 	defer func() {
 		if r := recover(); r != nil {
 			o.Rollback()
-			logs.Error(r)
+			logs.Error(err)
 		} else {
 			o.Commit()
 		}
 	}()
-		fmt.Println("ok")
 
-	
-	var elementos []ElementosMovimiento
-	var Elementos []map[string]interface{}
-
-	v := &Movimiento{Id: id}
-	if err = o.Read(v); err == nil {
-
-		if _, err := o.QueryTable(new(ElementosMovimiento)).RelatedSel().Filter("Activo",true).Filter("MovimientoId__Id",id).All(&elementos); err != nil{
-			panic(err.Error())
-		} else {
-
-			for _, elemento := range elementos {
-				Elementos = append(Elementos, map[string]interface{}{
-					"Id":					elemento.Id,                
-					"ElementoActaId":    	elemento.ElementoActaId,
-					"Unidad":            	elemento.Unidad,
-					"ValorUnitario":     	elemento.ValorUnitario,
-					"ValorTotal":        	elemento.ValorTotal,
-					"SaldoCantidad":     	elemento.SaldoCantidad,
-					"SaldoValor":        	elemento.SaldoValor,
-					"Activo":            	elemento.Activo,
-					"FechaCreacion":     	elemento.FechaCreacion,
-					"FechaModificacion": 	elemento.FechaModificacion,
-					// "MovimientoId":      	elemento.MovimientoId,
-				})
-			}
-			Salida = map[string]interface{}{
-				"Salida": v,
-				"Elementos": Elementos,
-			}
-			
-			return Salida, nil
-		}
-	} else {
-		return nil, err
+	if err != nil {
+		logs.Error(err)
+		return
 	}
-}
 
+	var elementos []interface{}
+	var movimiento Movimiento
+
+	if _, err := o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id", id).All(&movimiento); err != nil {
+		panic(err.Error())
+	}
+
+	query := map[string]string{"MovimientoId__Id": strconv.Itoa(id)}
+	fields := []string{"Id", "ElementoActaId", "Unidad", "ValorUnitario", "ValorTotal", "SaldoCantidad", "SaldoValor"}
+	if elementos, err = GetAllElementosMovimiento(query, fields, nil, nil, 0, -1); err != nil {
+		panic(err.Error())
+	}
+
+	Salida = map[string]interface{}{
+		"Salida":    movimiento,
+		"Elementos": elementos,
+	}
+
+	return Salida, nil
+}
