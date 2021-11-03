@@ -85,7 +85,7 @@ func GetTransaccionSalida(id int) (Salida map[string]interface{}, err error) {
 		panic(err.Error())
 	}
 
-	query := map[string]string{"MovimientoId__Id": strconv.Itoa(id)}
+	query := map[string]string{"MovimientoId__Id": strconv.Itoa(id), "Activo": "true"}
 	fields := []string{"Id", "ElementoActaId", "Unidad", "ValorUnitario", "ValorTotal", "SaldoCantidad", "SaldoValor"}
 	if elementos, err = GetAllElementosMovimiento(query, fields, nil, nil, 0, -1); err != nil {
 		panic(err.Error())
