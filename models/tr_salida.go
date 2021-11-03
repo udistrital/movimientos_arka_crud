@@ -67,7 +67,7 @@ func GetTransaccionSalida(id int) (Salida map[string]interface{}, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			o.Rollback()
-			logs.Error(err)
+			logs.Error(r)
 		} else {
 			o.Commit()
 		}
