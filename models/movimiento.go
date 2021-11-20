@@ -13,7 +13,7 @@ import (
 type Movimiento struct {
 	Id                      int                    `orm:"column(id);pk;auto"`
 	Observacion             string                 `orm:"column(observacion);null"`
-	Detalle                 string                 `orm:"column(detalle);type(json)"`
+	Detalle                 string                 `orm:"column(detalle);type(jsonb)"`
 	FechaCreacion           time.Time              `orm:"auto_now_add;column(fecha_creacion);type(timestamp without time zone)"`
 	FechaModificacion       time.Time              `orm:"auto_now;column(fecha_modificacion);type(timestamp without time zone)"`
 	Activo                  bool                   `orm:"column(activo)"`
