@@ -1,7 +1,7 @@
 UPDATE movimientos_arka.formato_tipo_movimiento SET
     nombre = 'Traslado',
     descripcion = 'Traslado de bien',
-    formato = '{ "Elementos": [ { "elementoMovimientoId": "number"} ], "FuncionarioOrigen": "number" , "FuncionarioDestino": "number" }',
+    formato = '{ "Elementos": [], "Ubicacion": number, "Consecutivo": string, "FuncionarioOrigen": number , "FuncionarioDestino": number }',
     fecha_modificacion = now()
 WHERE nombre = 'Solicitud de Traslado';
 
@@ -40,5 +40,3 @@ VALUES
 
 ALTER TABLE movimientos_arka.movimiento
     ALTER COLUMN detalle TYPE jsonb;
-
-        

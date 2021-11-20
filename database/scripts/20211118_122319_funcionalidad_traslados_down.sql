@@ -1,7 +1,7 @@
 UPDATE movimientos_arka.formato_tipo_movimiento SET
     nombre = 'Solicitud de Traslado',
-    descripcion = 'Traslado de bien',
-    formato = '{ "Elementos": [ { "elementoMovimientoId": "number"} ], "FuncionarioOrigen": "number" , "FuncionarioDestino": "number" }',
+    descripcion = 'Formato para guardar una solicitud de Traslado',
+    formato = '{ "Elementos": [ { "Funcionario": "number", "Ubicacion": "number", "ElementoActa": "number", "Cantidad": "number" } ] }',
     fecha_modificacion = now()
 WHERE nombre = 'Traslado';
 
