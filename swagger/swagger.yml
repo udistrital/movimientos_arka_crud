@@ -685,6 +685,26 @@ paths:
         "403":
           description: body is empty
   /tr_salida/:
+    put:
+      tags:
+      - tr_salida
+      description: Realiza los movimientos necesarios una vez se editó una salida
+        y se generaron nuevas salidas
+      operationId: TrSalidaController.Put TrSalida
+      parameters:
+      - in: body
+        name: body
+        description: body for SalidaGeneral content
+        required: true
+        schema:
+          $ref: '#/definitions/models.SalidaGeneral'
+      responses:
+        "201":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.SalidaGeneral'
+        "403":
+          description: body is empty
     post:
       tags:
       - tr_salida
