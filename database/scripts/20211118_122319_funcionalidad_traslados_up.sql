@@ -1,7 +1,7 @@
 UPDATE movimientos_arka.formato_tipo_movimiento SET
     nombre = 'Traslado',
     descripcion = 'Traslado de bien',
-    formato = '{ "Elementos": [], "Ubicacion": number, "Consecutivo": string, "FuncionarioOrigen": number , "FuncionarioDestino": number }',
+    formato = '{ "Elementos": [], "Ubicacion": "number", "Consecutivo": "string", "FuncionarioOrigen": "number" , "FuncionarioDestino": "number" }',
     fecha_modificacion = now()
 WHERE nombre = 'Solicitud de Traslado';
 
@@ -17,8 +17,8 @@ VALUES
     true,
     now(),
     now()),
-    ('Traslado Aceptado',
-    'Traslado aceptado por almacen',
+    ('Traslado Aprobado',
+    'Traslado aprobado por almacén',
     true,
     now(),
     now()),
