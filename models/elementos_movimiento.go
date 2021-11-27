@@ -11,18 +11,18 @@ import (
 )
 
 type ElementosMovimiento struct {
-	Id                		int         `orm:"column(id);pk;auto"`
-	ElementoActaId    		int         `orm:"column(elemento_acta_id)"`
-	ElementoCatalogoId    	int         `orm:"column(elemento_catalogo_id)"`
-	Unidad            		float64     `orm:"column(unidad)"`
-	ValorUnitario     		float64     `orm:"column(valor_unitario)"`
-	ValorTotal        		float64     `orm:"column(valor_total)"`
-	SaldoCantidad     		float64     `orm:"column(saldo_cantidad)"`
-	SaldoValor        		float64     `orm:"column(saldo_valor)"`
-	Activo            		bool        `orm:"column(activo)"`
-	FechaCreacion     		time.Time   `orm:"auto_now_add;column(fecha_creacion);type(timestamp without time zone)"`
-	FechaModificacion 		time.Time   `orm:"auto_now;column(fecha_modificacion);type(timestamp without time zone)"`
-	MovimientoId      		*Movimiento `orm:"column(movimiento_id);rel(fk)"`
+	Id                 int         `orm:"column(id);pk;auto"`
+	ElementoActaId     int         `orm:"column(elemento_acta_id)"`
+	ElementoCatalogoId int         `orm:"column(elemento_catalogo_id)"`
+	Unidad             float64     `orm:"column(unidad)"`
+	ValorUnitario      float64     `orm:"column(valor_unitario)"`
+	ValorTotal         float64     `orm:"column(valor_total)"`
+	SaldoCantidad      float64     `orm:"column(saldo_cantidad)"`
+	SaldoValor         float64     `orm:"column(saldo_valor)"`
+	Activo             bool        `orm:"column(activo)"`
+	FechaCreacion      time.Time   `orm:"auto_now_add;column(fecha_creacion);type(timestamp without time zone)"`
+	FechaModificacion  time.Time   `orm:"auto_now;column(fecha_modificacion);type(timestamp without time zone)"`
+	MovimientoId       *Movimiento `orm:"column(movimiento_id);rel(fk)"`
 }
 
 func (t *ElementosMovimiento) TableName() string {
@@ -64,9 +64,9 @@ func GetAllElementosMovimiento(query map[string]string, fields []string, sortby 
 		k = strings.Replace(k, ".", "__", -1)
 		if strings.Contains(k, "isnull") {
 			qs = qs.Filter(k, (v == "true" || v == "1"))
-		} else if strings.Contains(k, "__in") && strings.Contains(v, ";") {
-			f := strings.Split(v, ";")
-			qs = qs.Filter(k, f)
+		} else if strings.Contains(k, "__in") {
+			arr := strings.Split(v, "|")
+			qs = qs.Filter(k, arr)
 		} else {
 			qs = qs.Filter(k, v)
 		}
