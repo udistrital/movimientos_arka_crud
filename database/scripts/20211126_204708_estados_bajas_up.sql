@@ -46,7 +46,7 @@ VALUES
     now(),
     now()),
     ('Baja Aprobada',
-    'Traslado confirmado por funcionario destino',
+    'Baja aceptada en comité de almacén',
     true,
     now(),
     now());
