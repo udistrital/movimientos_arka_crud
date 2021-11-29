@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -54,7 +53,7 @@ func (c *TrSalidaController) GetOne() {
 func (c *TrSalidaController) Post() {
 	var v models.SalidaGeneral
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
-		fmt.Println(v);
+
 		if err := models.AddTransaccionSalida(&v); err == nil {
 			c.Ctx.Output.SetStatus(201)
 			c.Data["json"] = v
@@ -67,6 +66,33 @@ func (c *TrSalidaController) Post() {
 	} else {
 		logs.Error(err)
 		//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
+		c.Data["system"] = err
+		c.Abort("400")
+	}
+	c.ServeJSON()
+}
+
+// Put ...
+// @Title Put TrSalida
+// @Description Realiza los movimientos necesarios una vez se editó una salida y se generaron nuevas salidas
+// @Param	body		body 	models.SalidaGeneral	true		"body for SalidaGeneral content"
+// @Success 201 {object} models.SalidaGeneral
+// @Failure 403 body is empty
+// @router / [put]
+func (c *TrSalidaController) Put() {
+	var v models.SalidaGeneral
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
+
+		if err := models.PutTransaccionSalida(&v); err == nil {
+			c.Ctx.Output.SetStatus(201)
+			c.Data["json"] = v
+		} else {
+			logs.Error(err)
+			c.Data["system"] = err
+			c.Abort("400")
+		}
+	} else {
+		logs.Error(err)
 		c.Data["system"] = err
 		c.Abort("400")
 	}
