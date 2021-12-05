@@ -11,6 +11,30 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 basePath: /v1
 paths:
+  /bajas/:
+    put:
+      tags:
+      - bajas
+      description: Actualiza el estado de las solicitudes una vez se registra la revision
+        del comite de almacen
+      operationId: BajasController.Put
+      parameters:
+      - in: body
+        name: body
+        description: Informacion de la revision
+        required: true
+        schema:
+          $ref: '#/definitions/models.TrRevisionBaja'
+      responses:
+        "200":
+          description: ""
+          schema:
+            type: array
+            items:
+              format: int64
+              type: integer
+        "404":
+          description: not found resource
   /elementos_movimiento/:
     get:
       tags:
@@ -898,6 +922,19 @@ definitions:
           $ref: '#/definitions/models.ElementosMovimiento'
       Kardex:
         $ref: '#/definitions/models.Movimiento'
+  models.TrRevisionBaja:
+    title: TrRevisionBaja
+    type: object
+    properties:
+      Aprobacion:
+        type: boolean
+      Bajas:
+        type: array
+        items:
+          type: integer
+          format: int64
+      Observaciones:
+        type: string
   models.TrSalida:
     title: TrSalida
     type: object
@@ -930,3 +967,6 @@ tags:
 - name: tr_kardex
   description: |
     TrkardexController operations for Tr_Kardex
+- name: bajas
+  description: |
+    BajasController

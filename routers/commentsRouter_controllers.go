@@ -7,6 +7,15 @@ import (
 
 func init() {
 
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:BajasController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:BajasController"],
+        beego.ControllerComments{
+            Method: "Put",
+            Router: "/",
+            AllowHTTPMethods: []string{"put"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:ElementosMovimientoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:ElementosMovimientoController"],
         beego.ControllerComments{
             Method: "Post",
