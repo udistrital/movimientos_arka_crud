@@ -56,6 +56,11 @@ func init() {
 				&controllers.TrkardexController{},
 			),
 		),
+		beego.NSNamespace("/bajas",
+			beego.NSInclude(
+				&controllers.BajasController{},
+			),
+		),
 	)
 	beego.AddNamespace(ns)
 }
