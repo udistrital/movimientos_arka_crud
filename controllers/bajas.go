@@ -7,6 +7,7 @@ import (
 	"github.com/astaxie/beego/logs"
 
 	"github.com/udistrital/movimientos_arka_crud/models"
+	"github.com/udistrital/utils_oas/errorctrl"
 )
 
 // BajasController
@@ -27,6 +28,8 @@ func (c *BajasController) URLMapping() {
 // @Failure 404 not found resource
 // @router / [put]
 func (c *BajasController) Put() {
+
+	defer errorctrl.ErrorControlController(c.Controller, "BajasController")
 
 	var trBaja *models.TrRevisionBaja
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &trBaja); err != nil {

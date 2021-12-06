@@ -32,9 +32,9 @@ func PostRevisionComite(n *TrRevisionBaja) (ids []int, err error) {
 		if r := recover(); r != nil {
 			o.Rollback()
 			logs.Error(r)
-		} else {
-			o.Commit()
+			panic(err)
 		}
+		o.Commit()
 	}()
 	if err != nil {
 		logs.Error(err)
