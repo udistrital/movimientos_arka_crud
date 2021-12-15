@@ -134,6 +134,32 @@
                 }
             }
         },
+        "/elementos_movimiento/funcionario/{funcionarioId}": {
+            "get": {
+                "tags": [
+                    "elementos_movimiento"
+                ],
+                "description": "get Elementos by funcionario_id",
+                "operationId": "ElementosMovimientoController.Get By Funcionario",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "funcionarioId",
+                        "description": "tercero_id del funcionario a consultar",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "[]int"
+                    },
+                    "404": {
+                        "description": "not found resource"
+                    }
+                }
+            }
+        },
         "/elementos_movimiento/{id}": {
             "get": {
                 "tags": [

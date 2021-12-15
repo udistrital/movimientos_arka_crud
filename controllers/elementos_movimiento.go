@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/udistrital/movimientos_arka_crud/models"
+	"github.com/udistrital/utils_oas/errorctrl"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
@@ -24,6 +25,7 @@ func (c *ElementosMovimientoController) URLMapping() {
 	c.Mapping("GetAll", c.GetAll)
 	c.Mapping("Put", c.Put)
 	c.Mapping("Delete", c.Delete)
+	c.Mapping("GetByFuncionario", c.GetByFuncionario)
 }
 
 // Post ...
@@ -190,6 +192,37 @@ func (c *ElementosMovimientoController) Delete() {
 	} else {
 		logs.Error(err)
 		//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
+		c.Data["system"] = err
+		c.Abort("404")
+	}
+	c.ServeJSON()
+}
+
+// GetByFuncionario ...
+// @Title Get By Funcionario
+// @Description get Elementos by funcionario_id
+// @Param	funcionarioId path string true "tercero_id del funcionario a consultar"
+// @Success 200 []int
+// @Failure 404 not found resource
+// @router /funcionario/:funcionarioId [get]
+func (c *ElementosMovimientoController) GetByFuncionario() {
+
+	defer errorctrl.ErrorControlController(c.Controller, "ElementosMovimientoController")
+
+	var id int
+	if v, err := c.GetInt(":funcionarioId"); err != nil || v <= 0 {
+		if err == nil {
+			err = errors.New("Se debe especificar un funcionario válido")
+		}
+		panic(errorctrl.Error("GetByFuncionario", err, "400"))
+	} else {
+		id = v
+	}
+
+	if el, err := models.GetElementosFuncionario(id); err == nil {
+		c.Data["json"] = el
+	} else {
+		logs.Error(err)
 		c.Data["system"] = err
 		c.Abort("404")
 	}
