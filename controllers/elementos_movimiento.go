@@ -207,14 +207,14 @@ func (c *ElementosMovimientoController) Delete() {
 // @router /funcionario/:funcionarioId [get]
 func (c *ElementosMovimientoController) GetByFuncionario() {
 
-	defer errorctrl.ErrorControlController(c.Controller, "ElementosMovimientoController")
+	defer errorctrl.ErrorControlController(c.Controller, "ElementosMovimientoController - Unhandled Error!")
 
 	var id int
 	if v, err := c.GetInt(":funcionarioId"); err != nil || v <= 0 {
 		if err == nil {
 			err = errors.New("Se debe especificar un funcionario válido")
 		}
-		panic(errorctrl.Error("GetByFuncionario", err, "400"))
+		panic(errorctrl.Error("GetByFuncionario - c.GetInt(\":funcionarioId\")", err, "400"))
 	} else {
 		id = v
 	}
