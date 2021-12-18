@@ -4,10 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/astaxie/beego/orm"
+	"github.com/udistrital/utils_oas/formatdata"
 )
 
 type ElementosMovimiento struct {
@@ -27,8 +29,8 @@ type ElementosMovimiento struct {
 
 type Historial struct {
 	Salida       *Movimiento
+	Traslados    []*Movimiento
 	Baja         *Movimiento
-	Traslados    *Movimiento
 	Depreciacion *Movimiento
 }
 
@@ -320,151 +322,71 @@ func GetElementosFuncionario(funcionarioId int) (entrada []int, err error) {
 	return elementos, nil
 }
 
-func GetHistorialElemento(elementoId int) (entrada []int, err error) {
-
-	// Los elementos se determinan de la siguiente manera
-	// + Elementos asignados en una salida
-	// - Elementos trasladados a otro funcionario
-	// + Elementos trasladados desde otro funcionario
-	// - Elementos dados de baja
-	// - Elementos solicitados para traslado
+// Retorna los movimientos que han involucrado un elemento
+func GetHistorialElemento(elementoId int, final bool) (historial *Historial, err error) {
 
 	var (
-		query       string
-		elementos   []int
-		trasladados []int
+		baja      []*Movimiento
+		traslados []*Movimiento
 	)
 
+	historial = new(Historial)
+
 	o := orm.NewOrm()
-	queryC :=
-		`bajas AS (
-			SELECT
-				DISTINCT em.id as bajas
-			FROM
-				movimientos_arka.movimiento m,
-				movimientos_arka.estado_movimiento sm,
-				movimientos_arka.elementos_movimiento em,
-				jsonb_array_elements(m.detalle -> 'Elementos') AS elem
-			WHERE
-				sm.nombre LIKE 'Baja%'
-				AND CAST(elem as INTEGER) = em.id
-				AND m.estado_movimiento_id = sm.id
-			),
-		pendientes AS (
-				SELECT
-					DISTINCT em.id as pendientes
-				FROM
-					movimientos_arka.movimiento m,
-					movimientos_arka.estado_movimiento sm,
-					movimientos_arka.elementos_movimiento em,
-					jsonb_array_elements(m.detalle -> 'Elementos') AS elem
-				WHERE
-					sm.nombre IN ('Traslado En Trámite','Traslado Rechazado','Traslado Aprobado')
-					AND CAST(elem as INTEGER) = em.id
-					AND m.estado_movimiento_id = sm.id
-				),
-		excepto as (
-			SELECT bajas
-			FROM bajas
-			UNION
-			SELECT pendientes
-			FROM pendientes
-				)
-
-		SELECT *
-		FROM elementos
-		EXCEPT
-		SELECT *
-		FROM excepto;`
-	query =
-		`WITH
-			elementos AS (
-				SELECT
-					DISTINCT em.id as elementos
-				FROM
-					movimientos_arka.movimiento m,
-					movimientos_arka.estado_movimiento sm,
-					movimientos_arka.elementos_movimiento em,
-					jsonb(m.detalle -> 'funcionario') AS func
-				WHERE
-					sm.nombre = 'Salida Aprobada'
-					AND m.estado_movimiento_id = sm.id
-					AND em.movimiento_id = m.id
-					AND CAST(func as INTEGER) = ?
-				),`
-
-	if _, err = o.Raw(query+queryC, elementoId).QueryRows(&elementos); err != nil {
+	if l, err := GetAllElementosMovimiento(
+		map[string]string{"Id": strconv.Itoa(elementoId)}, []string{}, nil, nil, 0, -1); err != nil {
 		return nil, err
-	}
-
-	query =
-		`WITH
-			elementos AS (
-				SELECT
-					DISTINCT em.id as elementos
-				FROM
-					movimientos_arka.movimiento m,
-					movimientos_arka.estado_movimiento sm,
-					movimientos_arka.elementos_movimiento em,
-					jsonb_array_elements(m.detalle -> 'Elementos') AS elem,
-					jsonb(m.detalle -> 'FuncionarioOrigen') AS func_o,
-					jsonb(m.detalle -> 'FuncionarioDestino') AS func_d
-				WHERE
-					sm.nombre = 'Traslado Confirmado'
-					AND CAST(elem as INTEGER) = em.id
-					AND m.estado_movimiento_id = sm.id
-					AND (CAST(func_o as INTEGER) = ?
-					OR CAST(func_d as INTEGER) = ?)
-				),`
-
-	if _, err = o.Raw(query+queryC, elementoId, elementoId).QueryRows(&trasladados); err != nil {
-		return nil, err
-	}
-
-	var entregados []int
-	var recibidos []int
-	for _, el := range trasladados {
-		var funcionario []int
-		query =
-			`SELECT
-				func_o
-			FROM
-				movimientos_arka.movimiento m,
-				movimientos_arka.estado_movimiento sm,
-				jsonb_array_elements(m.detalle -> 'Elementos') AS elem,
-				jsonb(m.detalle -> 'FuncionarioOrigen') AS func_o,
-				jsonb(m.detalle -> 'FuncionarioDestino') AS func_d
-			WHERE
-				sm.nombre = 'Traslado Confirmado'
-				AND m.estado_movimiento_id = sm.id
-				AND CAST(elem as integer) = ?
-				AND (CAST(func_o as INTEGER) = ?
-				OR CAST(func_d as INTEGER) = ?)
-			ORDER BY
-				m.id DESC
-			LIMIT
-				1;`
-
-		if _, err = o.Raw(query, el, elementoId, elementoId).QueryRows(&funcionario); err != nil {
+	} else {
+		var salida_ []*ElementosMovimiento
+		if err := formatdata.FillStruct(l, &salida_); err != nil {
 			return nil, err
 		}
-
-		if funcionario[0] == elementoId {
-			entregados = append(entregados, el)
-		} else {
-			recibidos = append(recibidos, el)
-		}
+		historial.Salida = salida_[0].MovimientoId
 	}
 
-	for _, ent := range entregados {
-		for i, rec := range elementos {
-			if ent == rec {
-				elementos = append(elementos[:i], elementos[i+1:]...)
-			}
-		}
+	query :=
+		`SELECT
+			m.id,
+			m.detalle
+		FROM
+			movimientos_arka.movimiento m,
+			movimientos_arka.estado_movimiento sm
+		WHERE
+			sm.nombre LIKE 'Traslado%'
+			AND m.estado_movimiento_id = sm.id
+			AND m.detalle->'Elementos' @> ?
+		ORDER BY
+			m.id DESC`
+
+	if final {
+		query += " LIMIT 1"
 	}
 
-	elementos = append(elementos, recibidos...)
+	if _, err = o.Raw(query, elementoId).QueryRows(&traslados); err != nil {
+		return nil, err
+	}
 
-	return elementos, nil
+	historial.Traslados = traslados
+
+	query =
+		`SELECT
+			m.id,
+			m.detalle
+		FROM
+			movimientos_arka.movimiento m,
+			movimientos_arka.estado_movimiento sm
+		WHERE
+			sm.nombre LIKE 'Baja%'
+			AND m.estado_movimiento_id = sm.id
+			AND m.detalle->'Elementos' @> ?
+		ORDER BY m.id DESC
+		LIMIT 1`
+
+	if _, err = o.Raw(query, elementoId).QueryRows(&baja); err != nil {
+		return nil, err
+	} else if baja != nil {
+		historial.Baja = baja[0]
+	}
+
+	return historial, nil
 }

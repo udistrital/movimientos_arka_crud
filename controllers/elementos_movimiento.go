@@ -228,3 +228,42 @@ func (c *ElementosMovimientoController) GetByFuncionario() {
 	}
 	c.ServeJSON()
 }
+
+// GetHistorial ...
+// @Title Get Historial de un elemento
+// @Description Consulta los movimientos que ha tenido un elemento
+// @Param	id path string true "id del elemento"
+// @Param	final	query 	bool	false	"Indica si se incluye unicamente el ultimo traslado"
+// @Success 200 {object} models.Historial
+// @Failure 404 not found resource
+// @router /historial/:id [get]
+func (c *ElementosMovimientoController) GetHistorial() {
+
+	defer errorctrl.ErrorControlController(c.Controller, "ElementosMovimientoController - Unhandled Error!")
+
+	var id int
+	if v, err := c.GetInt(":id"); err != nil || v <= 0 {
+		if err == nil {
+			err = errors.New("Se debe especificar un elemento válido")
+		}
+		panic(errorctrl.Error("GetHistorial - c.GetInt(\":id\")", err, "400"))
+	} else {
+		id = v
+	}
+
+	var final bool
+	if v, err := c.GetBool("final", false); err != nil {
+		panic(errorctrl.Error("GetHistorial - c.GetBool(\"final\", false)", err, "400"))
+	} else {
+		final = v
+	}
+
+	if el, err := models.GetHistorialElemento(id, final); err == nil {
+		c.Data["json"] = el
+	} else {
+		logs.Error(err)
+		c.Data["system"] = err
+		c.Abort("404")
+	}
+	c.ServeJSON()
+}

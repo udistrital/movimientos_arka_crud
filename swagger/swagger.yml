@@ -167,6 +167,29 @@ paths:
           description: '[]int'
         "404":
           description: not found resource
+  /elementos_movimiento/historial/{id}:
+    get:
+      tags:
+      - elementos_movimiento
+      description: Consulta los movimientos que ha tenido un elemento
+      operationId: ElementosMovimientoController.Get Historial de un elemento
+      parameters:
+      - in: path
+        name: id
+        description: id del elemento
+        required: true
+        type: string
+      - in: query
+        name: final
+        description: Indica si se incluye unicamente el ultimo traslado
+        type: boolean
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Historial'
+        "404":
+          description: not found resource
   /estado_movimiento/:
     get:
       tags:
@@ -868,6 +891,20 @@ definitions:
       NumeroOrden:
         type: number
         format: double
+  models.Historial:
+    title: Historial
+    type: object
+    properties:
+      Baja:
+        $ref: '#/definitions/models.Movimiento'
+      Depreciacion:
+        $ref: '#/definitions/models.Movimiento'
+      Salida:
+        $ref: '#/definitions/models.Movimiento'
+      Traslados:
+        type: array
+        items:
+          $ref: '#/definitions/models.Movimiento'
   models.KardexGeneral:
     title: KardexGeneral
     type: object
