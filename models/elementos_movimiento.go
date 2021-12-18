@@ -326,8 +326,8 @@ func GetElementosFuncionario(funcionarioId int) (entrada []int, err error) {
 func GetHistorialElemento(elementoId int, final bool) (historial *Historial, err error) {
 
 	var (
-		baja      []*Movimiento
-		traslados []*Movimiento
+		baja      []int
+		traslados []int
 	)
 
 	historial = new(Historial)
@@ -346,8 +346,7 @@ func GetHistorialElemento(elementoId int, final bool) (historial *Historial, err
 
 	query :=
 		`SELECT
-			m.id,
-			m.detalle
+			m.id
 		FROM
 			movimientos_arka.movimiento m,
 			movimientos_arka.estado_movimiento sm
@@ -364,14 +363,22 @@ func GetHistorialElemento(elementoId int, final bool) (historial *Historial, err
 
 	if _, err = o.Raw(query, elementoId).QueryRows(&traslados); err != nil {
 		return nil, err
+	} else if traslados != nil {
+		if l, err := GetAllMovimiento(
+			map[string]string{"Id__in": ArrayToString(traslados, "|")}, []string{}, nil, nil, 0, -1); err != nil {
+			return nil, err
+		} else {
+			var traslados_ []*Movimiento
+			if err := formatdata.FillStruct(l, &traslados_); err != nil {
+				return nil, err
+			}
+			historial.Traslados = traslados_
+		}
 	}
-
-	historial.Traslados = traslados
 
 	query =
 		`SELECT
-			m.id,
-			m.detalle
+			m.id
 		FROM
 			movimientos_arka.movimiento m,
 			movimientos_arka.estado_movimiento sm
@@ -385,8 +392,21 @@ func GetHistorialElemento(elementoId int, final bool) (historial *Historial, err
 	if _, err = o.Raw(query, elementoId).QueryRows(&baja); err != nil {
 		return nil, err
 	} else if baja != nil {
-		historial.Baja = baja[0]
+		if l, err := GetAllMovimiento(
+			map[string]string{"Id__in": ArrayToString(baja, "|")}, []string{}, nil, nil, 0, -1); err != nil {
+			return nil, err
+		} else {
+			var baja []*Movimiento
+			if err := formatdata.FillStruct(l, &baja); err != nil {
+				return nil, err
+			}
+			historial.Baja = baja[0]
+		}
 	}
 
 	return historial, nil
+}
+
+func ArrayToString(a []int, delim string) string {
+	return strings.Trim(strings.Replace(fmt.Sprint(a), " ", delim, -1), "[]")
 }
