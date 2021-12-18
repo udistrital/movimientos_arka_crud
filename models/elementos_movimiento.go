@@ -4,10 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/astaxie/beego/orm"
+	"github.com/udistrital/utils_oas/formatdata"
 )
 
 type ElementosMovimiento struct {
@@ -23,6 +25,13 @@ type ElementosMovimiento struct {
 	FechaCreacion      time.Time   `orm:"auto_now_add;column(fecha_creacion);type(timestamp without time zone)"`
 	FechaModificacion  time.Time   `orm:"auto_now;column(fecha_modificacion);type(timestamp without time zone)"`
 	MovimientoId       *Movimiento `orm:"column(movimiento_id);rel(fk)"`
+}
+
+type Historial struct {
+	Salida       *Movimiento
+	Traslados    []*Movimiento
+	Baja         *Movimiento
+	Depreciacion *Movimiento
 }
 
 func (t *ElementosMovimiento) TableName() string {
@@ -311,4 +320,93 @@ func GetElementosFuncionario(funcionarioId int) (entrada []int, err error) {
 	elementos = append(elementos, recibidos...)
 
 	return elementos, nil
+}
+
+// Retorna los movimientos que han involucrado un elemento
+func GetHistorialElemento(elementoId int, final bool) (historial *Historial, err error) {
+
+	var (
+		baja      []int
+		traslados []int
+	)
+
+	historial = new(Historial)
+
+	o := orm.NewOrm()
+	if l, err := GetAllElementosMovimiento(
+		map[string]string{"Id": strconv.Itoa(elementoId)}, []string{}, nil, nil, 0, -1); err != nil {
+		return nil, err
+	} else {
+		var salida_ []*ElementosMovimiento
+		if err := formatdata.FillStruct(l, &salida_); err != nil {
+			return nil, err
+		}
+		historial.Salida = salida_[0].MovimientoId
+	}
+
+	query :=
+		`SELECT
+			m.id
+		FROM
+			movimientos_arka.movimiento m,
+			movimientos_arka.estado_movimiento sm
+		WHERE
+			sm.nombre LIKE 'Traslado%'
+			AND m.estado_movimiento_id = sm.id
+			AND m.detalle->'Elementos' @> ?
+		ORDER BY
+			m.id DESC`
+
+	if final {
+		query += " LIMIT 1"
+	}
+
+	if _, err = o.Raw(query, elementoId).QueryRows(&traslados); err != nil {
+		return nil, err
+	} else if traslados != nil {
+		if l, err := GetAllMovimiento(
+			map[string]string{"Id__in": ArrayToString(traslados, "|")}, []string{}, nil, nil, 0, -1); err != nil {
+			return nil, err
+		} else {
+			var traslados_ []*Movimiento
+			if err := formatdata.FillStruct(l, &traslados_); err != nil {
+				return nil, err
+			}
+			historial.Traslados = traslados_
+		}
+	}
+
+	query =
+		`SELECT
+			m.id
+		FROM
+			movimientos_arka.movimiento m,
+			movimientos_arka.estado_movimiento sm
+		WHERE
+			sm.nombre LIKE 'Baja%'
+			AND m.estado_movimiento_id = sm.id
+			AND m.detalle->'Elementos' @> ?
+		ORDER BY m.id DESC
+		LIMIT 1`
+
+	if _, err = o.Raw(query, elementoId).QueryRows(&baja); err != nil {
+		return nil, err
+	} else if baja != nil {
+		if l, err := GetAllMovimiento(
+			map[string]string{"Id__in": ArrayToString(baja, "|")}, []string{}, nil, nil, 0, -1); err != nil {
+			return nil, err
+		} else {
+			var baja []*Movimiento
+			if err := formatdata.FillStruct(l, &baja); err != nil {
+				return nil, err
+			}
+			historial.Baja = baja[0]
+		}
+	}
+
+	return historial, nil
+}
+
+func ArrayToString(a []int, delim string) string {
+	return strings.Trim(strings.Replace(fmt.Sprint(a), " ", delim, -1), "[]")
 }
