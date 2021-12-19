@@ -2,16 +2,17 @@ package models
 
 import (
 	"encoding/json"
-	"time"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 )
 
 type TrRevisionBaja struct {
-	Bajas         []int
-	Aprobacion    bool
-	Observaciones string
+	Bajas          []int
+	Aprobacion     bool
+	RazonRechazo   string
+	FechaRevisionC string
+	Resolucion     string
 }
 
 type FormatoBaja struct {
@@ -21,6 +22,8 @@ type FormatoBaja struct {
 	FechaRevisionC string
 	Funcionario    int
 	Revisor        int
+	RazonRechazo   string
+	Resolucion     string
 }
 
 // PostRevisionComite hace la actualización de los movimientos de acuerdo a la revisión
@@ -61,20 +64,22 @@ func PostRevisionComite(n *TrRevisionBaja) (ids []int, err error) {
 		}
 
 		v.EstadoMovimientoId = &estado
+		var detalle FormatoBaja
+		if err := json.Unmarshal([]byte(v.Detalle), &detalle); err != nil {
+			panic(err)
+		}
 
 		if !n.Aprobacion {
-			v.Observacion += n.Observaciones
+			detalle.RazonRechazo += n.RazonRechazo
 		} else {
-			var detalle FormatoBaja
-			if err := json.Unmarshal([]byte(v.Detalle), &detalle); err != nil {
-				panic(err)
-			}
-			detalle.FechaRevisionC = time.Now().UTC().String()
-			if detalle_, err := json.Marshal(detalle); err != nil {
-				panic(err)
-			} else {
-				v.Detalle = string(detalle_[:])
-			}
+			detalle.FechaRevisionC = n.FechaRevisionC
+			detalle.Resolucion = n.Resolucion
+		}
+
+		if detalle_, err := json.Marshal(detalle); err != nil {
+			panic(err)
+		} else {
+			v.Detalle = string(detalle_[:])
 		}
 
 		if _, err = o.Update(&v); err != nil {
