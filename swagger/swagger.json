@@ -1472,7 +1472,13 @@
                         "format": "int64"
                     }
                 },
-                "Observaciones": {
+                "FechaRevisionC": {
+                    "type": "string"
+                },
+                "RazonRechazo": {
+                    "type": "string"
+                },
+                "Resolucion": {
                     "type": "string"
                 }
             }

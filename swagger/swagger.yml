@@ -987,7 +987,11 @@ definitions:
         items:
           type: integer
           format: int64
-      Observaciones:
+      FechaRevisionC:
+        type: string
+      RazonRechazo:
+        type: string
+      Resolucion:
         type: string
   models.TrSalida:
     title: TrSalida
