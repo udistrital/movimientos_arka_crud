@@ -20,6 +20,8 @@ type ElementosMovimiento struct {
 	ValorUnitario      float64     `orm:"column(valor_unitario)"`
 	ValorTotal         float64     `orm:"column(valor_total)"`
 	SaldoCantidad      float64     `orm:"column(saldo_cantidad)"`
+	VidaUtil           float64     `orm:"column(vida_util)"`
+	ValorResidual      float64     `orm:"column(valor_residual)"`
 	SaldoValor         float64     `orm:"column(saldo_valor)"`
 	Activo             bool        `orm:"column(activo)"`
 	FechaCreacion      time.Time   `orm:"auto_now_add;column(fecha_creacion);type(timestamp without time zone)"`
