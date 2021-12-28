@@ -48,7 +48,7 @@ steps:
 
 - name: go_run_test
   failure: ignore
-  image: golang:1.14
+  image: golang:1.17
   commands:
   - go get -t
   - go get github.com/smartystreets/goconvey/convey
@@ -78,7 +78,7 @@ steps:
       from_secret: SONAR_TOKEN
 
 - name: go_build
-  image: golang:1.14
+  image: golang:1.17
   commands:
   - go get -t
   - GOOS=linux GOARCH=amd64 go build -o main
@@ -94,7 +94,7 @@ steps:
     - push
 
 - name: beego_migrate
-  image: golang:1.14
+  image: golang:1.17
   environment:
     PG_MIGRATION_USER:
       from_secret: PG_MIGRATION_USER
@@ -105,7 +105,7 @@ steps:
     PG_MIGRATION_DBNAME:
       from_secret: PG_MIGRATION_DBNAME
   commands:
-  - go get -t
+  - go get
   - GO111MODULE=on go get -u github.com/beego/bee
   - bee migrate -driver=postgres -conn="postgres://$${PG_MIGRATION_USER}:$${PG_MIGRATION_PASS}@$${PG_MIGRATION_URL}:5432/$${PG_MIGRATION_DBNAME}?sslmode=disable"
   when:
@@ -115,7 +115,7 @@ steps:
     - push
 
 - name: beego_rollback
-  image: golang:1.14
+  image: golang:1.17
   environment:
     PG_MIGRATION_USER:
       from_secret: PG_MIGRATION_USER
@@ -126,7 +126,7 @@ steps:
     PG_MIGRATION_DBNAME:
       from_secret: PG_MIGRATION_DBNAME
   commands:
-  - go get -t
+  - go get
   - GO111MODULE=on go get -u github.com/beego/bee
   - bee migrate rollback -driver=postgres -conn="postgres://$${PG_MIGRATION_USER}:$${PG_MIGRATION_PASS}@$${PG_MIGRATION_URL}:5432/$${PG_MIGRATION_DBNAME}?sslmode=disable"
   when:
@@ -155,7 +155,7 @@ steps:
         - refs/tags/**
 
 - name: update_aws_ecs
-  image: golang:1.9
+  image: golang:1.17
   environment:
     AWS_ACCESS_KEY_ID:
       from_secret: AWS_ACCESS_KEY_ID
