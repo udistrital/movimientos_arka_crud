@@ -105,7 +105,7 @@ steps:
     PG_MIGRATION_DBNAME:
       from_secret: PG_MIGRATION_DBNAME
   commands:
-  - go get -t
+  - go get
   - GO111MODULE=on go get -u github.com/beego/bee
   - bee migrate -driver=postgres -conn="postgres://$${PG_MIGRATION_USER}:$${PG_MIGRATION_PASS}@$${PG_MIGRATION_URL}:5432/$${PG_MIGRATION_DBNAME}?sslmode=disable"
   when:
@@ -126,7 +126,7 @@ steps:
     PG_MIGRATION_DBNAME:
       from_secret: PG_MIGRATION_DBNAME
   commands:
-  - go get -t
+  - go get
   - GO111MODULE=on go get -u github.com/beego/bee
   - bee migrate rollback -driver=postgres -conn="postgres://$${PG_MIGRATION_USER}:$${PG_MIGRATION_PASS}@$${PG_MIGRATION_URL}:5432/$${PG_MIGRATION_DBNAME}?sslmode=disable"
   when:
