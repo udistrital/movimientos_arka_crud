@@ -832,6 +832,179 @@
                 }
             }
         },
+        "/novedad_elemento/": {
+            "get": {
+                "tags": [
+                    "novedad_elemento"
+                ],
+                "description": "get NovedadElemento",
+                "operationId": "NovedadElementoController.Get All",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "query",
+                        "description": "Filter. e.g. col1:v1,col2:v2 ...",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "description": "Fields returned. e.g. col1,col2 ...",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "sortby",
+                        "description": "Sorted-by fields. e.g. col1,col2 ...",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "order",
+                        "description": "Order corresponding to each sortby field, if single value, apply to all sortby fields. e.g. desc,asc ...",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "description": "Limit the size of result set. Must be an integer",
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "offset",
+                        "description": "Start position of result set. Must be an integer",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.NovedadElemento"
+                        }
+                    },
+                    "404": {
+                        "description": "not found resource"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "novedad_elemento"
+                ],
+                "description": "create NovedadElemento",
+                "operationId": "NovedadElementoController.Post",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body for NovedadElemento content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.NovedadElemento"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "{int} models.NovedadElemento"
+                    },
+                    "400": {
+                        "description": "the request contains incorrect syntax"
+                    }
+                }
+            }
+        },
+        "/novedad_elemento/{id}": {
+            "get": {
+                "tags": [
+                    "novedad_elemento"
+                ],
+                "description": "get NovedadElemento by id",
+                "operationId": "NovedadElementoController.Get One",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "The key for staticblock",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.NovedadElemento"
+                        }
+                    },
+                    "404": {
+                        "description": "not found resource"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "novedad_elemento"
+                ],
+                "description": "update the NovedadElemento",
+                "operationId": "NovedadElementoController.Put",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "The id you want to update",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body for NovedadElemento content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.NovedadElemento"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.NovedadElemento"
+                        }
+                    },
+                    "400": {
+                        "description": "the request contains incorrect syntax"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "novedad_elemento"
+                ],
+                "description": "delete the NovedadElemento",
+                "operationId": "NovedadElementoController.Delete",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "The id you want to delete",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{string} delete success!"
+                    },
+                    "404": {
+                        "description": "not found resource"
+                    }
+                }
+            }
+        },
         "/soporte_movimiento/": {
             "get": {
                 "tags": [
@@ -1260,11 +1433,19 @@
                     "type": "number",
                     "format": "double"
                 },
+                "ValorResidual": {
+                    "type": "number",
+                    "format": "double"
+                },
                 "ValorTotal": {
                     "type": "number",
                     "format": "double"
                 },
                 "ValorUnitario": {
+                    "type": "number",
+                    "format": "double"
+                },
+                "VidaUtil": {
                     "type": "number",
                     "format": "double"
                 }
@@ -1403,6 +1584,48 @@
                 }
             }
         },
+        "models.NovedadElemento": {
+            "title": "NovedadElemento",
+            "type": "object",
+            "properties": {
+                "Activo": {
+                    "type": "boolean"
+                },
+                "ElementoMovimientoId": {
+                    "$ref": "#/definitions/models.ElementosMovimiento"
+                },
+                "FechaCreacion": {
+                    "type": "string",
+                    "format": "datetime"
+                },
+                "FechaModificacion": {
+                    "type": "string",
+                    "format": "datetime"
+                },
+                "Id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "Metadata": {
+                    "type": "string"
+                },
+                "MovimientoId": {
+                    "$ref": "#/definitions/models.Movimiento"
+                },
+                "ValorLibros": {
+                    "type": "number",
+                    "format": "double"
+                },
+                "ValorResidual": {
+                    "type": "number",
+                    "format": "double"
+                },
+                "VidaUtil": {
+                    "type": "number",
+                    "format": "double"
+                }
+            }
+        },
         "models.SalidaGeneral": {
             "title": "SalidaGeneral",
             "type": "object",
@@ -1519,6 +1742,10 @@
         {
             "name": "elementos_movimiento",
             "description": "ElementosMovimientoController operations for ElementosMovimiento\n"
+        },
+        {
+            "name": "novedad_elemento",
+            "description": "NovedadElementoController operations for NovedadElemento\n"
         },
         {
             "name": "tr_salida",
