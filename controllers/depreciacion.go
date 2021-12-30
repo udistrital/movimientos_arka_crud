@@ -19,7 +19,7 @@ func (c *DepreciacionController) URLMapping() {
 
 // GetCorte ...
 // @Title GetCorte
-// @Description Actualiza el estado de las solicitudes una vez se registra la revision del comite de almacen
+// @Description Retorna lista de elementos disponibles para liquidar depreciacion a una fecha de corte determinada
 // @Param	fechaCorte query string true "Fecha de corte en formato YYYY-MM-DD"
 // @Success 200 {object} []models.detalle
 // @Failure 404 not found resource
