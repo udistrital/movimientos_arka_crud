@@ -50,6 +50,38 @@
                 }
             }
         },
+        "/depreciacion/": {
+            "get": {
+                "tags": [
+                    "depreciacion"
+                ],
+                "description": "Actualiza el estado de las solicitudes una vez se registra la revision del comite de almacen",
+                "operationId": "DepreciacionController.GetCorte",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fechaCorte",
+                        "description": "Fecha de corte en formato YYYY-MM-DD",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.detalle"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found resource"
+                    }
+                }
+            }
+        },
         "/elementos_movimiento/": {
             "get": {
                 "tags": [
@@ -1720,6 +1752,40 @@
                     "$ref": "#/definitions/models.Movimiento"
                 }
             }
+        },
+        "models.detalle": {
+            "title": "detalle",
+            "type": "object",
+            "properties": {
+                "ElementoActaId": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "ElementoMovimientoId": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "FechaRef": {
+                    "type": "string",
+                    "format": "datetime"
+                },
+                "NovedadElementoId": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "ValorPresente": {
+                    "type": "number",
+                    "format": "double"
+                },
+                "ValorResidual": {
+                    "type": "number",
+                    "format": "double"
+                },
+                "VidaUtil": {
+                    "type": "number",
+                    "format": "double"
+                }
+            }
         }
     },
     "tags": [
@@ -1757,6 +1823,10 @@
         },
         {
             "name": "bajas",
+            "description": "BajasController\n"
+        },
+        {
+            "name": "depreciacion",
             "description": "BajasController\n"
         }
     ]

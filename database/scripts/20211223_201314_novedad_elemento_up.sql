@@ -35,3 +35,43 @@ ALTER TABLE movimientos_arka.elementos_movimiento
 
 ALTER TABLE movimientos_arka.elementos_movimiento
     ALTER COLUMN valor_residual DROP DEFAULT;
+
+INSERT INTO movimientos_arka.estado_movimiento (
+    nombre,
+    descripcion,
+    activo,
+    fecha_modificacion,
+    fecha_creacion)
+VALUES
+    ('Depreciación Registrada',
+    'Depreciación generada a una determinada fecha de corte',
+    true,
+    now(),
+    now()),
+    ('Depreciación Rechazada',
+    'Depreciación rechazada por funcionario de contabilidad',
+    true,
+    now(),
+    now()),
+    ('Depreciación Aprobada',
+    'Depreciación aprobada por funcionario de contabilidad',
+    true,
+    now(),
+    now());
+
+INSERT INTO movimientos_arka.formato_tipo_movimiento (
+    nombre,
+    formato,
+    descripcion,
+    codigo_abreviacion,
+    activo,
+    fecha_modificacion,
+    fecha_creacion)
+VALUES
+    ('Depreciación',
+    '{ "Totales": "map[int]float64", "TrContable": "int", "FechaCorte": "string" }',
+    'Liquidación de depreciación a una fecha de corte determinada',
+    'DEP',
+    true,
+    now(),
+    now());
