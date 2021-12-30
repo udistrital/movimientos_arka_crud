@@ -86,7 +86,7 @@ func GetTransaccionSalida(id int) (Salida map[string]interface{}, err error) {
 	}
 
 	query := map[string]string{"MovimientoId__Id": strconv.Itoa(id), "Activo": "true"}
-	fields := []string{"Id", "ElementoActaId", "Unidad", "ValorUnitario", "ValorTotal", "SaldoCantidad", "SaldoValor"}
+	fields := []string{"Id", "ElementoActaId", "Unidad", "ValorUnitario", "ValorTotal", "SaldoCantidad", "SaldoValor", "VidaUtil", "ValorResidual"}
 	if elementos, err = GetAllElementosMovimiento(query, fields, nil, nil, 0, -1); err != nil {
 		panic(err.Error())
 	}
@@ -124,13 +124,18 @@ func PutTransaccionSalida(n *SalidaGeneral) (err error) {
 			if _, err = o.Update(m.Salida); err != nil {
 				panic(err.Error())
 			}
+			for _, elemento := range m.Elementos {
+				if _, err := o.Update(elemento, "VidaUtil", "ValorResidual"); err != nil {
+					panic(err.Error())
+				}
+			}
 		} else {
 			// Las demás salidas se insertan como un movimiento adicional y este Id se asigna a los elementos
 			if idSalida, err := o.Insert(m.Salida); err == nil {
 				mov := Movimiento{Id: int(idSalida)}
 				for _, elemento := range m.Elementos {
 					elemento.MovimientoId = &mov
-					if _, err := o.Update(elemento, "MovimientoId"); err != nil {
+					if _, err := o.Update(elemento, "MovimientoId", "VidaUtil", "ValorResidual"); err != nil {
 						panic(err.Error())
 					}
 				}

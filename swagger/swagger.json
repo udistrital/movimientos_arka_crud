@@ -55,7 +55,7 @@
                 "tags": [
                     "depreciacion"
                 ],
-                "description": "Actualiza el estado de las solicitudes una vez se registra la revision del comite de almacen",
+                "description": "Retorna lista de elementos disponibles para liquidar depreciacion a una fecha de corte determinada",
                 "operationId": "DepreciacionController.GetCorte",
                 "parameters": [
                     {
