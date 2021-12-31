@@ -35,6 +35,28 @@ paths:
               type: integer
         "404":
           description: not found resource
+  /depreciacion/:
+    get:
+      tags:
+      - depreciacion
+      description: Retorna lista de elementos disponibles para liquidar depreciacion
+        a una fecha de corte determinada
+      operationId: DepreciacionController.GetCorte
+      parameters:
+      - in: query
+        name: fechaCorte
+        description: Fecha de corte en formato YYYY-MM-DD
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/models.detalle'
+        "404":
+          description: not found resource
   /elementos_movimiento/:
     get:
       tags:
@@ -1154,6 +1176,31 @@ definitions:
           $ref: '#/definitions/models.ElementosMovimiento'
       Salida:
         $ref: '#/definitions/models.Movimiento'
+  models.detalle:
+    title: detalle
+    type: object
+    properties:
+      ElementoActaId:
+        type: integer
+        format: int64
+      ElementoMovimientoId:
+        type: integer
+        format: int64
+      FechaRef:
+        type: string
+        format: datetime
+      NovedadElementoId:
+        type: integer
+        format: int64
+      ValorPresente:
+        type: number
+        format: double
+      ValorResidual:
+        type: number
+        format: double
+      VidaUtil:
+        type: number
+        format: double
 tags:
 - name: formato_tipo_movimiento
   description: |
@@ -1180,5 +1227,8 @@ tags:
   description: |
     TrkardexController operations for Tr_Kardex
 - name: bajas
+  description: |
+    BajasController
+- name: depreciacion
   description: |
     BajasController
