@@ -18,6 +18,15 @@ func init() {
 
     beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:DepreciacionController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:DepreciacionController"],
         beego.ControllerComments{
+            Method: "Post",
+            Router: "/",
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:DepreciacionController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:DepreciacionController"],
+        beego.ControllerComments{
             Method: "GetCorte",
             Router: "/",
             AllowHTTPMethods: []string{"get"},

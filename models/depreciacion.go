@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 )
 
@@ -65,15 +66,15 @@ func GetCorteDepreciacion(fechaCorte string) (entrada []*detalle, err error) {
 		ne.vida_util,
 		ne.valor_residual,
 		ne.valor_libros as valor_presente,
-		ne.fecha_creacion as fecha_ref,
+		m.detalle ->> 'FechaCorte' as fecha_ref,
 		em.elemento_acta_id
 	FROM
 		movimientos_arka.novedad_elemento ne,
 		movimientos_arka.elementos_movimiento em,
 		movimientos_arka.movimiento m
 	WHERE
-		m.fecha_creacion < ?
-		AND em.movimiento_id = m.id
+		em.fecha_creacion < ?
+		AND ne.movimiento_id = m.id
 		AND ne.elemento_movimiento_id = em.id
 		AND ne.activo = true
 		AND ne.vida_util > 0
@@ -87,4 +88,42 @@ func GetCorteDepreciacion(fechaCorte string) (entrada []*detalle, err error) {
 	elementos = append(elementos, novedad...)
 
 	return elementos, nil
+}
+
+// AddNovedadElemento insert a new NovedadElemento into database and returns
+// last inserted Id on success.
+func AddTrNovedadElemento(m *NovedadElemento) (id int64, err error) {
+	o := orm.NewOrm()
+	err = o.Begin()
+
+	if err != nil {
+		return
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			o.Rollback()
+			logs.Error(r)
+		} else {
+			o.Commit()
+		}
+	}()
+
+	var novedades []*NovedadElemento
+
+	if _, err := o.QueryTable(new(NovedadElemento)).RelatedSel().Filter("ElementoMovimientoId__Id", m.ElementoMovimientoId).Filter("Activo", true).All(&novedades, "Id"); err == nil {
+		for _, nv := range novedades {
+			nv.Activo = false
+			if _, err = o.Update(nv, "Activo"); err != nil {
+				panic(err.Error())
+			}
+		}
+		if id, err = o.Insert(m); err != nil {
+			panic(err.Error())
+		}
+	} else {
+		panic(err.Error())
+	}
+
+	return
 }

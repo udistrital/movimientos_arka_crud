@@ -57,6 +57,23 @@ paths:
               $ref: '#/definitions/models.detalle'
         "404":
           description: not found resource
+    post:
+      tags:
+      - depreciacion
+      description: creates NovedadElemento and deletes previous NovedadElemento
+      operationId: DepreciacionController.Post
+      parameters:
+      - in: body
+        name: body
+        description: body for NovedadElemento content
+        required: true
+        schema:
+          $ref: '#/definitions/models.NovedadElemento'
+      responses:
+        "201":
+          description: '{int} models.NovedadElemento'
+        "400":
+          description: the request contains incorrect syntax
   /elementos_movimiento/:
     get:
       tags:
