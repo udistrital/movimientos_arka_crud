@@ -30,6 +30,7 @@ func GetCorteDepreciacion(fechaCorte string) (entrada []*detalle, err error) {
 		elementos []*detalle
 		novedad   []*detalle
 	)
+
 	o := orm.NewOrm()
 	query =
 		`SELECT
@@ -38,15 +39,20 @@ func GetCorteDepreciacion(fechaCorte string) (entrada []*detalle, err error) {
 		em.vida_util,
 		em.elemento_acta_id,
 		em.valor_total as valor_presente,
-		m.fecha_creacion as fecha_ref
+		m.fecha_modificacion as fecha_ref
 	FROM
 		movimientos_arka.elementos_movimiento em,
 		movimientos_arka.movimiento m,
+		movimientos_arka.estado_movimiento sm,
 		movimientos_arka.formato_tipo_movimiento fm
-	WHERE	fm.nombre = 'Salida'
+	WHERE
+		fm.nombre = 'Salida'
+		AND sm.nombre = 'Salida Aprobada'
 		AND m.formato_tipo_movimiento_id  = fm.id
-		AND m.fecha_creacion < ?
+		AND m.fecha_modificacion < ?
+		AND m.estado_movimiento_id = sm.id
 		AND em.movimiento_id = m.id
+		AND em.valor_total > 0
 		AND em.vida_util > 0
 		AND NOT EXISTS (
 			SELECT
@@ -77,6 +83,7 @@ func GetCorteDepreciacion(fechaCorte string) (entrada []*detalle, err error) {
 		AND ne.movimiento_id = m.id
 		AND ne.elemento_movimiento_id = em.id
 		AND ne.activo = true
+		AND ne.valor_libros > 0
 		AND ne.vida_util > 0
 	ORDER BY
 		ne.elemento_movimiento_id,
