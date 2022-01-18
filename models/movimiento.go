@@ -166,7 +166,7 @@ func GetEntradaByActa(acta_recibido_id int) (entrada []Movimiento, err error) {
 	var estadoMovimiento []int
 	var movimientos []Movimiento
 
-	estados := []string{"Entrada Aceptada", "Entrada Con Salida"}
+	estados := []string{"Entrada Aprobada", "Entrada Con Salida"}
 	query_estado := "SELECT e.id FROM movimientos_arka.estado_movimiento e WHERE e.nombre IN (?, ?)"
 	query_movimiento := "SELECT * FROM movimientos_arka.movimiento m  WHERE CAST(m.detalle ->>'acta_recibido_id' as INTEGER) = ? AND m.estado_movimiento_id IN (?, ?)"
 
