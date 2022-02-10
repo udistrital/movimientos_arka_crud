@@ -1,9 +1,19 @@
+# Binarios y Temporales
 *.tmp
-.vscode
+*.exe
+*~
 movimientos_arka_crud
 main
+
+# IDEs
+.vscode
+
+# Variables de Entorno
 *.env
-!.env
+!develop.env
+!template.env
+
+# Otros
 .scannerwork/
 swagger/**
 !swagger/*.json

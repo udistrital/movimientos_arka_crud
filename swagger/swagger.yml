@@ -11,6 +11,69 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 basePath: /v1
 paths:
+  /bajas/:
+    put:
+      tags:
+      - bajas
+      description: Actualiza el estado de las solicitudes una vez se registra la revision
+        del comite de almacen
+      operationId: BajasController.Put
+      parameters:
+      - in: body
+        name: body
+        description: Informacion de la revision
+        required: true
+        schema:
+          $ref: '#/definitions/models.TrRevisionBaja'
+      responses:
+        "200":
+          description: ""
+          schema:
+            type: array
+            items:
+              format: int64
+              type: integer
+        "404":
+          description: not found resource
+  /depreciacion/:
+    get:
+      tags:
+      - depreciacion
+      description: Retorna lista de elementos disponibles para liquidar depreciacion
+        a una fecha de corte determinada
+      operationId: DepreciacionController.GetCorte
+      parameters:
+      - in: query
+        name: fechaCorte
+        description: Fecha de corte en formato YYYY-MM-DD
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/models.detalle'
+        "404":
+          description: not found resource
+    post:
+      tags:
+      - depreciacion
+      description: creates NovedadElemento and deletes previous NovedadElemento
+      operationId: DepreciacionController.Post
+      parameters:
+      - in: body
+        name: body
+        description: body for NovedadElemento content
+        required: true
+        schema:
+          $ref: '#/definitions/models.NovedadElemento'
+      responses:
+        "201":
+          description: '{int} models.NovedadElemento'
+        "400":
+          description: the request contains incorrect syntax
   /elementos_movimiento/:
     get:
       tags:
@@ -124,6 +187,46 @@ paths:
       responses:
         "200":
           description: '{string} delete success!'
+        "404":
+          description: not found resource
+  /elementos_movimiento/funcionario/{funcionarioId}:
+    get:
+      tags:
+      - elementos_movimiento
+      description: get Elementos by funcionario_id
+      operationId: ElementosMovimientoController.Get By Funcionario
+      parameters:
+      - in: path
+        name: funcionarioId
+        description: tercero_id del funcionario a consultar
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '[]int'
+        "404":
+          description: not found resource
+  /elementos_movimiento/historial/{id}:
+    get:
+      tags:
+      - elementos_movimiento
+      description: Consulta los movimientos que ha tenido un elemento
+      operationId: ElementosMovimientoController.Get Historial de un elemento
+      parameters:
+      - in: path
+        name: id
+        description: id del elemento
+        required: true
+        type: string
+      - in: query
+        name: final
+        description: Indica si se incluye unicamente el ultimo traslado
+        type: boolean
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Historial'
         "404":
           description: not found resource
   /estado_movimiento/:
@@ -471,6 +574,140 @@ paths:
           description: '{string} delete success!'
         "404":
           description: not found resource
+  /movimiento/entrada/{acta_recibido_id}:
+    get:
+      tags:
+      - movimiento
+      description: get Movimiento by acta_recibido_id
+      operationId: MovimientoController.Get By Acta
+      parameters:
+      - in: path
+        name: acta_recibido_id
+        description: id del acta asociada a la entrada
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Movimiento'
+        "404":
+          description: not found resource
+  /novedad_elemento/:
+    get:
+      tags:
+      - novedad_elemento
+      description: get NovedadElemento
+      operationId: NovedadElementoController.Get All
+      parameters:
+      - in: query
+        name: query
+        description: Filter. e.g. col1:v1,col2:v2 ...
+        type: string
+      - in: query
+        name: fields
+        description: Fields returned. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: sortby
+        description: Sorted-by fields. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: order
+        description: Order corresponding to each sortby field, if single value, apply
+          to all sortby fields. e.g. desc,asc ...
+        type: string
+      - in: query
+        name: limit
+        description: Limit the size of result set. Must be an integer
+        type: string
+      - in: query
+        name: offset
+        description: Start position of result set. Must be an integer
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.NovedadElemento'
+        "404":
+          description: not found resource
+    post:
+      tags:
+      - novedad_elemento
+      description: create NovedadElemento
+      operationId: NovedadElementoController.Post
+      parameters:
+      - in: body
+        name: body
+        description: body for NovedadElemento content
+        required: true
+        schema:
+          $ref: '#/definitions/models.NovedadElemento'
+      responses:
+        "201":
+          description: '{int} models.NovedadElemento'
+        "400":
+          description: the request contains incorrect syntax
+  /novedad_elemento/{id}:
+    get:
+      tags:
+      - novedad_elemento
+      description: get NovedadElemento by id
+      operationId: NovedadElementoController.Get One
+      parameters:
+      - in: path
+        name: id
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.NovedadElemento'
+        "404":
+          description: not found resource
+    put:
+      tags:
+      - novedad_elemento
+      description: update the NovedadElemento
+      operationId: NovedadElementoController.Put
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to update
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: body for NovedadElemento content
+        required: true
+        schema:
+          $ref: '#/definitions/models.NovedadElemento'
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.NovedadElemento'
+        "400":
+          description: the request contains incorrect syntax
+    delete:
+      tags:
+      - novedad_elemento
+      description: delete the NovedadElemento
+      operationId: NovedadElementoController.Delete
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to delete
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{string} delete success!'
+        "404":
+          description: not found resource
   /soporte_movimiento/:
     get:
       tags:
@@ -666,6 +903,26 @@ paths:
         "403":
           description: body is empty
   /tr_salida/:
+    put:
+      tags:
+      - tr_salida
+      description: Realiza los movimientos necesarios una vez se editó una salida
+        y se generaron nuevas salidas
+      operationId: TrSalidaController.Put TrSalida
+      parameters:
+      - in: body
+        name: body
+        description: body for SalidaGeneral content
+        required: true
+        schema:
+          $ref: '#/definitions/models.SalidaGeneral'
+      responses:
+        "201":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.SalidaGeneral'
+        "403":
+          description: body is empty
     post:
       tags:
       - tr_salida
@@ -737,10 +994,16 @@ definitions:
       Unidad:
         type: number
         format: double
+      ValorResidual:
+        type: number
+        format: double
       ValorTotal:
         type: number
         format: double
       ValorUnitario:
+        type: number
+        format: double
+      VidaUtil:
         type: number
         format: double
   models.EstadoMovimiento:
@@ -788,6 +1051,20 @@ definitions:
       NumeroOrden:
         type: number
         format: double
+  models.Historial:
+    title: Historial
+    type: object
+    properties:
+      Baja:
+        $ref: '#/definitions/models.Movimiento'
+      Depreciacion:
+        $ref: '#/definitions/models.Movimiento'
+      Salida:
+        $ref: '#/definitions/models.Movimiento'
+      Traslados:
+        type: array
+        items:
+          $ref: '#/definitions/models.Movimiento'
   models.KardexGeneral:
     title: KardexGeneral
     type: object
@@ -821,6 +1098,36 @@ definitions:
         $ref: '#/definitions/models.Movimiento'
       Observacion:
         type: string
+  models.NovedadElemento:
+    title: NovedadElemento
+    type: object
+    properties:
+      Activo:
+        type: boolean
+      ElementoMovimientoId:
+        $ref: '#/definitions/models.ElementosMovimiento'
+      FechaCreacion:
+        type: string
+        format: datetime
+      FechaModificacion:
+        type: string
+        format: datetime
+      Id:
+        type: integer
+        format: int64
+      Metadata:
+        type: string
+      MovimientoId:
+        $ref: '#/definitions/models.Movimiento'
+      ValorLibros:
+        type: number
+        format: double
+      ValorResidual:
+        type: number
+        format: double
+      VidaUtil:
+        type: number
+        format: double
   models.SalidaGeneral:
     title: SalidaGeneral
     type: object
@@ -859,6 +1166,23 @@ definitions:
           $ref: '#/definitions/models.ElementosMovimiento'
       Kardex:
         $ref: '#/definitions/models.Movimiento'
+  models.TrRevisionBaja:
+    title: TrRevisionBaja
+    type: object
+    properties:
+      Aprobacion:
+        type: boolean
+      Bajas:
+        type: array
+        items:
+          type: integer
+          format: int64
+      FechaRevisionC:
+        type: string
+      RazonRechazo:
+        type: string
+      Resolucion:
+        type: string
   models.TrSalida:
     title: TrSalida
     type: object
@@ -869,6 +1193,31 @@ definitions:
           $ref: '#/definitions/models.ElementosMovimiento'
       Salida:
         $ref: '#/definitions/models.Movimiento'
+  models.detalle:
+    title: detalle
+    type: object
+    properties:
+      ElementoActaId:
+        type: integer
+        format: int64
+      ElementoMovimientoId:
+        type: integer
+        format: int64
+      FechaRef:
+        type: string
+        format: datetime
+      NovedadElementoId:
+        type: integer
+        format: int64
+      ValorPresente:
+        type: number
+        format: double
+      ValorResidual:
+        type: number
+        format: double
+      VidaUtil:
+        type: number
+        format: double
 tags:
 - name: formato_tipo_movimiento
   description: |
@@ -885,9 +1234,18 @@ tags:
 - name: elementos_movimiento
   description: |
     ElementosMovimientoController operations for ElementosMovimiento
+- name: novedad_elemento
+  description: |
+    NovedadElementoController operations for NovedadElemento
 - name: tr_salida
   description: |
     TrSalidaController operations for Tr_salida
 - name: tr_kardex
   description: |
     TrkardexController operations for Tr_Kardex
+- name: bajas
+  description: |
+    BajasController
+- name: depreciacion
+  description: |
+    BajasController

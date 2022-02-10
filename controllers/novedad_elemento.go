@@ -7,38 +7,36 @@ import (
 	"strings"
 
 	"github.com/udistrital/movimientos_arka_crud/models"
-	"github.com/udistrital/utils_oas/errorctrl"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 )
 
-// ElementosMovimientoController operations for ElementosMovimiento
-type ElementosMovimientoController struct {
+// NovedadElementoController operations for NovedadElemento
+type NovedadElementoController struct {
 	beego.Controller
 }
 
 // URLMapping ...
-func (c *ElementosMovimientoController) URLMapping() {
+func (c *NovedadElementoController) URLMapping() {
 	c.Mapping("Post", c.Post)
 	c.Mapping("GetOne", c.GetOne)
 	c.Mapping("GetAll", c.GetAll)
 	c.Mapping("Put", c.Put)
 	c.Mapping("Delete", c.Delete)
-	c.Mapping("GetByFuncionario", c.GetByFuncionario)
 }
 
 // Post ...
 // @Title Post
-// @Description create ElementosMovimiento
-// @Param	body		body 	models.ElementosMovimiento	true		"body for ElementosMovimiento content"
-// @Success 201 {int} models.ElementosMovimiento
+// @Description create NovedadElemento
+// @Param	body		body 	models.NovedadElemento	true		"body for NovedadElemento content"
+// @Success 201 {int} models.NovedadElemento
 // @Failure 400 the request contains incorrect syntax
 // @router / [post]
-func (c *ElementosMovimientoController) Post() {
-	var v models.ElementosMovimiento
+func (c *NovedadElementoController) Post() {
+	var v models.NovedadElemento
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
-		if _, err := models.AddElementosMovimiento(&v); err == nil {
+		if _, err := models.AddNovedadElemento(&v); err == nil {
 			c.Ctx.Output.SetStatus(201)
 			c.Data["json"] = v
 		} else {
@@ -58,15 +56,15 @@ func (c *ElementosMovimientoController) Post() {
 
 // GetOne ...
 // @Title Get One
-// @Description get ElementosMovimiento by id
+// @Description get NovedadElemento by id
 // @Param	id		path 	string	true		"The key for staticblock"
-// @Success 200 {object} models.ElementosMovimiento
+// @Success 200 {object} models.NovedadElemento
 // @Failure 404 not found resource
 // @router /:id [get]
-func (c *ElementosMovimientoController) GetOne() {
+func (c *NovedadElementoController) GetOne() {
 	idStr := c.Ctx.Input.Param(":id")
 	id, _ := strconv.Atoi(idStr)
-	v, err := models.GetElementosMovimientoById(id)
+	v, err := models.GetNovedadElementoById(id)
 	if err != nil {
 		logs.Error(err)
 		//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
@@ -80,17 +78,17 @@ func (c *ElementosMovimientoController) GetOne() {
 
 // GetAll ...
 // @Title Get All
-// @Description get ElementosMovimiento
+// @Description get NovedadElemento
 // @Param	query	query	string	false	"Filter. e.g. col1:v1,col2:v2 ..."
 // @Param	fields	query	string	false	"Fields returned. e.g. col1,col2 ..."
 // @Param	sortby	query	string	false	"Sorted-by fields. e.g. col1,col2 ..."
 // @Param	order	query	string	false	"Order corresponding to each sortby field, if single value, apply to all sortby fields. e.g. desc,asc ..."
 // @Param	limit	query	string	false	"Limit the size of result set. Must be an integer"
 // @Param	offset	query	string	false	"Start position of result set. Must be an integer"
-// @Success 200 {object} models.ElementosMovimiento
+// @Success 200 {object} models.NovedadElemento
 // @Failure 404 not found resource
 // @router / [get]
-func (c *ElementosMovimientoController) GetAll() {
+func (c *NovedadElementoController) GetAll() {
 	var fields []string
 	var sortby []string
 	var order []string
@@ -132,7 +130,7 @@ func (c *ElementosMovimientoController) GetAll() {
 		}
 	}
 
-	l, err := models.GetAllElementosMovimiento(query, fields, sortby, order, offset, limit)
+	l, err := models.GetAllNovedadElemento(query, fields, sortby, order, offset, limit)
 	if err != nil {
 		logs.Error(err)
 		//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
@@ -149,18 +147,18 @@ func (c *ElementosMovimientoController) GetAll() {
 
 // Put ...
 // @Title Put
-// @Description update the ElementosMovimiento
+// @Description update the NovedadElemento
 // @Param	id		path 	string	true		"The id you want to update"
-// @Param	body		body 	models.ElementosMovimiento	true		"body for ElementosMovimiento content"
-// @Success 200 {object} models.ElementosMovimiento
+// @Param	body		body 	models.NovedadElemento	true		"body for NovedadElemento content"
+// @Success 200 {object} models.NovedadElemento
 // @Failure 400 the request contains incorrect syntax
 // @router /:id [put]
-func (c *ElementosMovimientoController) Put() {
+func (c *NovedadElementoController) Put() {
 	idStr := c.Ctx.Input.Param(":id")
 	id, _ := strconv.Atoi(idStr)
-	v := models.ElementosMovimiento{Id: id}
+	v := models.NovedadElemento{Id: id}
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
-		if err := models.UpdateElementosMovimientoById(&v); err == nil {
+		if err := models.UpdateNovedadElemento(&v); err == nil {
 			c.Data["json"] = v
 		} else {
 			logs.Error(err)
@@ -179,89 +177,19 @@ func (c *ElementosMovimientoController) Put() {
 
 // Delete ...
 // @Title Delete
-// @Description delete the ElementosMovimiento
+// @Description delete the NovedadElemento
 // @Param	id		path 	string	true		"The id you want to delete"
 // @Success 200 {string} delete success!
 // @Failure 404 not found resource
 // @router /:id [delete]
-func (c *ElementosMovimientoController) Delete() {
+func (c *NovedadElementoController) Delete() {
 	idStr := c.Ctx.Input.Param(":id")
 	id, _ := strconv.Atoi(idStr)
-	if err := models.DeleteElementosMovimiento(id); err == nil {
+	if err := models.DeleteNovedadElemento(id); err == nil {
 		c.Data["json"] = map[string]interface{}{"Id": id}
 	} else {
 		logs.Error(err)
 		//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
-		c.Data["system"] = err
-		c.Abort("404")
-	}
-	c.ServeJSON()
-}
-
-// GetByFuncionario ...
-// @Title Get By Funcionario
-// @Description get Elementos by funcionario_id
-// @Param	funcionarioId path string true "tercero_id del funcionario a consultar"
-// @Success 200 []int
-// @Failure 404 not found resource
-// @router /funcionario/:funcionarioId [get]
-func (c *ElementosMovimientoController) GetByFuncionario() {
-
-	defer errorctrl.ErrorControlController(c.Controller, "ElementosMovimientoController - Unhandled Error!")
-
-	var id int
-	if v, err := c.GetInt(":funcionarioId"); err != nil || v <= 0 {
-		if err == nil {
-			err = errors.New("Se debe especificar un funcionario válido")
-		}
-		panic(errorctrl.Error("GetByFuncionario - c.GetInt(\":funcionarioId\")", err, "400"))
-	} else {
-		id = v
-	}
-
-	if el, err := models.GetElementosFuncionario(id); err == nil {
-		c.Data["json"] = el
-	} else {
-		logs.Error(err)
-		c.Data["system"] = err
-		c.Abort("404")
-	}
-	c.ServeJSON()
-}
-
-// GetHistorial ...
-// @Title Get Historial de un elemento
-// @Description Consulta los movimientos que ha tenido un elemento
-// @Param	id path string true "id del elemento"
-// @Param	final	query 	bool	false	"Indica si se incluye unicamente el ultimo traslado"
-// @Success 200 {object} models.Historial
-// @Failure 404 not found resource
-// @router /historial/:id [get]
-func (c *ElementosMovimientoController) GetHistorial() {
-
-	defer errorctrl.ErrorControlController(c.Controller, "ElementosMovimientoController - Unhandled Error!")
-
-	var id int
-	if v, err := c.GetInt(":id"); err != nil || v <= 0 {
-		if err == nil {
-			err = errors.New("Se debe especificar un elemento válido")
-		}
-		panic(errorctrl.Error("GetHistorial - c.GetInt(\":id\")", err, "400"))
-	} else {
-		id = v
-	}
-
-	var final bool
-	if v, err := c.GetBool("final", false); err != nil {
-		panic(errorctrl.Error("GetHistorial - c.GetBool(\"final\", false)", err, "400"))
-	} else {
-		final = v
-	}
-
-	if el, err := models.GetHistorialElemento(id, final); err == nil {
-		c.Data["json"] = el
-	} else {
-		logs.Error(err)
 		c.Data["system"] = err
 		c.Abort("404")
 	}

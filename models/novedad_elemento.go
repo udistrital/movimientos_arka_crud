@@ -10,51 +10,52 @@ import (
 	"github.com/astaxie/beego/orm"
 )
 
-type Movimiento struct {
-	Id                      int                    `orm:"column(id);pk;auto"`
-	Observacion             string                 `orm:"column(observacion);null"`
-	Detalle                 string                 `orm:"column(detalle);type(jsonb)"`
-	FechaCreacion           time.Time              `orm:"auto_now_add;column(fecha_creacion);type(timestamp without time zone)"`
-	FechaModificacion       time.Time              `orm:"auto_now;column(fecha_modificacion);type(timestamp without time zone)"`
-	Activo                  bool                   `orm:"column(activo)"`
-	MovimientoPadreId       *Movimiento            `orm:"column(movimiento_padre_id);rel(fk);null"`
-	FormatoTipoMovimientoId *FormatoTipoMovimiento `orm:"column(formato_tipo_movimiento_id);rel(fk)"`
-	EstadoMovimientoId      *EstadoMovimiento      `orm:"column(estado_movimiento_id);rel(fk)"`
+type NovedadElemento struct {
+	Id                   int                  `orm:"column(id);pk;auto"`
+	VidaUtil             float64              `orm:"column(vida_util)"`
+	ValorLibros          float64              `orm:"column(valor_libros);null"`
+	ValorResidual        float64              `orm:"column(valor_residual);null"`
+	Metadata             string               `orm:"column(metadata);type(jsonb);null"`
+	MovimientoId         *Movimiento          `orm:"column(movimiento_id);rel(fk)"`
+	ElementoMovimientoId *ElementosMovimiento `orm:"column(elemento_movimiento_id);rel(fk)"`
+	Activo               bool                 `orm:"column(activo)"`
+	FechaCreacion        time.Time            `orm:"auto_now_add;column(fecha_creacion);type(timestamp without time zone)"`
+	FechaModificacion    time.Time            `orm:"auto_now;column(fecha_modificacion);type(timestamp without time zone)"`
 }
 
-func (t *Movimiento) TableName() string {
-	return "movimiento"
+func (t *NovedadElemento) TableName() string {
+	return "novedad_elemento"
 }
 
 func init() {
-	orm.RegisterModel(new(Movimiento))
+	orm.RegisterModel(new(NovedadElemento))
 }
 
-// AddMovimiento insert a new Movimiento into database and returns
+// AddNovedadElemento insert a new NovedadElemento into database and returns
 // last inserted Id on success.
-func AddMovimiento(m *Movimiento) (id int64, err error) {
+func AddNovedadElemento(m *NovedadElemento) (id int64, err error) {
 	o := orm.NewOrm()
 	id, err = o.Insert(m)
 	return
 }
 
-// GetMovimientoById retrieves Movimiento by Id. Returns error if
+// GetNovedadElementoById retrieves NovedadElemento by Id. Returns error if
 // Id doesn't exist
-func GetMovimientoById(id int) (v *Movimiento, err error) {
+func GetNovedadElementoById(id int) (v *NovedadElemento, err error) {
 	o := orm.NewOrm()
-	v = &Movimiento{Id: id}
+	v = &NovedadElemento{Id: id}
 	if err = o.Read(v); err == nil {
 		return v, nil
 	}
 	return nil, err
 }
 
-// GetAllMovimiento retrieves all Movimiento matches certain condition. Returns empty list if
+// GetAllNovedadElemento retrieves all NovedadElemento matches certain condition. Returns empty list if
 // no records exist
-func GetAllMovimiento(query map[string]string, fields []string, sortby []string, order []string,
+func GetAllNovedadElemento(query map[string]string, fields []string, sortby []string, order []string,
 	offset int64, limit int64) (ml []interface{}, err error) {
 	o := orm.NewOrm()
-	qs := o.QueryTable(new(Movimiento)).RelatedSel()
+	qs := o.QueryTable(new(NovedadElemento)).RelatedSel()
 	// query k=v
 	for k, v := range query {
 		// rewrite dot-notation to Object__Attribute
@@ -107,7 +108,7 @@ func GetAllMovimiento(query map[string]string, fields []string, sortby []string,
 		}
 	}
 
-	var l []Movimiento
+	var l []NovedadElemento
 	qs = qs.OrderBy(sortFields...)
 	if _, err = qs.Limit(limit, offset).All(&l, fields...); err == nil {
 		if len(fields) == 0 {
@@ -130,11 +131,11 @@ func GetAllMovimiento(query map[string]string, fields []string, sortby []string,
 	return nil, err
 }
 
-// UpdateMovimiento updates Movimiento by Id and returns error if
+// UpdateNovedadElemento updates NovedadElemento by Id and returns error if
 // the record to be updated doesn't exist
-func UpdateMovimientoById(m *Movimiento) (err error) {
+func UpdateNovedadElemento(m *NovedadElemento) (err error) {
 	o := orm.NewOrm()
-	v := Movimiento{Id: m.Id}
+	v := NovedadElemento{Id: m.Id}
 	// ascertain id exists in the database
 	if err = o.Read(&v); err == nil {
 		var num int64
@@ -145,38 +146,17 @@ func UpdateMovimientoById(m *Movimiento) (err error) {
 	return
 }
 
-// DeleteMovimiento deletes Movimiento by Id and returns error if
+// DeleteNovedadElemento deletes NovedadElemento by Id and returns error if
 // the record to be deleted doesn't exist
-func DeleteMovimiento(id int) (err error) {
+func DeleteNovedadElemento(id int) (err error) {
 	o := orm.NewOrm()
-	v := Movimiento{Id: id}
+	v := NovedadElemento{Id: id}
 	// ascertain id exists in the database
 	if err = o.Read(&v); err == nil {
 		var num int64
-		if num, err = o.Delete(&Movimiento{Id: id}); err == nil {
+		if num, err = o.Delete(&NovedadElemento{Id: id}); err == nil {
 			fmt.Println("Number of records deleted in database:", num)
 		}
 	}
 	return
-}
-
-// GetEntradaByActa retrieves all Movimiento matches an specific acta_recibido_id. Returns empty list if
-// no records exist
-func GetEntradaByActa(acta_recibido_id int) (entrada []Movimiento, err error) {
-	var estadoMovimiento []int
-	var movimientos []Movimiento
-
-	estados := []string{"Entrada Aprobada", "Entrada Con Salida"}
-	query_estado := "SELECT e.id FROM movimientos_arka.estado_movimiento e WHERE e.nombre IN (?, ?)"
-	query_movimiento := "SELECT * FROM movimientos_arka.movimiento m  WHERE CAST(m.detalle ->>'acta_recibido_id' as INTEGER) = ? AND m.estado_movimiento_id IN (?, ?)"
-
-	o := orm.NewOrm()
-	_, err = o.Raw(query_estado, estados).QueryRows(&estadoMovimiento)
-	if num, err := o.Raw(query_movimiento, acta_recibido_id, estadoMovimiento).QueryRows(&movimientos); err != nil {
-		return nil, err
-	} else if num == 0 {
-		movimientos = make([]Movimiento, 0)
-	}
-
-	return movimientos, nil
 }

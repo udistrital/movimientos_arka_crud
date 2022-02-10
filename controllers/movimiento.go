@@ -138,7 +138,7 @@ func (c *MovimientoController) GetAll() {
 		c.Abort("404")
 	} else {
 		if l == nil {
-			l = append(l, map[string]interface{}{})
+			l = []interface{}{}
 		}
 		c.Data["json"] = l
 	}
@@ -192,6 +192,28 @@ func (c *MovimientoController) Delete() {
 		//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
 		c.Data["system"] = err
 		c.Abort("404")
+	}
+	c.ServeJSON()
+}
+
+// GetEntradaByActa ...
+// @Title Get By Acta
+// @Description get Movimiento by acta_recibido_id
+// @Param	acta_recibido_id path string true "id del acta asociada a la entrada"
+// @Success 200 {object} models.Movimiento
+// @Failure 404 not found resource
+// @router /entrada/:acta_recibido_id [get]
+func (c *MovimientoController) GetMovimientoByActa() {
+	ActaRecibidoIdStr := c.Ctx.Input.Param(":acta_recibido_id")
+	ActaRecibidoId, _ := strconv.Atoi(ActaRecibidoIdStr)
+	v, err := models.GetEntradaByActa(ActaRecibidoId)
+	if err != nil {
+		logs.Error(err)
+		//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
+		c.Data["system"] = err
+		c.Abort("404")
+	} else {
+		c.Data["json"] = v
 	}
 	c.ServeJSON()
 }

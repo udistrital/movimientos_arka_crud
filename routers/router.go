@@ -46,14 +46,33 @@ func init() {
 			),
 		),
 
+		beego.NSNamespace("/novedad_elemento",
+			beego.NSInclude(
+				&controllers.NovedadElementoController{},
+			),
+		),
+
 		beego.NSNamespace("/tr_salida",
 			beego.NSInclude(
 				&controllers.TrSalidaController{},
 			),
 		),
+
 		beego.NSNamespace("/tr_kardex",
 			beego.NSInclude(
 				&controllers.TrkardexController{},
+			),
+		),
+
+		beego.NSNamespace("/bajas",
+			beego.NSInclude(
+				&controllers.BajasController{},
+			),
+		),
+
+		beego.NSNamespace("/depreciacion",
+			beego.NSInclude(
+				&controllers.DepreciacionController{},
 			),
 		),
 	)

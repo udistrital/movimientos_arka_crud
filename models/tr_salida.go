@@ -1,7 +1,7 @@
 package models
 
 import (
-	"fmt"
+	"strconv"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
@@ -15,14 +15,10 @@ type SalidaGeneral struct {
 	Salidas []*TrSalida
 }
 
-// AddTransaccionProduccionAcademica Transacción para registrar toda la información de un grupo asociándolo a un catálogo
+// AddTransaccionSalida Transacción para registrar todas las salidas asociadas a una entrada
 func AddTransaccionSalida(n *SalidaGeneral) (err error) {
 	o := orm.NewOrm()
 	err = o.Begin()
-
-	if err != nil {
-		return
-	}
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -32,42 +28,32 @@ func AddTransaccionSalida(n *SalidaGeneral) (err error) {
 			o.Commit()
 		}
 	}()
-		fmt.Println("ok")
+	if err != nil {
+		logs.Error(err)
+		return
+	}
 
+	var estado EstadoMovimiento
+	if _, err = o.QueryTable(new(EstadoMovimiento)).RelatedSel().Filter("Nombre", "Entrada Con Salida").All(&estado); err != nil {
+		panic(err.Error())
+	}
+	n.Salidas[0].Salida.MovimientoPadreId.EstadoMovimientoId = &estado
+	if _, err = o.Update(n.Salidas[0].Salida.MovimientoPadreId, "EstadoMovimientoId"); err != nil {
+		panic(err.Error())
+	}
 
 	for _, m := range n.Salidas {
-
-
-		fmt.Println(m.Salida.Detalle)
 		if idSalida, err := o.Insert(m.Salida); err == nil {
-			fmt.Println(idSalida)
-			mov := Movimiento{Id : int(idSalida)}
+			mov := Movimiento{Id: int(idSalida)}
 			for _, elemento := range m.Elementos {
 				elemento.MovimientoId = &mov
-				fmt.Println("elemento" ,elemento)
 				if _, err := o.Insert(elemento); err != nil {
 					panic(err.Error())
 				}
 			}
-			fmt.Println("ok2")
-
-			if m.Salida.MovimientoPadreId != nil {
-				fmt.Println(m.Salida.MovimientoPadreId)
-				var entrada Movimiento
-
-				if _, err := o.QueryTable(new(Movimiento)).RelatedSel().Filter("Activo",true).Filter("Id",m.Salida.MovimientoPadreId.Id).All(&entrada) ; err == nil {
-					fmt.Println(entrada)
-					entrada.EstadoMovimientoId.Id = 4
-					if _, err := o.Update(&entrada, "EstadoMovimientoId"); err != nil {
-						panic(err.Error())
-					}
-				}
-			}
-			
 		} else {
 			panic(err.Error())
 		}
-
 	}
 
 	return
@@ -78,9 +64,45 @@ func GetTransaccionSalida(id int) (Salida map[string]interface{}, err error) {
 	o := orm.NewOrm()
 	err = o.Begin()
 
+	defer func() {
+		if r := recover(); r != nil {
+			o.Rollback()
+			logs.Error(r)
+		} else {
+			o.Commit()
+		}
+	}()
+
 	if err != nil {
+		logs.Error(err)
 		return
 	}
+
+	var elementos []interface{}
+	var movimiento Movimiento
+
+	if _, err := o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id", id).All(&movimiento); err != nil {
+		panic(err.Error())
+	}
+
+	query := map[string]string{"MovimientoId__Id": strconv.Itoa(id), "Activo": "true"}
+	fields := []string{"Id", "ElementoActaId", "Unidad", "ValorUnitario", "ValorTotal", "SaldoCantidad", "SaldoValor", "VidaUtil", "ValorResidual"}
+	if elementos, err = GetAllElementosMovimiento(query, fields, nil, nil, 0, -1); err != nil {
+		panic(err.Error())
+	}
+
+	Salida = map[string]interface{}{
+		"Salida":    movimiento,
+		"Elementos": elementos,
+	}
+
+	return Salida, nil
+}
+
+// PutTransaccionSalida Transacción para registrar todas las salidas asociadas a una entrada
+func PutTransaccionSalida(n *SalidaGeneral) (err error) {
+	o := orm.NewOrm()
+	err = o.Begin()
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -90,43 +112,38 @@ func GetTransaccionSalida(id int) (Salida map[string]interface{}, err error) {
 			o.Commit()
 		}
 	}()
-		fmt.Println("ok")
 
-	
-	var elementos []ElementosMovimiento
-	var Elementos []map[string]interface{}
-
-	v := &Movimiento{Id: id}
-	if err = o.Read(v); err == nil {
-
-		if _, err := o.QueryTable(new(ElementosMovimiento)).RelatedSel().Filter("Activo",true).Filter("MovimientoId__Id",id).All(&elementos); err != nil{
-			panic(err.Error())
-		} else {
-
-			for _, elemento := range elementos {
-				Elementos = append(Elementos, map[string]interface{}{
-					"Id":					elemento.Id,                
-					"ElementoActaId":    	elemento.ElementoActaId,
-					"Unidad":            	elemento.Unidad,
-					"ValorUnitario":     	elemento.ValorUnitario,
-					"ValorTotal":        	elemento.ValorTotal,
-					"SaldoCantidad":     	elemento.SaldoCantidad,
-					"SaldoValor":        	elemento.SaldoValor,
-					"Activo":            	elemento.Activo,
-					"FechaCreacion":     	elemento.FechaCreacion,
-					"FechaModificacion": 	elemento.FechaModificacion,
-					// "MovimientoId":      	elemento.MovimientoId,
-				})
-			}
-			Salida = map[string]interface{}{
-				"Salida": v,
-				"Elementos": Elementos,
-			}
-			
-			return Salida, nil
-		}
-	} else {
-		return nil, err
+	if err != nil {
+		logs.Error(err)
+		return
 	}
-}
 
+	for _, m := range n.Salidas {
+		// Se actualiza la salida con el id y consecutivo original
+		if m.Salida.Id > 0 {
+			if _, err = o.Update(m.Salida); err != nil {
+				panic(err.Error())
+			}
+			for _, elemento := range m.Elementos {
+				if _, err := o.Update(elemento, "VidaUtil", "ValorResidual"); err != nil {
+					panic(err.Error())
+				}
+			}
+		} else {
+			// Las demás salidas se insertan como un movimiento adicional y este Id se asigna a los elementos
+			if idSalida, err := o.Insert(m.Salida); err == nil {
+				mov := Movimiento{Id: int(idSalida)}
+				for _, elemento := range m.Elementos {
+					elemento.MovimientoId = &mov
+					if _, err := o.Update(elemento, "MovimientoId", "VidaUtil", "ValorResidual"); err != nil {
+						panic(err.Error())
+					}
+				}
+			} else {
+				panic(err.Error())
+			}
+		}
+	}
+
+	return
+}

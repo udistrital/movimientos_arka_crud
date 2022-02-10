@@ -7,6 +7,33 @@ import (
 
 func init() {
 
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:BajasController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:BajasController"],
+        beego.ControllerComments{
+            Method: "Put",
+            Router: "/",
+            AllowHTTPMethods: []string{"put"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:DepreciacionController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:DepreciacionController"],
+        beego.ControllerComments{
+            Method: "Post",
+            Router: "/",
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:DepreciacionController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:DepreciacionController"],
+        beego.ControllerComments{
+            Method: "GetCorte",
+            Router: "/",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:ElementosMovimientoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:ElementosMovimientoController"],
         beego.ControllerComments{
             Method: "Post",
@@ -52,6 +79,24 @@ func init() {
             Filters: nil,
             Params: nil})
 
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:ElementosMovimientoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:ElementosMovimientoController"],
+        beego.ControllerComments{
+            Method: "GetByFuncionario",
+            Router: "/funcionario/:funcionarioId",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:ElementosMovimientoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:ElementosMovimientoController"],
+        beego.ControllerComments{
+            Method: "GetHistorial",
+            Router: "/historial/:id",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:EstadoMovimientoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:EstadoMovimientoController"],
         beego.ControllerComments{
             Method: "Post",
@@ -179,6 +224,60 @@ func init() {
             Params: nil})
 
     beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:MovimientoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:MovimientoController"],
+        beego.ControllerComments{
+            Method: "Delete",
+            Router: "/:id",
+            AllowHTTPMethods: []string{"delete"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:MovimientoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:MovimientoController"],
+        beego.ControllerComments{
+            Method: "GetMovimientoByActa",
+            Router: "/entrada/:acta_recibido_id",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:NovedadElementoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:NovedadElementoController"],
+        beego.ControllerComments{
+            Method: "Post",
+            Router: "/",
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:NovedadElementoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:NovedadElementoController"],
+        beego.ControllerComments{
+            Method: "GetAll",
+            Router: "/",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:NovedadElementoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:NovedadElementoController"],
+        beego.ControllerComments{
+            Method: "GetOne",
+            Router: "/:id",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:NovedadElementoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:NovedadElementoController"],
+        beego.ControllerComments{
+            Method: "Put",
+            Router: "/:id",
+            AllowHTTPMethods: []string{"put"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:NovedadElementoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:NovedadElementoController"],
         beego.ControllerComments{
             Method: "Delete",
             Router: "/:id",
@@ -237,6 +336,15 @@ func init() {
             Method: "Post",
             Router: "/",
             AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:TrSalidaController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:TrSalidaController"],
+        beego.ControllerComments{
+            Method: "Put",
+            Router: "/",
+            AllowHTTPMethods: []string{"put"},
             MethodParams: param.Make(),
             Filters: nil,
             Params: nil})
