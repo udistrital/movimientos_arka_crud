@@ -5,24 +5,27 @@ Api CRUD para el manejo de los movimiento contables o generales en el Sistema de
 ## Especificaciones Técnicas
 
 ### Tecnologías Implementadas y Versiones
-* [Golang](https://github.com/udistrital/introduccion_oas/blob/master/instalacion_de_herramientas/golang.md)
-* [BeeGo](https://github.com/udistrital/introduccion_oas/blob/master/instalacion_de_herramientas/beego.md)
-* [Docker](https://docs.docker.com/engine/install/ubuntu/)
-* [Docker Compose](https://docs.docker.com/compose/)
 
+- [Golang](https://github.com/udistrital/introduccion_oas/blob/master/instalacion_de_herramientas/golang.md)
+- [BeeGo](https://github.com/udistrital/introduccion_oas/blob/master/instalacion_de_herramientas/beego.md)
+- [Docker](https://docs.docker.com/engine/install/ubuntu/)
+- [Docker Compose](https://docs.docker.com/compose/)
 
 ### Variables de Entorno
+
 ```shell
 MOVIMIENTOS_ARKA_CRUD_HTTP_PORT: Puerto asignado para la ejecución del API
 MOVIMIENTOS_ARKA_CRUD_PGUSER: Usuario de la base de datos
-MOVIMIENTOS_ARKA_CRUD_PGPASS: Clave del usuario para la conexión a la base de datos  
+MOVIMIENTOS_ARKA_CRUD_PGPASS: Clave del usuario para la conexión a la base de datos
 MOVIMIENTOS_ARKA_CRUD_PGURLS: Host de conexión
 MOVIMIENTOS_ARKA_CRUD_PGDB: Nombre de la base de datos
 MOVIMIENTOS_ARKA_CRUD_SCHEMA: Esquema a utilizar en la base de datos
 ```
-**NOTA:** Las variables se pueden ver en el fichero conf/app.conf y están identificadas con MOVIMIENTOS_ARKA_CRUD_...
+
+**NOTA:** Las variables se pueden ver en el fichero conf/app.conf y están identificadas con `MOVIMIENTOS_ARKA_CRUD_...`
 
 ### Ejecución del Proyecto
+
 ```shell
 #1. Obtener el repositorio con Go
 go get github.com/udistrital/movimientos_arka_crud
@@ -36,13 +39,16 @@ git pull origin develop && git checkout develop
 # 4. alimentar todas las variables de entorno que utiliza el proyecto.
 MOVIMIENTOS_ARKA_CRUD_HTTP_PORT=8080 MOVIMIENTOS_ARKA_CRUD_DB_HOST=127.0.0.1:27017 MOVIMIENTOS_ARKA_CRUD_SOME_VARIABLE=some_value bee run
 ```
+
 ### Ejecución Dockerfile
+
 ```shell
 # docker build --tag=movimientos_arka_crud . --no-cache
 # docker run -p 80:80 movimientos_arka_crud
 ```
 
 ### Ejecución docker-compose
+
 ```shell
 #1. Clonar el repositorio
 git clone -b develop https://github.com/udistrital/movimientos_arka_crud
@@ -67,9 +73,11 @@ docker ps
 ### Ejecución Pruebas
 
 Pruebas unitarias
+
 ```shell
 # En Proceso
 ```
+
 ## Estado CI
 
 | Develop | Relese 0.7.3 | Master |
