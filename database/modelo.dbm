@@ -3,8 +3,8 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1" last-position="0,0" last-zoom="0.8"
-	 default-schema="public" default-owner="postgres">
+<dbmodel pgmodeler-ver="0.9.1-beta" last-position="0,0" last-zoom="1"
+	 default-owner="postgres">
 <role name="desarrollooas"
       superuser="true"
       createdb="true"
@@ -16,7 +16,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
       password="********">
 </role>
 
-<database name="bd_oas" encoding="UTF8" lc-collate="en_US.UTF-8" lc-ctype="en_US.UTF-8" is-template="false" allow-conns="true">
+<database name="bd_oas" encoding="UTF8" lc-collate="en_US.UTF-8" lc-ctype="en_US.UTF-8">
 	<role name="postgres"/>
 	<tablespace name="pg_default"/>
 </database>
@@ -352,66 +352,38 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </constraint>
 
 <relationship name="rel_movimiento_formato_tipo_movimiento" type="relfk"
-	 custom-color="#a98b25"
 	 src-table="movimientos_arka.movimiento"
-	 dst-table="movimientos_arka.formato_tipo_movimiento" reference-fk="fk_movimiento_formato_tipo_movimiento"
-	 src-required="false" dst-required="false">
-	<label ref-type="name-label">
-		<position x="51.9547" y="3.23934"/>
-	</label>
-</relationship>
+	 dst-table="movimientos_arka.formato_tipo_movimiento"
+	 src-required="false" dst-required="false"/>
 
 <relationship name="rel_movimiento_estado_movimiento" type="relfk"
-	 custom-color="#045d6b"
 	 src-table="movimientos_arka.movimiento"
-	 dst-table="movimientos_arka.estado_movimiento" reference-fk="fk_movimiento_estado_movimiento"
-	 src-required="false" dst-required="false">
-	<label ref-type="name-label">
-		<position x="9.05883" y="15.5522"/>
-	</label>
-</relationship>
+	 dst-table="movimientos_arka.estado_movimiento"
+	 src-required="false" dst-required="false"/>
 
 <relationship name="rel_movimiento_movimiento" type="relfk"
-	 custom-color="#e5d892"
 	 src-table="movimientos_arka.movimiento"
-	 dst-table="movimientos_arka.movimiento" reference-fk="fk_movimiento_padre"
-	 src-required="false" dst-required="false">
-	<line>
-		<position x="903.73" y="498.417"/>
-	<position x="903.73" y="409"/>
-	<position x="755.153" y="409"/>
-	</line>
-	<label ref-type="name-label">
-		<position x="16.6647" y="3.85"/>
-	</label>
-</relationship>
+	 dst-table="movimientos_arka.movimiento"
+	 src-required="false" dst-required="false"/>
 
 <relationship name="rel_soporte_movimiento_movimiento" type="relfk"
-	 custom-color="#df91be"
 	 src-table="movimientos_arka.soporte_movimiento"
-	 dst-table="movimientos_arka.movimiento" reference-fk="fk_soporte_movimiento_movimiento"
+	 dst-table="movimientos_arka.movimiento"
 	 src-required="false" dst-required="false"/>
 
 <relationship name="rel_elementos_movimiento_movimiento" type="relfk"
-	 custom-color="#4095dc"
 	 src-table="movimientos_arka.elementos_movimiento"
-	 dst-table="movimientos_arka.movimiento" reference-fk="fk_elementos_movimiento_movimiento"
+	 dst-table="movimientos_arka.movimiento"
 	 src-required="false" dst-required="false"/>
 
 <relationship name="rel_novedad_elemento_elementos_movimiento" type="relfk"
-	 custom-color="#e08f3c"
 	 src-table="movimientos_arka.novedad_elemento"
-	 dst-table="movimientos_arka.elementos_movimiento" reference-fk="fk_novedad_elemento_elementos_movimiento"
-	 src-required="false" dst-required="false">
-	<label ref-type="name-label">
-		<position x="11.3947" y="10.7393"/>
-	</label>
-</relationship>
+	 dst-table="movimientos_arka.elementos_movimiento"
+	 src-required="false" dst-required="false"/>
 
 <relationship name="rel_novedad_elemento_movimiento" type="relfk"
-	 custom-color="#e5e8b5"
 	 src-table="movimientos_arka.novedad_elemento"
-	 dst-table="movimientos_arka.movimiento" reference-fk="fk_novedad_elemento_movimiento"
+	 dst-table="movimientos_arka.movimiento"
 	 src-required="false" dst-required="false"/>
 
 <permission>
