@@ -3,8 +3,8 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1" last-position="0,0" last-zoom="0.8"
-	 default-schema="public" default-owner="postgres">
+<dbmodel pgmodeler-ver="0.9.1-beta" last-position="0,0" last-zoom="1"
+	 default-owner="postgres">
 <role name="desarrollooas"
       superuser="true"
       createdb="true"
@@ -16,7 +16,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
       password="********">
 </role>
 
-<database name="bd_oas" encoding="UTF8" lc-collate="en_US.UTF-8" lc-ctype="en_US.UTF-8" is-template="false" allow-conns="true">
+<database name="bd_oas" encoding="UTF8" lc-collate="en_US.UTF-8" lc-ctype="en_US.UTF-8">
 	<role name="postgres"/>
 	<tablespace name="pg_default"/>
 </database>
@@ -25,7 +25,6 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </schema>
 
 <schema name="movimientos_arka" rect-visible="true" fill-color="#babdb6">
-	<role name="postgres"/>
 </schema>
 
 <sequence name="movimiento_id_seq"
@@ -38,8 +37,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 
 <table name="movimiento">
 	<schema name="movimientos_arka"/>
-	<role name="postgres"/>
-	<position x="480" y="420"/>
+	<position x="1340" y="960"/>
 	<column name="id" not-null="true" sequence="movimientos_arka.movimiento_id_seq">
 		<type name="integer" length="0"/>
 		<comment><![CDATA[Identificador de la tabla movimiento]]></comment>
@@ -84,9 +82,8 @@ CAUTION: Do not modify this file unless you know what you are doing.
 
 <table name="estado_movimiento">
 	<schema name="movimientos_arka"/>
-	<role name="postgres"/>
 	<comment><![CDATA[Tabla para almacenar los posibles estados por los que puede pasar un movimiento de almacén]]></comment>
-	<position x="540" y="820"/>
+	<position x="800" y="1200"/>
 	<column name="id" not-null="true" sequence="movimientos_arka.estado_movimiento_id_seq">
 		<type name="integer" length="0"/>
 	</column>
@@ -122,9 +119,8 @@ CAUTION: Do not modify this file unless you know what you are doing.
 
 <table name="soporte_movimiento">
 	<schema name="movimientos_arka"/>
-	<role name="postgres"/>
 	<comment><![CDATA[Tabla que almacena los documentos/soportes relacionados a un movimiento, ej: factura, concepto técnico de la red de datos, denuncio, entre otros.]]></comment>
-	<position x="1400" y="600"/>
+	<position x="1960" y="760"/>
 	<column name="id" not-null="true" sequence="movimientos_arka.soporte_movimiento_id_seq">
 		<type name="integer" length="0"/>
 	</column>
@@ -160,9 +156,8 @@ CAUTION: Do not modify this file unless you know what you are doing.
 
 <table name="elementos_movimiento">
 	<schema name="movimientos_arka"/>
-	<role name="postgres"/>
 	<comment><![CDATA[Tabla que almacena los elementos relacionados con un movimiento de almacén]]></comment>
-	<position x="1380" y="260"/>
+	<position x="1900" y="1120"/>
 	<column name="id" not-null="true" sequence="movimientos_arka.elementos_movimiento_id_seq">
 		<type name="integer" length="0"/>
 	</column>
@@ -224,9 +219,8 @@ CAUTION: Do not modify this file unless you know what you are doing.
 
 <table name="formato_tipo_movimiento">
 	<schema name="movimientos_arka"/>
-	<role name="postgres"/>
 	<comment><![CDATA[Tabla para parametrizar los campos de la entrada en el JSON.]]></comment>
-	<position x="1400" y="860"/>
+	<position x="800" y="860"/>
 	<column name="id" not-null="true" sequence="movimientos_arka.formato_tipo_movimiento_id_seq">
 		<type name="integer" length="0"/>
 	</column>
@@ -234,7 +228,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<type name="character varying" length="50"/>
 	</column>
 	<column name="formato" not-null="true">
-		<type name="json" length="0"/>
+		<type name="jsonb" length="0"/>
 		<comment><![CDATA[Campos necesarios para cada tipo movimiento especificado en un JSON]]></comment>
 	</column>
 	<column name="descripcion">
@@ -272,8 +266,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 
 <table name="novedad_elemento">
 	<schema name="movimientos_arka"/>
-	<role name="postgres"/>
-	<position x="460" y="100"/>
+	<position x="2500" y="860"/>
 	<column name="id" not-null="true" sequence="movimientos_arka.novedad_elemento_id_seq">
 		<type name="integer" length="0"/>
 	</column>
@@ -352,66 +345,44 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </constraint>
 
 <relationship name="rel_movimiento_formato_tipo_movimiento" type="relfk"
-	 custom-color="#a98b25"
 	 src-table="movimientos_arka.movimiento"
-	 dst-table="movimientos_arka.formato_tipo_movimiento" reference-fk="fk_movimiento_formato_tipo_movimiento"
-	 src-required="false" dst-required="false">
-	<label ref-type="name-label">
-		<position x="51.9547" y="3.23934"/>
-	</label>
-</relationship>
+	 dst-table="movimientos_arka.formato_tipo_movimiento"
+	 src-required="false" dst-required="false"/>
 
 <relationship name="rel_movimiento_estado_movimiento" type="relfk"
-	 custom-color="#045d6b"
 	 src-table="movimientos_arka.movimiento"
-	 dst-table="movimientos_arka.estado_movimiento" reference-fk="fk_movimiento_estado_movimiento"
-	 src-required="false" dst-required="false">
-	<label ref-type="name-label">
-		<position x="9.05883" y="15.5522"/>
-	</label>
-</relationship>
+	 dst-table="movimientos_arka.estado_movimiento"
+	 src-required="false" dst-required="false"/>
 
 <relationship name="rel_movimiento_movimiento" type="relfk"
-	 custom-color="#e5d892"
 	 src-table="movimientos_arka.movimiento"
-	 dst-table="movimientos_arka.movimiento" reference-fk="fk_movimiento_padre"
+	 dst-table="movimientos_arka.movimiento"
 	 src-required="false" dst-required="false">
 	<line>
-		<position x="903.73" y="498.417"/>
-	<position x="903.73" y="409"/>
-	<position x="755.153" y="409"/>
+		<position x="1710.83" y="1065.3"/>
+	<position x="1710.83" y="949"/>
+	<position x="1579.89" y="949"/>
 	</line>
-	<label ref-type="name-label">
-		<position x="16.6647" y="3.85"/>
-	</label>
 </relationship>
 
 <relationship name="rel_soporte_movimiento_movimiento" type="relfk"
-	 custom-color="#df91be"
 	 src-table="movimientos_arka.soporte_movimiento"
-	 dst-table="movimientos_arka.movimiento" reference-fk="fk_soporte_movimiento_movimiento"
+	 dst-table="movimientos_arka.movimiento"
 	 src-required="false" dst-required="false"/>
 
 <relationship name="rel_elementos_movimiento_movimiento" type="relfk"
-	 custom-color="#4095dc"
 	 src-table="movimientos_arka.elementos_movimiento"
-	 dst-table="movimientos_arka.movimiento" reference-fk="fk_elementos_movimiento_movimiento"
+	 dst-table="movimientos_arka.movimiento"
 	 src-required="false" dst-required="false"/>
 
 <relationship name="rel_novedad_elemento_elementos_movimiento" type="relfk"
-	 custom-color="#e08f3c"
 	 src-table="movimientos_arka.novedad_elemento"
-	 dst-table="movimientos_arka.elementos_movimiento" reference-fk="fk_novedad_elemento_elementos_movimiento"
-	 src-required="false" dst-required="false">
-	<label ref-type="name-label">
-		<position x="11.3947" y="10.7393"/>
-	</label>
-</relationship>
+	 dst-table="movimientos_arka.elementos_movimiento"
+	 src-required="false" dst-required="false"/>
 
 <relationship name="rel_novedad_elemento_movimiento" type="relfk"
-	 custom-color="#e5e8b5"
 	 src-table="movimientos_arka.novedad_elemento"
-	 dst-table="movimientos_arka.movimiento" reference-fk="fk_novedad_elemento_movimiento"
+	 dst-table="movimientos_arka.movimiento"
 	 src-required="false" dst-required="false"/>
 
 <permission>
