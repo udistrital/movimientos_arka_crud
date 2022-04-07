@@ -13,7 +13,7 @@ import (
 type FormatoTipoMovimiento struct {
 	Id                int       `orm:"column(id);pk;auto"`
 	Nombre            string    `orm:"column(nombre)"`
-	Formato           string    `orm:"column(formato);type(json)"`
+	Formato           string    `orm:"column(formato);type(jsonb)"`
 	Descripcion       string    `orm:"column(descripcion);null"`
 	CodigoAbreviacion string    `orm:"column(codigo_abreviacion);null"`
 	NumeroOrden       float64   `orm:"column(numero_orden);null"`
