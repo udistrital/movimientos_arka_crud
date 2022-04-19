@@ -146,7 +146,7 @@ func AddTrNovedadElemento(m *NovedadElemento) (id int64, err error) {
 
 	var novedades []*NovedadElemento
 
-	if _, err := o.QueryTable(new(NovedadElemento)).RelatedSel().Filter("ElementoMovimientoId__Id", m.ElementoMovimientoId).Filter("Activo", true).All(&novedades, "Id"); err == nil {
+	if _, err = o.QueryTable(new(NovedadElemento)).RelatedSel().Filter("ElementoMovimientoId__Id", m.ElementoMovimientoId).Filter("Activo", true).All(&novedades, "Id"); err == nil {
 		for _, nv := range novedades {
 			nv.Activo = false
 			if _, err = o.Update(nv, "Activo"); err != nil {
