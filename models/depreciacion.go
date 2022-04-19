@@ -23,12 +23,13 @@ func GetCorteDepreciacion(fechaCorte string) (entrada []*detalle, err error) {
 
 	// Los elementos se determinan de la siguiente manera
 	// + Elementos sin novedad y vida útil > 0
-	// + Novedad con vida útil > 0
+	// + Novedades con vida útil > 0
+	// - Elementos solicitados para baja antes de la fecha de corte
 
 	var (
 		query     string
 		elementos []*detalle
-		novedad   []*detalle
+		novedades []*detalle
 	)
 
 	o := orm.NewOrm()
@@ -59,9 +60,22 @@ func GetCorteDepreciacion(fechaCorte string) (entrada []*detalle, err error) {
 			FROM
 				movimientos_arka.novedad_elemento ne
 			WHERE
-				ne.elemento_movimiento_id = em.id);`
+				ne.elemento_movimiento_id = em.id)
+		AND em.id NOT IN (
+			SELECT
+				em.id
+			FROM
+				 movimientos_arka.movimiento m,
+				 movimientos_arka.elementos_movimiento em,
+				 movimientos_arka.formato_tipo_movimiento fm,
+				 jsonb_array_elements(m.detalle -> 'Elementos') AS elem
+			WHERE
+				fm.codigo_abreviacion LIKE 'BJ%'
+				AND m.formato_tipo_movimiento_id = fm.id
+				AND m.fecha_creacion < ?
+				AND em.id = CAST(elem as INTEGER));`
 
-	if _, err = o.Raw(query, fechaCorte).QueryRows(&elementos); err != nil {
+	if _, err = o.Raw(query, fechaCorte, fechaCorte).QueryRows(&elementos); err != nil {
 		return nil, err
 	}
 
@@ -85,14 +99,28 @@ func GetCorteDepreciacion(fechaCorte string) (entrada []*detalle, err error) {
 		AND ne.activo = true
 		AND ne.valor_libros > 0
 		AND ne.vida_util > 0
+		AND ne.elemento_movimiento_id NOT IN (
+			SELECT
+				ne.elemento_movimiento_id
+			FROM
+				movimientos_arka.movimiento m,
+				movimientos_arka.novedad_elemento ne,
+				movimientos_arka.elementos_movimiento em,
+				movimientos_arka.formato_tipo_movimiento fm,
+				jsonb_array_elements(m.detalle -> 'Elementos') AS elem
+			WHERE
+				fm.codigo_abreviacion LIKE 'BJ%'
+				AND m.formato_tipo_movimiento_id = fm.id
+				AND m.fecha_creacion < ?
+				AND ne.elemento_movimiento_id = CAST(elem as INTEGER))
 	ORDER BY
 		ne.elemento_movimiento_id,
 		ne.id DESC;`
 
-	if _, err = o.Raw(query, fechaCorte).QueryRows(&novedad); err != nil {
+	if _, err = o.Raw(query, fechaCorte, fechaCorte).QueryRows(&novedades); err != nil {
 		return nil, err
 	}
-	elementos = append(elementos, novedad...)
+	elementos = append(elementos, novedades...)
 
 	return elementos, nil
 }
