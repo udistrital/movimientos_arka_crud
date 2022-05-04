@@ -96,10 +96,10 @@ func PostRevisionComite(n *TrRevisionBaja) (ids []int, err error) {
 							panic(err.Error())
 						}
 					}
+				}
 
-					if _, err = o.Insert(&novedad); err != nil {
-						panic(err.Error())
-					}
+				if _, err = o.Insert(&novedad); err != nil {
+					panic(err.Error())
 				}
 
 			}
