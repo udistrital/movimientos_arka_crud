@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/udistrital/movimientos_arka_crud/models"
+	"github.com/udistrital/utils_oas/errorctrl"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
@@ -214,6 +215,46 @@ func (c *MovimientoController) GetMovimientoByActa() {
 		c.Abort("404")
 	} else {
 		c.Data["json"] = v
+	}
+	c.ServeJSON()
+}
+
+// GetTrasladosByTerceroId ...
+// @Title Get Traslados By Tercero
+// @Description Consulta traslados asociados a un tercero determinado.
+// @Param	tercero_id	path	string	true	"TerceroId de quien solicita los traslados"
+// @Param	confirmar	query	bool	false	"Consulta los traslados que están pendientes de ser confirmados por el tercero que consulta."
+// @Success 200 {object} []models.Movimiento
+// @Failure 404 not found resource
+// @router /traslado/:tercero_id [get]
+func (c *MovimientoController) GetTrasladosByTerceroId() {
+	var (
+		terceroId int
+		recibir   bool
+	)
+
+	if v, err := c.GetInt(":tercero_id", 0); err != nil {
+		panic(errorctrl.Error(`GetAll - c.GetInt(":tercero_id", 0)`, err, "400"))
+	} else if terceroId > 0 {
+		terceroId = v
+	} else {
+		panic(errorctrl.Error(`GetAll - Se debe especificar un tercero válido`, err, "400"))
+	}
+
+	if v, err := c.GetBool("confirmar", false); err != nil {
+		panic(errorctrl.Error(`GetAll - c.GetBool("confirmar", false)`, err, "400"))
+	} else {
+		recibir = v
+	}
+
+	var traslados []models.Movimiento
+	err := models.GetTrasladosByTerceroId(terceroId, recibir, &traslados)
+	if err != nil {
+		logs.Error(err)
+		c.Data["system"] = err
+		c.Abort("404")
+	} else {
+		c.Data["json"] = traslados
 	}
 	c.ServeJSON()
 }

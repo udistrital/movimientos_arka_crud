@@ -593,6 +593,32 @@ paths:
             $ref: '#/definitions/models.Movimiento'
         "404":
           description: not found resource
+  /movimiento/traslado/{tercero_id}:
+    get:
+      tags:
+      - movimiento
+      description: Consulta traslados asociados a un tercero determinado.
+      operationId: MovimientoController.Get Traslados By Tercero
+      parameters:
+      - in: path
+        name: tercero_id
+        description: TerceroId de quien solicita los traslados
+        required: true
+        type: string
+      - in: query
+        name: confirmar
+        description: Consulta los traslados que están pendientes de ser confirmados
+          por el tercero que consulta.
+        type: boolean
+      responses:
+        "200":
+          description: ""
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/models.Movimiento'
+        "404":
+          description: not found resource
   /novedad_elemento/:
     get:
       tags:
