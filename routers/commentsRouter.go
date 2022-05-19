@@ -243,7 +243,7 @@ func init() {
 
     beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:MovimientoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:MovimientoController"],
         beego.ControllerComments{
-            Method: "GetTrasladosByTerceroId",
+            Method: "GetAllTrasladoByTerceroId",
             Router: `/traslado/:tercero_id`,
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),

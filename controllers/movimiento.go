@@ -23,6 +23,7 @@ func (c *MovimientoController) URLMapping() {
 	c.Mapping("Post", c.Post)
 	c.Mapping("GetOne", c.GetOne)
 	c.Mapping("GetAll", c.GetAll)
+	c.Mapping("GetAllTrasladoByTerceroId", c.GetAllTrasladoByTerceroId)
 	c.Mapping("Put", c.Put)
 	c.Mapping("Delete", c.Delete)
 }
@@ -219,7 +220,7 @@ func (c *MovimientoController) GetMovimientoByActa() {
 	c.ServeJSON()
 }
 
-// GetTrasladosByTerceroId ...
+// GetAllTrasladoByTerceroId ...
 // @Title Get Traslados By Tercero
 // @Description Consulta traslados asociados a un tercero determinado.
 // @Param	tercero_id	path	string	true	"TerceroId de quien solicita los traslados"
@@ -227,7 +228,7 @@ func (c *MovimientoController) GetMovimientoByActa() {
 // @Success 200 {object} []models.Movimiento
 // @Failure 404 not found resource
 // @router /traslado/:tercero_id [get]
-func (c *MovimientoController) GetTrasladosByTerceroId() {
+func (c *MovimientoController) GetAllTrasladoByTerceroId() {
 	var (
 		terceroId int
 		recibir   bool
