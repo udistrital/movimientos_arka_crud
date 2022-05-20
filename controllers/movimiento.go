@@ -236,7 +236,7 @@ func (c *MovimientoController) GetAllTrasladoByTerceroId() {
 
 	if v, err := c.GetInt(":tercero_id", 0); err != nil {
 		panic(errorctrl.Error(`GetAll - c.GetInt(":tercero_id", 0)`, err, "400"))
-	} else if terceroId > 0 {
+	} else if v > 0 {
 		terceroId = v
 	} else {
 		panic(errorctrl.Error(`GetAll - Se debe especificar un tercero válido`, err, "400"))
