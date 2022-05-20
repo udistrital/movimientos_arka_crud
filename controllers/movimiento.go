@@ -229,6 +229,7 @@ func (c *MovimientoController) GetMovimientoByActa() {
 // @Failure 404 not found resource
 // @router /traslado/:tercero_id [get]
 func (c *MovimientoController) GetAllTrasladoByTerceroId() {
+
 	var (
 		terceroId int
 		recibir   bool
@@ -248,7 +249,7 @@ func (c *MovimientoController) GetAllTrasladoByTerceroId() {
 		recibir = v
 	}
 
-	var traslados []models.Movimiento
+	var traslados = make([]models.Movimiento, 0)
 	err := models.GetTrasladosByTerceroId(terceroId, recibir, &traslados)
 	if err != nil {
 		logs.Error(err)
