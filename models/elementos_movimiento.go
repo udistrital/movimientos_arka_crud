@@ -214,7 +214,7 @@ func GetElementosFuncionario(funcionarioId int) (entrada []int, err error) {
 					movimientos_arka.elementos_movimiento em,
 					jsonb_array_elements(m.detalle -> 'Elementos') AS elem
 				WHERE
-					sm.nombre IN ('Traslado Por Confirmar','Traslado Rechazado','Traslado Aprobado')
+					sm.nombre IN ('Traslado Por Confirmar','Traslado Rechazado','Traslado Confirmado')
 					AND CAST(elem as INTEGER) = em.id
 					AND m.estado_movimiento_id = sm.id
 				),
