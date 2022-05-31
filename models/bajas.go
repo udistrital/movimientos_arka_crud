@@ -8,16 +8,18 @@ import (
 )
 
 type TrRevisionBaja struct {
-	Bajas          []int
 	Aprobacion     bool
-	RazonRechazo   string
+	Bajas          []int
+	DependenciaId  int
 	FechaRevisionC string
+	RazonRechazo   string
 	Resolucion     string
 }
 
 type FormatoBaja struct {
 	Consecutivo    string
 	ConsecutivoId  int
+	DependenciaId  int
 	Elementos      []int
 	FechaRevisionA string
 	FechaRevisionC string
@@ -75,6 +77,7 @@ func PostRevisionComite(n *TrRevisionBaja) (ids []int, err error) {
 		} else {
 			detalle.FechaRevisionC = n.FechaRevisionC
 			detalle.Resolucion = n.Resolucion
+			detalle.DependenciaId = n.DependenciaId
 
 			for _, el := range detalle.Elementos {
 				novedad := NovedadElemento{

@@ -1203,6 +1203,9 @@ definitions:
         items:
           type: integer
           format: int64
+      DependenciaId:
+        type: integer
+        format: int64
       FechaRevisionC:
         type: string
       RazonRechazo:
