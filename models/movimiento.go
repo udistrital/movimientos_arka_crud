@@ -193,3 +193,62 @@ func GetEntradaByActa(acta_recibido_id int) (entrada *Movimiento, err error) {
 
 	return entrada, nil
 }
+
+// GetEntradaByActa Retorna la entrada asociada a un acta determinada
+func GetTrasladosByTerceroId(terceroId int, porRecibir bool, traslados *[]Movimiento) (err error) {
+
+	o := orm.NewOrm()
+
+	var ids []int
+
+	query :=
+		`SELECT	m.id
+	FROM movimientos_arka.movimiento m,
+		movimientos_arka.formato_tipo_movimiento fm`
+
+	if porRecibir {
+		query += `,
+		movimientos_arka.estado_movimiento em`
+	}
+
+	query +=
+		`
+		WHERE fm.codigo_abreviacion = 'SOL_TRD'
+		AND (m.detalle ->> 'FuncionarioDestino' = ?`
+
+	if !porRecibir {
+		query += `
+		OR m.detalle ->> 'FuncionarioOrigen' = ?);`
+	} else {
+		query += `)
+		AND em.nombre = 'Traslado Por Confirmar'
+		AND m.estado_movimiento_id = em.id;`
+	}
+
+	if porRecibir {
+		if _, err = o.Raw(query, terceroId).QueryRows(&ids); err != nil {
+			return err
+		}
+	} else {
+		if _, err = o.Raw(query, terceroId, terceroId).QueryRows(&ids); err != nil {
+			return err
+		}
+	}
+
+	if len(ids) == 0 {
+		return nil
+	}
+
+	if l, err := GetAllMovimiento(
+		map[string]string{"Id__in": strings.Trim(strings.Replace(fmt.Sprint(ids), " ", "|", -1), "[]")}, []string{}, nil, nil, 0, -1); err != nil {
+		return err
+	} else {
+		var movs []Movimiento
+		if err := formatdata.FillStruct(l, &movs); err != nil {
+			return err
+		}
+		*traslados = movs
+	}
+
+	return
+}
