@@ -5,24 +5,27 @@ Api CRUD para el manejo de los movimiento contables o generales en el Sistema de
 ## Especificaciones Técnicas
 
 ### Tecnologías Implementadas y Versiones
-* [Golang](https://github.com/udistrital/introduccion_oas/blob/master/instalacion_de_herramientas/golang.md)
-* [BeeGo](https://github.com/udistrital/introduccion_oas/blob/master/instalacion_de_herramientas/beego.md)
-* [Docker](https://docs.docker.com/engine/install/ubuntu/)
-* [Docker Compose](https://docs.docker.com/compose/)
 
+- [Golang](https://github.com/udistrital/introduccion_oas/blob/master/instalacion_de_herramientas/golang.md)
+- [BeeGo](https://github.com/udistrital/introduccion_oas/blob/master/instalacion_de_herramientas/beego.md)
+- [Docker](https://docs.docker.com/engine/install/ubuntu/)
+- [Docker Compose](https://docs.docker.com/compose/)
 
 ### Variables de Entorno
+
 ```shell
 MOVIMIENTOS_ARKA_CRUD_HTTP_PORT: Puerto asignado para la ejecución del API
 MOVIMIENTOS_ARKA_CRUD_PGUSER: Usuario de la base de datos
-MOVIMIENTOS_ARKA_CRUD_PGPASS: Clave del usuario para la conexión a la base de datos  
+MOVIMIENTOS_ARKA_CRUD_PGPASS: Clave del usuario para la conexión a la base de datos
 MOVIMIENTOS_ARKA_CRUD_PGURLS: Host de conexión
 MOVIMIENTOS_ARKA_CRUD_PGDB: Nombre de la base de datos
 MOVIMIENTOS_ARKA_CRUD_SCHEMA: Esquema a utilizar en la base de datos
 ```
-**NOTA:** Las variables se pueden ver en el fichero conf/app.conf y están identificadas con MOVIMIENTOS_ARKA_CRUD_...
+
+**NOTA:** Las variables se pueden ver en el fichero conf/app.conf y están identificadas con `MOVIMIENTOS_ARKA_CRUD_...`
 
 ### Ejecución del Proyecto
+
 ```shell
 #1. Obtener el repositorio con Go
 go get github.com/udistrital/movimientos_arka_crud
@@ -36,13 +39,16 @@ git pull origin develop && git checkout develop
 # 4. alimentar todas las variables de entorno que utiliza el proyecto.
 MOVIMIENTOS_ARKA_CRUD_HTTP_PORT=8080 MOVIMIENTOS_ARKA_CRUD_DB_HOST=127.0.0.1:27017 MOVIMIENTOS_ARKA_CRUD_SOME_VARIABLE=some_value bee run
 ```
+
 ### Ejecución Dockerfile
+
 ```shell
 # docker build --tag=movimientos_arka_crud . --no-cache
 # docker run -p 80:80 movimientos_arka_crud
 ```
 
 ### Ejecución docker-compose
+
 ```shell
 #1. Clonar el repositorio
 git clone -b develop https://github.com/udistrital/movimientos_arka_crud
@@ -67,19 +73,20 @@ docker ps
 ### Ejecución Pruebas
 
 Pruebas unitarias
+
 ```shell
 # En Proceso
 ```
+
 ## Estado CI
 
-| Develop | Relese 0.7.3 | Master |
+| Develop | Relese 1.0.0 | Master |
 | -- | -- | -- |
-| [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/movimientos_arka_crud/status.svg?ref=refs/heads/develop)](https://hubci.portaloas.udistrital.edu.co/udistrital/movimientos_arka_crud) | [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/movimientos_arka_crud/status.svg?ref=refs/heads/release/0.7.3)](https://hubci.portaloas.udistrital.edu.co/udistrital/movimientos_arka_crud) | [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/movimientos_arka_crud/status.svg?ref=refs/heads/master)](https://hubci.portaloas.udistrital.edu.co/udistrital/movimientos_arka_crud) |
+| [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/movimientos_arka_crud/status.svg?ref=refs/heads/develop)](https://hubci.portaloas.udistrital.edu.co/udistrital/movimientos_arka_crud) | [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/movimientos_arka_crud/status.svg?ref=refs/heads/release/1.0.0)](https://hubci.portaloas.udistrital.edu.co/udistrital/movimientos_arka_crud) | [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/movimientos_arka_crud/status.svg?ref=refs/heads/master)](https://hubci.portaloas.udistrital.edu.co/udistrital/movimientos_arka_crud) |
 
 ## Modelo de Datos
-[Modelo de Datos MOVIMIENTOS ARKA CRUD](https://drive.google.com/drive/u/2/folders/1VXw4sg2JiGH8PvLzff3J2gmW5igcq4V6)\
-[PGModeler](models/modelo.dbm) - [SVG](models/modelo.svg)
 
+[PGModeler](database/modelo.dbm) - [SVG](database/modelo.svg)
 
 ## Licencia
 

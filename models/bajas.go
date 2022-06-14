@@ -8,15 +8,18 @@ import (
 )
 
 type TrRevisionBaja struct {
-	Bajas          []int
 	Aprobacion     bool
-	RazonRechazo   string
+	Bajas          []int
+	DependenciaId  int
 	FechaRevisionC string
+	RazonRechazo   string
 	Resolucion     string
 }
 
 type FormatoBaja struct {
 	Consecutivo    string
+	ConsecutivoId  int
+	DependenciaId  int
 	Elementos      []int
 	FechaRevisionA string
 	FechaRevisionC string
@@ -31,18 +34,18 @@ func PostRevisionComite(n *TrRevisionBaja) (ids []int, err error) {
 	o := orm.NewOrm()
 	err = o.Begin()
 
-	defer func() {
-		if r := recover(); r != nil {
-			o.Rollback()
-			logs.Error(r)
-			panic(err)
-		}
-		o.Commit()
-	}()
 	if err != nil {
 		logs.Error(err)
 		return
 	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			o.Rollback()
+			logs.Error(r)
+		}
+		o.Commit()
+	}()
 
 	var estado EstadoMovimiento
 	var estadoString string
@@ -74,6 +77,36 @@ func PostRevisionComite(n *TrRevisionBaja) (ids []int, err error) {
 		} else {
 			detalle.FechaRevisionC = n.FechaRevisionC
 			detalle.Resolucion = n.Resolucion
+			detalle.DependenciaId = n.DependenciaId
+
+			for _, el := range detalle.Elementos {
+				novedad := NovedadElemento{
+					MovimientoId:         &Movimiento{Id: id},
+					ElementoMovimientoId: &ElementosMovimiento{Id: el},
+					Activo:               true,
+				}
+
+				var novedades []*NovedadElemento
+
+				if _, err = o.QueryTable(new(NovedadElemento)).RelatedSel().Filter("ElementoMovimientoId__Id", el).Filter("Activo", true).All(&novedades, "Id"); err != nil {
+					panic(err.Error())
+				}
+
+				if len(novedades) > 0 {
+					for _, nv := range novedades {
+						nv.Activo = false
+						if _, err = o.Update(nv, "Activo"); err != nil {
+							panic(err.Error())
+						}
+					}
+				}
+
+				if _, err = o.Insert(&novedad); err != nil {
+					panic(err.Error())
+				}
+
+			}
+
 		}
 
 		if detalle_, err := json.Marshal(detalle); err != nil {

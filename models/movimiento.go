@@ -4,10 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/astaxie/beego/orm"
+	"github.com/udistrital/utils_oas/formatdata"
 )
 
 type Movimiento struct {
@@ -160,23 +162,93 @@ func DeleteMovimiento(id int) (err error) {
 	return
 }
 
-// GetEntradaByActa retrieves all Movimiento matches an specific acta_recibido_id. Returns empty list if
-// no records exist
-func GetEntradaByActa(acta_recibido_id int) (entrada []Movimiento, err error) {
-	var estadoMovimiento []int
-	var movimientos []Movimiento
-
-	estados := []string{"Entrada Aprobada", "Entrada Con Salida"}
-	query_estado := "SELECT e.id FROM movimientos_arka.estado_movimiento e WHERE e.nombre IN (?, ?)"
-	query_movimiento := "SELECT * FROM movimientos_arka.movimiento m  WHERE CAST(m.detalle ->>'acta_recibido_id' as INTEGER) = ? AND m.estado_movimiento_id IN (?, ?)"
+// GetEntradaByActa Retorna la entrada asociada a un acta determinada
+func GetEntradaByActa(acta_recibido_id int) (entrada *Movimiento, err error) {
 
 	o := orm.NewOrm()
-	_, err = o.Raw(query_estado, estados).QueryRows(&estadoMovimiento)
-	if num, err := o.Raw(query_movimiento, acta_recibido_id, estadoMovimiento).QueryRows(&movimientos); err != nil {
+	var ids []int
+	query :=
+		`SELECT	m.id
+	FROM movimientos_arka.movimiento m
+	WHERE m.detalle ->> 'acta_recibido_id' = ?;`
+
+	if _, err = o.Raw(query, acta_recibido_id).QueryRows(&ids); err != nil {
 		return nil, err
-	} else if num == 0 {
-		movimientos = make([]Movimiento, 0)
 	}
 
-	return movimientos, nil
+	if len(ids) == 0 {
+		return nil, nil
+	}
+
+	if l, err := GetAllMovimiento(
+		map[string]string{"Id": strconv.Itoa(ids[0])}, []string{}, nil, nil, 0, -1); err != nil {
+		return nil, err
+	} else {
+		var movs []*Movimiento
+		if err := formatdata.FillStruct(l, &movs); err != nil {
+			return nil, err
+		}
+		entrada = movs[0]
+	}
+
+	return entrada, nil
+}
+
+// GetEntradaByActa Retorna la entrada asociada a un acta determinada
+func GetTrasladosByTerceroId(terceroId int, porRecibir bool, traslados *[]Movimiento) (err error) {
+
+	o := orm.NewOrm()
+
+	var ids []int
+
+	query :=
+		`SELECT	m.id
+	FROM movimientos_arka.movimiento m,
+		movimientos_arka.formato_tipo_movimiento fm`
+
+	if porRecibir {
+		query += `,
+		movimientos_arka.estado_movimiento em`
+	}
+
+	query +=
+		`
+		WHERE fm.codigo_abreviacion = 'SOL_TRD'
+		AND (m.detalle ->> 'FuncionarioDestino' = ?`
+
+	if !porRecibir {
+		query += `
+		OR m.detalle ->> 'FuncionarioOrigen' = ?);`
+	} else {
+		query += `)
+		AND em.nombre = 'Traslado Por Confirmar'
+		AND m.estado_movimiento_id = em.id;`
+	}
+
+	if porRecibir {
+		if _, err = o.Raw(query, terceroId).QueryRows(&ids); err != nil {
+			return err
+		}
+	} else {
+		if _, err = o.Raw(query, terceroId, terceroId).QueryRows(&ids); err != nil {
+			return err
+		}
+	}
+
+	if len(ids) == 0 {
+		return nil
+	}
+
+	if l, err := GetAllMovimiento(
+		map[string]string{"Id__in": strings.Trim(strings.Replace(fmt.Sprint(ids), " ", "|", -1), "[]")}, []string{}, nil, nil, 0, -1); err != nil {
+		return err
+	} else {
+		var movs []Movimiento
+		if err := formatdata.FillStruct(l, &movs); err != nil {
+			return err
+		}
+		*traslados = movs
+	}
+
+	return
 }
