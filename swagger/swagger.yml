@@ -54,7 +54,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/models.detalle'
+              $ref: '#/definitions/models.DepreciacionElemento'
         "404":
           description: not found resource
     post:
@@ -988,6 +988,19 @@ paths:
         "404":
           description: not found resource
 definitions:
+  models.DepreciacionElemento:
+    title: DepreciacionElemento
+    type: object
+    properties:
+      DeltaValor:
+        type: number
+        format: double
+      ElementoActaId:
+        type: integer
+        format: int64
+      ElementoMovimientoId:
+        type: integer
+        format: int64
   models.ElementosMovimiento:
     title: ElementosMovimiento
     type: object
@@ -1222,31 +1235,6 @@ definitions:
           $ref: '#/definitions/models.ElementosMovimiento'
       Salida:
         $ref: '#/definitions/models.Movimiento'
-  models.detalle:
-    title: detalle
-    type: object
-    properties:
-      ElementoActaId:
-        type: integer
-        format: int64
-      ElementoMovimientoId:
-        type: integer
-        format: int64
-      FechaRef:
-        type: string
-        format: datetime
-      NovedadElementoId:
-        type: integer
-        format: int64
-      ValorPresente:
-        type: number
-        format: double
-      ValorResidual:
-        type: number
-        format: double
-      VidaUtil:
-        type: number
-        format: double
 tags:
 - name: formato_tipo_movimiento
   description: |

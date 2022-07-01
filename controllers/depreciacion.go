@@ -52,7 +52,7 @@ func (c *DepreciacionController) Post() {
 // @Title GetCorte
 // @Description Retorna lista de elementos disponibles para liquidar depreciacion a una fecha de corte determinada
 // @Param	fechaCorte query string true "Fecha de corte en formato YYYY-MM-DD"
-// @Success 200 {object} []models.detalle
+// @Success 200 {object} []models.DepreciacionElemento
 // @Failure 404 not found resource
 // @router / [get]
 func (c *DepreciacionController) GetCorte() {
