@@ -20,13 +20,8 @@ func GetCorteDepreciacion(fechaCorte string) (entrada interface{}, err error) {
 	// + Novedades con vida útil > 0
 	// - Elementos solicitados para baja antes de la fecha de corte
 
-	var (
-		query     string
-		elementos []*DepreciacionElemento
-	)
-
 	o := orm.NewOrm()
-	query =
+	query :=
 		`WITH fecha_corte AS (
 			SELECT (TO_DATE(?, 'YYYY-MM-DD') + INTERVAL '1 day')::date fecha_corte
 		), bajas AS (
@@ -163,6 +158,7 @@ func GetCorteDepreciacion(fechaCorte string) (entrada interface{}, err error) {
 		
 	select * from calculados;`
 
+	elementos := make([]*DepreciacionElemento, 0)
 	if _, err = o.Raw(query, fechaCorte).QueryRows(&elementos); err != nil {
 		return nil, err
 	}
