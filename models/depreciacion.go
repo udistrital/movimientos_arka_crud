@@ -13,15 +13,38 @@ type DepreciacionElemento struct {
 
 // GetCorteDepreciacion Retorna los valores y detalles necesarios para generar
 // la transacción contable correspondiente a la depreciación dada una fecha de corte
-func GetCorteDepreciacion(fechaCorte string) (entrada interface{}, err error) {
+func GetCorteDepreciacion(fechaCorte string, elementos *[]*DepreciacionElemento) (err error) {
+
+	o := orm.NewOrm()
+
+	// Se confirma que la fecha de corte no es anterior a la de un cierre existente
+	query :=
+		`SELECT m.id
+		FROM
+			movimientos_arka.movimiento m,
+			movimientos_arka.formato_tipo_movimiento fm,
+			movimientos_arka.estado_movimiento sm,
+			TO_DATE(?, 'YYYY-MM-DD') AS fecha_corte,
+			TO_DATE(m.detalle->>'FechaCorte', 'YYYY-MM-DD') AS fecha
+		WHERE
+			fm.codigo_abreviacion = 'DEP'
+			AND m.formato_tipo_movimiento_id = fm.id
+			AND sm.nombre = 'Cierre Aprobado'
+			AND fecha >= fecha_corte
+		LIMIT 1;`
+
+	cierres := make([]*Movimiento, 0)
+	if _, err = o.Raw(query, fechaCorte).QueryRows(&cierres); err != nil {
+		return err
+	} else if len(cierres) > 0 {
+		return
+	}
 
 	// Los elementos se determinan de la siguiente manera
 	// + Elementos sin novedad y vida útil > 0
 	// + Novedades con vida útil > 0
 	// - Elementos solicitados para baja antes de la fecha de corte
-
-	o := orm.NewOrm()
-	query :=
+	query =
 		`WITH fecha_corte AS (
 			SELECT (TO_DATE(?, 'YYYY-MM-DD') + INTERVAL '1 day')::date fecha_corte
 		), bajas AS (
@@ -156,14 +179,13 @@ func GetCorteDepreciacion(fechaCorte string) (entrada interface{}, err error) {
 			FROM depreciados dp
 		)
 		
-	select * from calculados;`
+		SELECT * from calculados;`
 
-	elementos := make([]*DepreciacionElemento, 0)
-	if _, err = o.Raw(query, fechaCorte).QueryRows(&elementos); err != nil {
-		return nil, err
+	if _, err = o.Raw(query, fechaCorte).QueryRows(elementos); err != nil {
+		return err
 	}
 
-	return elementos, nil
+	return
 }
 
 // AddNovedadElemento insert a new NovedadElemento into database and returns

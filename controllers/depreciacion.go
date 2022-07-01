@@ -67,12 +67,13 @@ func (c *DepreciacionController) GetCorte() {
 		fecha = fecha_
 	}
 
-	if v, err := models.GetCorteDepreciacion(fecha); err != nil {
+	elementos := make([]*models.DepreciacionElemento, 0)
+	if err := models.GetCorteDepreciacion(fecha, &elementos); err != nil {
 		logs.Error(err)
 		c.Data["system"] = err
 		c.Abort("404")
 	} else {
-		c.Data["json"] = v
+		c.Data["json"] = elementos
 	}
 
 	c.ServeJSON()
