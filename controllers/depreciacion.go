@@ -22,24 +22,25 @@ func (c *DepreciacionController) URLMapping() {
 
 // Post ...
 // @Title Post
-// @Description creates NovedadElemento and deletes previous NovedadElemento
-// @Param	body		body 	models.NovedadElemento	true		"body for NovedadElemento content"
-// @Success 201 {int} models.NovedadElemento
+// @Description Crea las novedades correspondientes a un cierre determinado y actualiza el cierre
+// @Param	body	body	models.TransaccionCierre	true	"body for NovedadElemento content"
+// @Success 201 {int} models.TransaccionCierre
 // @Failure 400 the request contains incorrect syntax
 // @router / [post]
 func (c *DepreciacionController) Post() {
 
 	defer errorctrl.ErrorControlController(c.Controller, "DepreciacionController - Unhandled Error!")
 
-	var v models.NovedadElemento
+	var v models.TransaccionCierre
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err != nil {
 		logs.Error(err)
 		panic(errorctrl.Error(`Post - json.Unmarshal(c.Ctx.Input.RequestBody, &v)`, err, "400"))
 	}
 
-	if _, err := models.AddTrNovedadElemento(&v); err == nil {
+	var m models.Movimiento
+	if err := models.SubmitCierre(&v, &m); err == nil {
 		c.Ctx.Output.SetStatus(201)
-		c.Data["json"] = v
+		c.Data["json"] = m
 	} else {
 		logs.Error(err)
 		c.Data["system"] = err
