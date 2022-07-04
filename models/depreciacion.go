@@ -177,7 +177,7 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 	return
 }
 
-// AddNovedadElemento insert a new NovedadElemento into database and returns
+// SubmitCierre Actualiza el cierre y genera las novedades correspondientes
 func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 
 	o := orm.NewOrm()
@@ -256,7 +256,7 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 			em.valor_residual,
 			em.vida_util,
 			em.valor_total valor_presente,
-			date_part('day', fecha_corte - ((fecha + INTERVAL '1 day')::date)::timestamp) / 365 delta_tiempo
+			date_part('day', fecha_corte - ((m.fecha_modificacion::date + INTERVAL '1 day')::date)::timestamp) / 365 delta_tiempo
 		FROM
 			movimientos_arka.elementos_movimiento em,
 			movimientos_arka.movimiento m,
