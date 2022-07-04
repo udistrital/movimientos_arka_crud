@@ -236,7 +236,7 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 			ne.valor_residual,
 			ne.vida_util,
 			ne.valor_libros valor_presente,
-			date_part('day', fecha_corte - (fecha::date)::timestamp) / 365 delta_tiempo
+			date_part('day', fecha_corte - ((fecha + INTERVAL '1 day')::date)::timestamp) / 365 delta_tiempo
 		FROM
 			movimientos_arka.novedad_elemento ne,
 			movimientos_arka.elementos_movimiento em,
@@ -256,7 +256,7 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 			em.valor_residual,
 			em.vida_util,
 			em.valor_total valor_presente,
-			date_part('day', fecha_corte - ((m.fecha_modificacion::date + INTERVAL '1 day')::date)::timestamp) / 365 delta_tiempo
+			date_part('day', fecha_corte - (m.fecha_modificacion::date)::timestamp) / 365 delta_tiempo
 		FROM
 			movimientos_arka.elementos_movimiento em,
 			movimientos_arka.movimiento m,
