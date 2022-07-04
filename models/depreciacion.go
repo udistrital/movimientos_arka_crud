@@ -62,7 +62,7 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 	// - Elementos solicitados para baja antes de la fecha de corte
 	query =
 		`WITH fecha_corte AS (
-			SELECT TO_DATE(?, 'YYYY-MM-DD')::date fecha_corte
+			SELECT (TO_DATE(?, 'YYYY-MM-DD') + INTERVAL '1 day')::date fecha_corte
 		), bajas AS (
 			SELECT
 				em.id
@@ -123,7 +123,7 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 				ne.vida_util,
 				em.elemento_acta_id,
 				ne.valor_libros valor_presente,
-				date_part('day', fecha_corte - (fecha::date)::timestamp) / 365 delta_tiempo
+				date_part('day', fecha_corte - ((fecha + INTERVAL '1 day')::date)::timestamp) / 365 delta_tiempo
 			FROM
 				movimientos_arka.novedad_elemento ne,
 				movimientos_arka.elementos_movimiento em,
@@ -228,7 +228,7 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 
 	query := `
 	WITH fecha_corte AS (
-		SELECT TO_DATE(?, 'YYYY-MM-DD')::date fecha_corte
+		SELECT (TO_DATE(?, 'YYYY-MM-DD') + INTERVAL '1 day')::date fecha_corte
 	), elemento AS (
 		SELECT CAST(? as INTEGER) id
 	), referencia AS (
@@ -256,7 +256,7 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 			em.valor_residual,
 			em.vida_util,
 			em.valor_total valor_presente,
-			date_part('day', fecha_corte - (m.fecha_modificacion::date)::timestamp) / 365 delta_tiempo
+			date_part('day', fecha_corte - ((fecha + INTERVAL '1 day')::date)::timestamp) / 365 delta_tiempo
 		FROM
 			movimientos_arka.elementos_movimiento em,
 			movimientos_arka.movimiento m,
@@ -293,7 +293,7 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 				WHEN
 					ref.vida_util > ref.delta_tiempo
 				THEN
-					ref.valor_presente - ((ref.valor_presente - ref.valor_residual) * ref.delta_tiempo / ref.vida_util)
+					ref.valor_presente - (ref.valor_presente - ref.valor_residual) * ref.delta_tiempo / ref.vida_util
 				ELSE ref.valor_residual
 			END valor_libros
 		FROM
