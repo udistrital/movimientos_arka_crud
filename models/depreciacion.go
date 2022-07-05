@@ -1,139 +1,187 @@
 package models
 
 import (
-	"time"
+	"encoding/json"
+	"strconv"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
+	"github.com/udistrital/utils_oas/formatdata"
 )
 
-type detalle struct {
-	ValorPresente        float64
+type FormatoCierre struct {
+	ConsecutivoId int
+	Consecutivo   string
+	FechaCorte    string
+	RazonRechazo  string
+}
+
+type DepreciacionElemento struct {
+	DeltaValor           float64
 	ElementoMovimientoId int
-	VidaUtil             float64
 	ElementoActaId       int
-	ValorResidual        float64
-	NovedadElementoId    int
-	FechaRef             time.Time
+}
+
+type TransaccionCierre struct {
+	MovimientoId         int
+	ElementoMovimientoId []int
 }
 
 // GetCorteDepreciacion Retorna los valores y detalles necesarios para generar
 // la transacción contable correspondiente a la depreciación dada una fecha de corte
-func GetCorteDepreciacion(fechaCorte string) (entrada []*detalle, err error) {
+func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) {
+
+	o := orm.NewOrm()
+
+	// Se confirma que la fecha de corte no es anterior a la de un cierre existente
+	query :=
+		`SELECT m.id
+		FROM
+			movimientos_arka.movimiento m,
+			movimientos_arka.formato_tipo_movimiento fm,
+			movimientos_arka.estado_movimiento sm,
+			TO_DATE(?, 'YYYY-MM-DD') AS fecha_corte,
+			TO_DATE(m.detalle->>'FechaCorte', 'YYYY-MM-DD') AS fecha
+		WHERE
+			fm.codigo_abreviacion = 'DEP'
+			AND m.formato_tipo_movimiento_id = fm.id
+			AND sm.nombre = 'Cierre Aprobado'
+			AND fecha >= fecha_corte
+		LIMIT 1;`
+
+	cierres := make([]*Movimiento, 0)
+	if _, err = o.Raw(query, fechaCorte).QueryRows(&cierres); err != nil {
+		return err
+	} else if len(cierres) > 0 {
+		return
+	}
 
 	// Los elementos se determinan de la siguiente manera
 	// + Elementos sin novedad y vida útil > 0
 	// + Novedades con vida útil > 0
 	// - Elementos solicitados para baja antes de la fecha de corte
-
-	var (
-		query     string
-		elementos []*detalle
-		novedades []*detalle
-	)
-
-	o := orm.NewOrm()
 	query =
-		`SELECT
-		em.id as elemento_movimiento_id,
-		em.valor_residual,
-		em.vida_util,
-		em.elemento_acta_id,
-		em.valor_total as valor_presente,
-		m.fecha_modificacion as fecha_ref
-	FROM
-		movimientos_arka.elementos_movimiento em,
-		movimientos_arka.movimiento m,
-		movimientos_arka.estado_movimiento sm,
-		movimientos_arka.formato_tipo_movimiento fm
-	WHERE
-		fm.nombre = 'Salida'
-		AND sm.nombre = 'Salida Aprobada'
-		AND m.formato_tipo_movimiento_id  = fm.id
-		AND m.fecha_modificacion < ?
-		AND m.estado_movimiento_id = sm.id
-		AND em.movimiento_id = m.id
-		AND em.valor_total > 0
-		AND em.vida_util > 0
-		AND NOT EXISTS (
-			SELECT
-			FROM
-				movimientos_arka.novedad_elemento ne
-			WHERE
-				ne.elemento_movimiento_id = em.id)
-		AND em.id NOT IN (
+		`WITH fecha_corte AS (
+			SELECT (TO_DATE(?, 'YYYY-MM-DD') + INTERVAL '1 day')::date fecha_corte
+		), bajas AS (
 			SELECT
 				em.id
 			FROM
-				 movimientos_arka.movimiento m,
-				 movimientos_arka.elementos_movimiento em,
-				 movimientos_arka.formato_tipo_movimiento fm,
-				 jsonb_array_elements(m.detalle -> 'Elementos') AS elem
-			WHERE
-				fm.codigo_abreviacion LIKE 'BJ%'
-				AND m.formato_tipo_movimiento_id = fm.id
-				AND m.fecha_creacion < ?
-				AND em.id = CAST(elem as INTEGER));`
-
-	if _, err = o.Raw(query, fechaCorte, fechaCorte).QueryRows(&elementos); err != nil {
-		return nil, err
-	}
-
-	query =
-		`SELECT
-		DISTINCT ON (ne.elemento_movimiento_id) ne.elemento_movimiento_id,
-		ne.id as novedad_elemento_id,
-		ne.vida_util,
-		ne.valor_residual,
-		ne.valor_libros as valor_presente,
-		m.detalle ->> 'FechaCorte' as fecha_ref,
-		em.elemento_acta_id
-	FROM
-		movimientos_arka.novedad_elemento ne,
-		movimientos_arka.elementos_movimiento em,
-		movimientos_arka.movimiento m
-	WHERE
-		em.fecha_creacion < ?
-		AND ne.movimiento_id = m.id
-		AND ne.elemento_movimiento_id = em.id
-		AND ne.activo = true
-		AND ne.valor_libros > 0
-		AND ne.vida_util > 0
-		AND ne.elemento_movimiento_id NOT IN (
-			SELECT
-				ne.elemento_movimiento_id
-			FROM
 				movimientos_arka.movimiento m,
-				movimientos_arka.novedad_elemento ne,
 				movimientos_arka.elementos_movimiento em,
 				movimientos_arka.formato_tipo_movimiento fm,
-				jsonb_array_elements(m.detalle -> 'Elementos') AS elem
+				jsonb_array_elements(m.detalle -> 'Elementos') AS elem,
+				fecha_corte
 			WHERE
 				fm.codigo_abreviacion LIKE 'BJ%'
 				AND m.formato_tipo_movimiento_id = fm.id
-				AND m.fecha_creacion < ?
-				AND ne.elemento_movimiento_id = CAST(elem as INTEGER))
-	ORDER BY
-		ne.elemento_movimiento_id,
-		ne.id DESC;`
+				AND m.fecha_creacion < fecha_corte
+				AND em.id = CAST(elem as INTEGER)
+		), sin_novedad AS (
+			SELECT
+				em.id elemento_movimiento_id,
+				em.valor_residual,
+				em.vida_util,
+				em.elemento_acta_id,
+				em.valor_total valor_presente,
+				date_part('day', fecha_corte - (m.fecha_modificacion::date)::timestamp) / 365 delta_tiempo
+			FROM
+				movimientos_arka.elementos_movimiento em,
+				movimientos_arka.movimiento m,
+				movimientos_arka.estado_movimiento sm,
+				movimientos_arka.formato_tipo_movimiento fm,
+				fecha_corte
+			WHERE
+				fm.codigo_abreviacion = 'SAL'
+				AND sm.nombre = 'Salida Aprobada'
+				AND m.formato_tipo_movimiento_id  = fm.id
+				AND m.fecha_modificacion < fecha_corte
+				AND m.estado_movimiento_id = sm.id
+				AND em.movimiento_id = m.id
+				AND em.valor_total > 0
+				AND em.vida_util > 0
+				AND em.id NOT IN (
+					SELECT 
+						em.id
+					FROM
+						movimientos_arka.novedad_elemento ne
+					WHERE
+						ne.elemento_movimiento_id = em.id
+				)
+				AND em.id NOT IN (
+					SELECT
+						em.id
+					FROM 
+						bajas
+					WHERE
+						bajas.id = em.id
+				)
+		), con_novedad AS (
+			SELECT DISTINCT ON (1)
+				ne.elemento_movimiento_id,
+				ne.valor_residual,
+				ne.vida_util,
+				em.elemento_acta_id,
+				ne.valor_libros valor_presente,
+				date_part('day', fecha_corte - ((fecha + INTERVAL '1 day')::date)::timestamp) / 365 delta_tiempo
+			FROM
+				movimientos_arka.novedad_elemento ne,
+				movimientos_arka.elementos_movimiento em,
+				movimientos_arka.movimiento m,
+				to_date(m.detalle->>'FechaCorte', 'YYYY-MM-DD') AS fecha,
+				fecha_corte
+			WHERE
+				fecha < fecha_corte
+				AND	ne.elemento_movimiento_id = em.id
+				AND ne.movimiento_id = m.id
+				AND ne.vida_util > 0
+				AND ne.valor_libros > ne.valor_residual
+				AND em.id NOT IN (
+					SELECT
+						bajas.id
+					FROM 
+						bajas
+					WHERE
+						bajas.id = em.id
+				)
+			ORDER BY 1 DESC, fecha DESC
+		), referencia AS (
+			SELECT *
+			FROM
+				sin_novedad ndp
+			UNION
+			SELECT *
+			FROM
+				con_novedad dp
+		), delta_valor AS (
+			SELECT
+				ref.elemento_movimiento_id,
+				ref.elemento_acta_id,
+				CASE
+					WHEN
+						ref.vida_util > ref.delta_tiempo
+					THEN
+						(ref.valor_presente - ref.valor_residual) * ref.delta_tiempo / ref.vida_util
+					ELSE ref.valor_presente - ref.valor_residual
+				END delta_valor
+			FROM
+				referencia ref
+		)
+		
+		SELECT * from delta_valor`
 
-	if _, err = o.Raw(query, fechaCorte, fechaCorte).QueryRows(&novedades); err != nil {
-		return nil, err
+	if _, err = o.Raw(query, fechaCorte).QueryRows(elementos); err != nil {
+		return err
 	}
-	elementos = append(elementos, novedades...)
 
-	return elementos, nil
+	return
 }
 
-// AddNovedadElemento insert a new NovedadElemento into database and returns
-// last inserted Id on success.
-func AddTrNovedadElemento(m *NovedadElemento) (id int64, err error) {
+// SubmitCierre Actualiza el cierre y genera las novedades correspondientes
+func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
+
 	o := orm.NewOrm()
 	err = o.Begin()
-
-	if err != nil {
-		return
-	}
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -144,20 +192,150 @@ func AddTrNovedadElemento(m *NovedadElemento) (id int64, err error) {
 		}
 	}()
 
-	var novedades []*NovedadElemento
+	if m.MovimientoId <= 0 || len(m.ElementoMovimientoId) == 0 {
+		return
+	}
 
-	if _, err = o.QueryTable(new(NovedadElemento)).RelatedSel().Filter("ElementoMovimientoId__Id", m.ElementoMovimientoId).Filter("Activo", true).All(&novedades, "Id"); err == nil {
-		for _, nv := range novedades {
-			nv.Activo = false
-			if _, err = o.Update(nv, "Activo"); err != nil {
-				panic(err.Error())
-			}
-		}
-		if id, err = o.Insert(m); err != nil {
-			panic(err.Error())
-		}
+	if m, err := GetAllMovimiento(
+		map[string]string{"Id": strconv.Itoa(m.MovimientoId)}, []string{}, nil, nil, 0, 1); err != nil || len(m) != 1 {
+		return err
 	} else {
-		panic(err.Error())
+		if err := formatdata.FillStruct(m[0], &cierre); err != nil {
+			return err
+		}
+	}
+
+	if cierre.EstadoMovimientoId.Nombre != "Cierre En Curso" {
+		return
+	}
+
+	if e, err := GetAllEstadoMovimiento(
+		map[string]string{"Nombre": "Cierre Aprobado"}, []string{}, nil, nil, 0, 1); err != nil || len(e) != 1 {
+		return err
+	} else {
+		*cierre.EstadoMovimientoId = e[0].(EstadoMovimiento)
+	}
+
+	var detalle FormatoCierre
+	err = json.Unmarshal([]byte(cierre.Detalle), &detalle)
+	if err != nil {
+		return err
+	}
+
+	if detalle.FechaCorte == "" {
+		return
+	}
+
+	query := `
+	WITH fecha_corte AS (
+		SELECT (TO_DATE(?, 'YYYY-MM-DD') + INTERVAL '1 day')::date fecha_corte
+	), elemento AS (
+		SELECT CAST(? as INTEGER) id
+	), referencia AS (
+		(SELECT
+			ne.valor_residual,
+			ne.vida_util,
+			ne.valor_libros valor_presente,
+			date_part('day', fecha_corte - ((fecha + INTERVAL '1 day')::date)::timestamp) / 365 delta_tiempo
+		FROM
+			movimientos_arka.novedad_elemento ne,
+			movimientos_arka.elementos_movimiento em,
+			movimientos_arka.movimiento m,
+			to_date(m.detalle->>'FechaCorte', 'YYYY-MM-DD') AS fecha,
+			fecha_corte,
+			elemento
+		WHERE
+			fecha < fecha_corte
+			AND em.id = elemento.id
+			AND	ne.elemento_movimiento_id = em.id
+			AND ne.movimiento_id = m.id
+		ORDER BY fecha DESC
+		LIMIT 1)
+		UNION
+		SELECT
+			em.valor_residual,
+			em.vida_util,
+			em.valor_total valor_presente,
+			date_part('day', fecha_corte - (m.fecha_modificacion::date)::timestamp) / 365 delta_tiempo
+		FROM
+			movimientos_arka.elementos_movimiento em,
+			movimientos_arka.movimiento m,
+			movimientos_arka.estado_movimiento sm,
+			movimientos_arka.formato_tipo_movimiento fm,
+			fecha_corte,
+			elemento
+		WHERE
+			fm.codigo_abreviacion = 'SAL'
+			AND sm.nombre = 'Salida Aprobada'
+			AND m.formato_tipo_movimiento_id  = fm.id
+			AND m.estado_movimiento_id = sm.id
+			AND em.movimiento_id = m.id
+			AND em.id = elemento.id
+			AND em.id NOT IN (
+				SELECT 
+					em.id
+				FROM
+					movimientos_arka.novedad_elemento ne
+				WHERE
+					ne.elemento_movimiento_id = em.id
+				)
+	), delta AS (
+		SELECT
+			ref.valor_residual,
+			CASE
+				WHEN
+					ref.vida_util > ref.delta_tiempo
+				THEN
+					ref.vida_util - ref.delta_tiempo
+				ELSE 0
+			END vida_util,
+			CASE
+				WHEN
+					ref.vida_util > ref.delta_tiempo
+				THEN
+					ref.valor_presente - (ref.valor_presente - ref.valor_residual) * ref.delta_tiempo / ref.vida_util
+				ELSE ref.valor_residual
+			END valor_libros
+		FROM
+			referencia ref
+	)
+
+	INSERT INTO movimientos_arka.novedad_elemento (
+			vida_util,
+			valor_libros,
+			valor_residual,
+			elemento_movimiento_id,
+			movimiento_id,
+			activo,
+			fecha_modificacion,
+			fecha_creacion)
+	SELECT
+		delta.vida_util,
+		delta.valor_libros,
+		delta.valor_residual,
+		elemento.id,
+		?,
+		true,
+		now(),
+		now()
+	FROM
+		delta,
+		elemento;`
+
+	p, err := o.Raw(query).Prepare()
+	for _, el := range m.ElementoMovimientoId {
+		_, err := p.Exec(detalle.FechaCorte, el, m.MovimientoId)
+		if err != nil {
+			return err
+		}
+	}
+
+	if err := p.Close(); err != nil {
+		return err
+	}
+
+	if _, err = o.Update(cierre); err != nil {
+		return err
 	}
 
 	return
