@@ -54,13 +54,14 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/models.detalle'
+              $ref: '#/definitions/models.DepreciacionElemento'
         "404":
           description: not found resource
     post:
       tags:
       - depreciacion
-      description: creates NovedadElemento and deletes previous NovedadElemento
+      description: Crea las novedades correspondientes a un cierre determinado y actualiza
+        el cierre
       operationId: DepreciacionController.Post
       parameters:
       - in: body
@@ -68,10 +69,10 @@ paths:
         description: body for NovedadElemento content
         required: true
         schema:
-          $ref: '#/definitions/models.NovedadElemento'
+          $ref: '#/definitions/models.TransaccionCierre'
       responses:
         "201":
-          description: '{int} models.NovedadElemento'
+          description: '{int} models.TransaccionCierre'
         "400":
           description: the request contains incorrect syntax
   /elementos_movimiento/:
@@ -988,6 +989,19 @@ paths:
         "404":
           description: not found resource
 definitions:
+  models.DepreciacionElemento:
+    title: DepreciacionElemento
+    type: object
+    properties:
+      DeltaValor:
+        type: number
+        format: double
+      ElementoActaId:
+        type: integer
+        format: int64
+      ElementoMovimientoId:
+        type: integer
+        format: int64
   models.ElementosMovimiento:
     title: ElementosMovimiento
     type: object
@@ -1222,31 +1236,18 @@ definitions:
           $ref: '#/definitions/models.ElementosMovimiento'
       Salida:
         $ref: '#/definitions/models.Movimiento'
-  models.detalle:
-    title: detalle
+  models.TransaccionCierre:
+    title: TransaccionCierre
     type: object
     properties:
-      ElementoActaId:
-        type: integer
-        format: int64
       ElementoMovimientoId:
+        type: array
+        items:
+          type: integer
+          format: int64
+      MovimientoId:
         type: integer
         format: int64
-      FechaRef:
-        type: string
-        format: datetime
-      NovedadElementoId:
-        type: integer
-        format: int64
-      ValorPresente:
-        type: number
-        format: double
-      ValorResidual:
-        type: number
-        format: double
-      VidaUtil:
-        type: number
-        format: double
 tags:
 - name: formato_tipo_movimiento
   description: |
