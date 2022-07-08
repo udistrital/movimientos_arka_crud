@@ -42,8 +42,9 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 			TO_DATE(m.detalle->>'FechaCorte', 'YYYY-MM-DD') AS fecha
 		WHERE
 			fm.codigo_abreviacion = 'CRR'
-			AND m.formato_tipo_movimiento_id = fm.id
 			AND sm.nombre = 'Cierre Aprobado'
+			AND m.formato_tipo_movimiento_id = fm.id
+			AND m.estado_movimiento_id = sm.id
 			AND fecha >= fecha_corte
 		LIMIT 1;`
 
