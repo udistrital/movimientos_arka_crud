@@ -2,11 +2,9 @@ package models
 
 import (
 	"encoding/json"
-	"strconv"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
-	"github.com/udistrital/utils_oas/formatdata"
 )
 
 type FormatoCierre struct {
@@ -43,7 +41,7 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 			TO_DATE(?, 'YYYY-MM-DD') AS fecha_corte,
 			TO_DATE(m.detalle->>'FechaCorte', 'YYYY-MM-DD') AS fecha
 		WHERE
-			fm.codigo_abreviacion = 'DEP'
+			fm.codigo_abreviacion = 'CRR'
 			AND m.formato_tipo_movimiento_id = fm.id
 			AND sm.nombre = 'Cierre Aprobado'
 			AND fecha >= fecha_corte
@@ -196,24 +194,14 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 		return
 	}
 
-	if m, err := GetAllMovimiento(
-		map[string]string{"Id": strconv.Itoa(m.MovimientoId)}, []string{}, nil, nil, 0, 1); err != nil || len(m) != 1 {
+	if _, err := o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id", m.MovimientoId).All(cierre); err != nil {
 		return err
-	} else {
-		if err := formatdata.FillStruct(m[0], &cierre); err != nil {
-			return err
-		}
+	} else if cierre.EstadoMovimientoId.Nombre != "Cierre En Curso" {
+		return nil
 	}
 
-	if cierre.EstadoMovimientoId.Nombre != "Cierre En Curso" {
-		return
-	}
-
-	if e, err := GetAllEstadoMovimiento(
-		map[string]string{"Nombre": "Cierre Aprobado"}, []string{}, nil, nil, 0, 1); err != nil || len(e) != 1 {
+	if _, err := o.QueryTable(new(EstadoMovimiento)).RelatedSel().Filter("Nombre", "Cierre Aprobado").All(cierre.EstadoMovimientoId); err != nil {
 		return err
-	} else {
-		*cierre.EstadoMovimientoId = e[0].(EstadoMovimiento)
 	}
 
 	var detalle FormatoCierre
