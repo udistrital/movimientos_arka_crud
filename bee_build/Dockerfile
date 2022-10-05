@@ -1,9 +1,8 @@
-FROM golang:1.12.1-alpine
-RUN apk add --no-cache git
-RUN apk add --no-cache build-base
-
-RUN set -x \
-    # go get bee
-    && go get -u github.com/astaxie/beego \
-    && go get -u github.com/beego/bee 
+FROM golang:1.14-alpine
+RUN apk add --no-cache git openssh-client build-base
+ARG GO111MODULE=on
+RUN set -x && go get\
+  github.com/astaxie/beego@v1.12.3\
+  github.com/beego/bee@v1.12.3\
+  && bee version
 WORKDIR /go/src
