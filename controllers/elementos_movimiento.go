@@ -214,18 +214,19 @@ func (c *ElementosMovimientoController) GetByFuncionario() {
 		if err == nil {
 			err = errors.New("Se debe especificar un funcionario válido")
 		}
-		panic(errorctrl.Error("GetByFuncionario - c.GetInt(\":funcionarioId\")", err, "400"))
+		panic(errorctrl.Error(`GetByFuncionario - c.GetInt(":funcionarioId")`, err, "400"))
 	} else {
 		id = v
 	}
 
-	if el, err := models.GetElementosFuncionario(id); err == nil {
-		c.Data["json"] = el
-	} else {
+	var elementos = make([]int, 0)
+	if err := models.GetElementosFuncionario(id, &elementos); err != nil {
 		logs.Error(err)
 		c.Data["system"] = err
 		c.Abort("404")
 	}
+
+	c.Data["json"] = elementos
 	c.ServeJSON()
 }
 
