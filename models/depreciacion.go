@@ -323,7 +323,14 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 		return err
 	}
 
-	if _, err = o.Update(cierre); err != nil {
+	detalle.RazonRechazo = ""
+	if dt, err := json.Marshal(detalle); err != nil {
+		return err
+	} else {
+		cierre.Detalle = string(dt)
+	}
+
+	if _, err = o.Update(cierre, "Detalle", "EstadoMovimientoId"); err != nil {
 		return err
 	}
 
