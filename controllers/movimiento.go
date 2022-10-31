@@ -24,6 +24,7 @@ func (c *MovimientoController) URLMapping() {
 	c.Mapping("GetOne", c.GetOne)
 	c.Mapping("GetAll", c.GetAll)
 	c.Mapping("GetAllTrasladoByTerceroId", c.GetAllTrasladoByTerceroId)
+	c.Mapping("GetAllBajasByTerceroId", c.GetAllBajasByTerceroId)
 	c.Mapping("Put", c.Put)
 	c.Mapping("Delete", c.Delete)
 }
@@ -258,5 +259,36 @@ func (c *MovimientoController) GetAllTrasladoByTerceroId() {
 	} else {
 		c.Data["json"] = traslados
 	}
+	c.ServeJSON()
+}
+
+// GetAllBajasByTerceroId ...
+// @Title Get Bajas Solicitadas By Tercero
+// @Description Consulta las bajas solicitadas por un tercero determinado.
+// @Param	tercero_id	path	string	true	"TerceroId de quien consulta la lista de bajas"
+// @Success 200 {object} []models.Movimiento
+// @Failure 404 not found resource
+// @router /baja/:tercero_id [get]
+func (c *MovimientoController) GetAllBajasByTerceroId() {
+
+	var terceroId int
+
+	if v, err := c.GetInt(":tercero_id", 0); err != nil {
+		panic(errorctrl.Error(`GetAll - c.GetInt(":tercero_id", 0)`, err, "400"))
+	} else if v > 0 {
+		terceroId = v
+	} else {
+		panic(errorctrl.Error(`GetAll - Se debe especificar un tercero válido`, err, "400"))
+	}
+
+	var bajas = make([]interface{}, 0)
+	if err := models.GetBajasByTerceroId(terceroId, &bajas); err != nil {
+		logs.Error(err)
+		c.Data["system"] = err
+		c.Abort("404")
+	} else {
+		c.Data["json"] = bajas
+	}
+
 	c.ServeJSON()
 }
