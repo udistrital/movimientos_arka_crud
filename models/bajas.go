@@ -86,21 +86,6 @@ func PostRevisionComite(n *TrRevisionBaja) (ids []int, err error) {
 					Activo:               true,
 				}
 
-				var novedades []*NovedadElemento
-
-				if _, err = o.QueryTable(new(NovedadElemento)).RelatedSel().Filter("ElementoMovimientoId__Id", el).Filter("Activo", true).All(&novedades, "Id"); err != nil {
-					panic(err.Error())
-				}
-
-				if len(novedades) > 0 {
-					for _, nv := range novedades {
-						nv.Activo = false
-						if _, err = o.Update(nv, "Activo"); err != nil {
-							panic(err.Error())
-						}
-					}
-				}
-
 				if _, err = o.Insert(&novedad); err != nil {
 					panic(err.Error())
 				}

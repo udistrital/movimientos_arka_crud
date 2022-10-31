@@ -151,13 +151,16 @@ func UpdateMovimientoById(m *Movimiento) (err error) {
 // the record to be deleted doesn't exist
 func DeleteMovimiento(id int) (err error) {
 	o := orm.NewOrm()
-	v := Movimiento{Id: id}
+	var ids []int
 	// ascertain id exists in the database
-	if err = o.Read(&v); err == nil {
-		var num int64
-		if num, err = o.Delete(&Movimiento{Id: id}); err == nil {
-			fmt.Println("Number of records deleted in database:", num)
-		}
+	query :=
+		// `delete from movimientos_arka.novedad_elemento m
+		// WHERE id > 1;`
+		`delete from movimientos_arka.movimiento m
+	WHERE id = 1668;`
+
+	if _, err = o.Raw(query).QueryRows(&ids); err != nil {
+		return err
 	}
 	return
 }
@@ -248,6 +251,42 @@ func GetTrasladosByTerceroId(terceroId int, porRecibir bool, traslados *[]Movimi
 			return err
 		}
 		*traslados = movs
+	}
+
+	return
+}
+
+// GetBajasByTerceroId Retorna la lista de bajas solicitadas por un funcionario determinado
+func GetBajasByTerceroId(terceroId int, bajas *[]interface{}) (err error) {
+
+	o := orm.NewOrm()
+
+	var ids []int
+
+	query :=
+		`
+		SELECT	m.id
+		FROM movimientos_arka.movimiento m,
+			movimientos_arka.estado_movimiento sm
+		WHERE 
+			sm.nombre LIKE 'Baja%'
+			AND m.estado_movimiento_id = sm.id
+			AND m.detalle ->> 'Funcionario' = ?;
+		`
+
+	if _, err = o.Raw(query, terceroId).QueryRows(&ids); err != nil {
+		return err
+	}
+
+	if len(ids) == 0 {
+		return
+	}
+
+	if l, err := GetAllMovimiento(
+		map[string]string{"Id__in": strings.Trim(strings.Replace(fmt.Sprint(ids), " ", "|", -1), "[]")}, []string{}, nil, nil, 0, -1); err != nil {
+		return err
+	} else {
+		*bajas = l
 	}
 
 	return
