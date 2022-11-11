@@ -223,6 +223,10 @@ paths:
         name: final
         description: Indica si se incluye unicamente el ultimo traslado
         type: boolean
+      - in: query
+        name: acta
+        description: Indica si consulta por el elemento del acta o de la salida
+        type: boolean
       responses:
         "200":
           description: ""

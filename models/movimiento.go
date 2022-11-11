@@ -151,16 +151,13 @@ func UpdateMovimientoById(m *Movimiento) (err error) {
 // the record to be deleted doesn't exist
 func DeleteMovimiento(id int) (err error) {
 	o := orm.NewOrm()
-	var ids []int
+	v := Movimiento{Id: id}
 	// ascertain id exists in the database
-	query :=
-		// `delete from movimientos_arka.novedad_elemento m
-		// WHERE id > 1;`
-		`delete from movimientos_arka.movimiento m
-	WHERE id = 1668;`
-
-	if _, err = o.Raw(query).QueryRows(&ids); err != nil {
-		return err
+	if err = o.Read(&v); err == nil {
+		var num int64
+		if num, err = o.Delete(&Movimiento{Id: id}); err == nil {
+			fmt.Println("Number of records deleted in database:", num)
+		}
 	}
 	return
 }
