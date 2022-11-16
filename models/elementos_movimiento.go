@@ -266,23 +266,27 @@ func GetElementosFuncionario(funcionarioId int, elementos *[]int) (err error) {
 }
 
 // Retorna los movimientos que han involucrado un elemento
-func GetHistorialElemento(elementoId int, final bool) (historial *Historial, err error) {
+func GetHistorialElemento(elementoId int, acta, final bool, historial *Historial) (err error) {
 
 	var (
 		baja      []int
 		traslados []int
 	)
 
-	historial = new(Historial)
-
 	o := orm.NewOrm()
-	if l, err := GetAllElementosMovimiento(
-		map[string]string{"Id": strconv.Itoa(elementoId)}, []string{}, nil, nil, 0, -1); err != nil {
-		return nil, err
+	query_ := make(map[string]string)
+	if acta {
+		query_["ElementoActaId"] = strconv.Itoa(elementoId)
+	} else {
+		query_["Id"] = strconv.Itoa(elementoId)
+	}
+
+	if l, err := GetAllElementosMovimiento(query_, []string{}, nil, nil, 0, -1); err != nil {
+		return err
 	} else {
 		var salida_ []*ElementosMovimiento
 		if err := formatdata.FillStruct(l, &salida_); err != nil {
-			return nil, err
+			return err
 		}
 		historial.Salida = salida_[0].MovimientoId
 	}
@@ -305,15 +309,15 @@ func GetHistorialElemento(elementoId int, final bool) (historial *Historial, err
 	}
 
 	if _, err = o.Raw(query, elementoId).QueryRows(&traslados); err != nil {
-		return nil, err
+		return err
 	} else if traslados != nil {
 		if l, err := GetAllMovimiento(
 			map[string]string{"Id__in": ArrayToString(traslados, "|")}, []string{}, nil, nil, 0, -1); err != nil {
-			return nil, err
+			return err
 		} else {
 			var traslados_ []*Movimiento
 			if err := formatdata.FillStruct(l, &traslados_); err != nil {
-				return nil, err
+				return err
 			}
 			historial.Traslados = traslados_
 		}
@@ -333,21 +337,21 @@ func GetHistorialElemento(elementoId int, final bool) (historial *Historial, err
 		LIMIT 1`
 
 	if _, err = o.Raw(query, elementoId).QueryRows(&baja); err != nil {
-		return nil, err
+		return err
 	} else if baja != nil {
 		if l, err := GetAllMovimiento(
 			map[string]string{"Id__in": ArrayToString(baja, "|")}, []string{}, nil, nil, 0, -1); err != nil {
-			return nil, err
+			return err
 		} else {
 			var baja []*Movimiento
 			if err := formatdata.FillStruct(l, &baja); err != nil {
-				return nil, err
+				return err
 			}
 			historial.Baja = baja[0]
 		}
 	}
 
-	return historial, nil
+	return
 }
 
 func ArrayToString(a []int, delim string) string {
