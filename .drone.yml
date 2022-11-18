@@ -1,10 +1,10 @@
 kind: pipeline
 name: oas_api_ci
 
-trigger:
-  event:
-    exclude:
-      - tag
+# trigger:
+#   event:
+#     exclude:
+#       - tag
 
 steps:
 - name: check_readme
