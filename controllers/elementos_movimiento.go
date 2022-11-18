@@ -233,9 +233,10 @@ func (c *ElementosMovimientoController) GetByFuncionario() {
 // GetHistorial ...
 // @Title Get Historial de un elemento
 // @Description Consulta los movimientos que ha tenido un elemento
-// @Param	id		path	string	true	"id del elemento"
-// @Param	final	query	bool	false	"Indica si se incluye unicamente el ultimo traslado"
-// @Param	acta	query	bool	false	"Indica si consulta por el elemento del acta o de la salida"
+// @Param	id			path	string	true	"id del elemento"
+// @Param	final		query	bool	false	"Indica si se incluye unicamente el ultimo traslado"
+// @Param	acta		query	bool	false	"Indica si consulta por el elemento del acta o de la salida"
+// @Param	entradas	query	bool	false	"Indica si consulta las entradas"
 // @Success 200 {object} models.Historial
 // @Failure 404 not found resource
 // @router /historial/:id [get]
@@ -267,8 +268,15 @@ func (c *ElementosMovimientoController) GetHistorial() {
 		acta = v
 	}
 
+	var entradas bool
+	if v, err := c.GetBool("entradas", false); err != nil {
+		panic(errorctrl.Error(`GetHistorial - c.GetBool("entradas", false)`, err, "400"))
+	} else {
+		entradas = v
+	}
+
 	var historial models.Historial
-	if err := models.GetHistorialElemento(id, acta, final, &historial); err != nil {
+	if err := models.GetHistorialElemento(id, acta, entradas, final, &historial); err != nil {
 		logs.Error(err)
 		c.Data["system"] = err
 		c.Abort("404")

@@ -244,6 +244,12 @@
                         "name": "acta",
                         "description": "Indica si consulta por el elemento del acta o de la salida",
                         "type": "boolean"
+                    },
+                    {
+                        "in": "query",
+                        "name": "entradas",
+                        "description": "Indica si consulta las entradas",
+                        "type": "boolean"
                     }
                 ],
                 "responses": {
@@ -1525,6 +1531,10 @@
         }
     },
     "definitions": {
+        "11627.\u003cnil\u003e.Movimiento": {
+            "title": "Movimiento",
+            "type": "object"
+        },
         "models.DepreciacionElemento": {
             "title": "DepreciacionElemento",
             "type": "object",
@@ -1676,6 +1686,12 @@
                 },
                 "Depreciacion": {
                     "$ref": "#/definitions/models.Movimiento"
+                },
+                "Elemento": {
+                    "$ref": "#/definitions/models.ElementosMovimiento"
+                },
+                "Entradas": {
+                    "$ref": "#/definitions/11627.\u003cnil\u003e.Movimiento"
                 },
                 "Salida": {
                     "$ref": "#/definitions/models.Movimiento"

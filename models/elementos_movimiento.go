@@ -30,10 +30,12 @@ type ElementosMovimiento struct {
 }
 
 type Historial struct {
+	Elemento     *ElementosMovimiento
+	Entradas     *[]Movimiento
 	Salida       *Movimiento
 	Traslados    []*Movimiento
-	Baja         *Movimiento
 	Depreciacion *Movimiento
+	Baja         *Movimiento
 }
 
 func (t *ElementosMovimiento) TableName() string {
@@ -266,12 +268,9 @@ func GetElementosFuncionario(funcionarioId int, elementos *[]int) (err error) {
 }
 
 // Retorna los movimientos que han involucrado un elemento
-func GetHistorialElemento(elementoId int, acta, final bool, historial *Historial) (err error) {
+func GetHistorialElemento(elementoId int, acta, entradas, final bool, historial *Historial) (err error) {
 
-	var (
-		baja      []int
-		traslados []int
-	)
+	var ids []int
 
 	o := orm.NewOrm()
 	query_ := make(map[string]string)
@@ -281,14 +280,16 @@ func GetHistorialElemento(elementoId int, acta, final bool, historial *Historial
 		query_["Id"] = strconv.Itoa(elementoId)
 	}
 
-	if l, err := GetAllElementosMovimiento(query_, []string{}, nil, nil, 0, -1); err != nil {
+	if l, err := GetAllElementosMovimiento(query_, []string{}, nil, nil, 0, 1); err != nil || len(l) != 1 {
 		return err
-	} else {
-		var salida_ []*ElementosMovimiento
-		if err := formatdata.FillStruct(l, &salida_); err != nil {
+	} else if len(l) == 1 {
+		var elemento ElementosMovimiento
+		if err := formatdata.FillStruct(l[0], &elemento); err != nil {
 			return err
 		}
-		historial.Salida = salida_[0].MovimientoId
+		elementoId = elemento.Id
+		historial.Elemento = &elemento
+		historial.Salida = elemento.MovimientoId
 	}
 
 	query :=
@@ -308,21 +309,20 @@ func GetHistorialElemento(elementoId int, acta, final bool, historial *Historial
 		query += " LIMIT 1"
 	}
 
-	if _, err = o.Raw(query, elementoId).QueryRows(&traslados); err != nil {
+	if _, err = o.Raw(query, elementoId).QueryRows(&ids); err != nil {
 		return err
-	} else if traslados != nil {
+	} else if ids != nil && len(ids) > 0 {
 		if l, err := GetAllMovimiento(
-			map[string]string{"Id__in": ArrayToString(traslados, "|")}, []string{}, nil, nil, 0, -1); err != nil {
+			map[string]string{"Id__in": ArrayToString(ids, "|")}, []string{}, nil, nil, 0, -1); err != nil {
 			return err
 		} else {
-			var traslados_ []*Movimiento
-			if err := formatdata.FillStruct(l, &traslados_); err != nil {
+			if err := formatdata.FillStruct(l, &historial.Traslados); err != nil {
 				return err
 			}
-			historial.Traslados = traslados_
 		}
 	}
 
+	ids = []int{}
 	query =
 		`SELECT
 			m.id
@@ -336,11 +336,11 @@ func GetHistorialElemento(elementoId int, acta, final bool, historial *Historial
 		ORDER BY m.id DESC
 		LIMIT 1`
 
-	if _, err = o.Raw(query, elementoId).QueryRows(&baja); err != nil {
+	if _, err = o.Raw(query, elementoId).QueryRows(&ids); err != nil {
 		return err
-	} else if baja != nil {
+	} else if ids != nil && len(ids) > 0 {
 		if l, err := GetAllMovimiento(
-			map[string]string{"Id__in": ArrayToString(baja, "|")}, []string{}, nil, nil, 0, -1); err != nil {
+			map[string]string{"Id__in": ArrayToString(ids, "|")}, []string{}, nil, nil, 0, -1); err != nil {
 			return err
 		} else {
 			var baja []*Movimiento
@@ -348,6 +348,34 @@ func GetHistorialElemento(elementoId int, acta, final bool, historial *Historial
 				return err
 			}
 			historial.Baja = baja[0]
+		}
+	}
+
+	if entradas {
+		ids = []int{}
+		query = `
+		SELECT
+			m.id
+		FROM
+			movimientos_arka.movimiento m,
+			movimientos_arka.estado_movimiento sm
+		WHERE
+			sm.nombre LIKE 'Entrada%'
+			AND m.estado_movimiento_id = sm.id
+			AND m.detalle->'elementos' @> ?
+		ORDER BY m.id DESC;`
+
+		if _, err = o.Raw(query, elementoId).QueryRows(&ids); err != nil {
+			return err
+		} else if ids != nil && len(ids) > 0 {
+			if l, err := GetAllMovimiento(
+				map[string]string{"Id__in": ArrayToString(ids, "|")}, []string{}, nil, nil, 0, -1); err != nil {
+				return err
+			} else {
+				if err := formatdata.FillStruct(l, &historial.Entradas); err != nil {
+					return err
+				}
+			}
 		}
 	}
 
