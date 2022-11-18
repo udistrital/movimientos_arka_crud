@@ -1,10 +1,10 @@
 kind: pipeline
 name: oas_api_ci
 
-# trigger:
-#   event:
-#     exclude:
-#       - tag
+trigger:
+  event:
+    exclude:
+      - tag
 
 steps:
 - name: check_readme
@@ -150,9 +150,9 @@ steps:
     branch:
     - release/*
     - master
-    # ref:
-    #   exclude:
-    #     - refs/tags/**
+    ref:
+      exclude:
+        - refs/tags/**
 
 - name: update_aws_ecs
   image: golang:1.17
@@ -188,9 +188,9 @@ steps:
     - master
     event:
     - push
-    # ref:
-    #   exclude:
-    #     - refs/tags/**
+    ref:
+      exclude:
+        - refs/tags/**
 
 - name: notify_telegram
   failure: ignore
