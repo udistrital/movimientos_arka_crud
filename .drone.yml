@@ -150,9 +150,9 @@ steps:
     branch:
     - release/*
     - master
-    ref:
-      exclude:
-        - refs/tags/**
+    # ref:
+    #   exclude:
+    #     - refs/tags/**
 
 - name: update_aws_ecs
   image: golang:1.17
