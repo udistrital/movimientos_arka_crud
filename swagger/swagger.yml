@@ -1018,9 +1018,6 @@ paths:
         "404":
           description: not found resource
 definitions:
-  11627.<nil>.Movimiento:
-    title: Movimiento
-    type: object
   models.DepreciacionElemento:
     title: DepreciacionElemento
     type: object
@@ -1134,7 +1131,9 @@ definitions:
       Elemento:
         $ref: '#/definitions/models.ElementosMovimiento'
       Entradas:
-        $ref: '#/definitions/11627.<nil>.Movimiento'
+        type: array
+        items:
+          $ref: '#/definitions/models.Movimiento'
       Salida:
         $ref: '#/definitions/models.Movimiento'
       Traslados:

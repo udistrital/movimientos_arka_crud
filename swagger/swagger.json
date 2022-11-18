@@ -1531,10 +1531,6 @@
         }
     },
     "definitions": {
-        "11627.\u003cnil\u003e.Movimiento": {
-            "title": "Movimiento",
-            "type": "object"
-        },
         "models.DepreciacionElemento": {
             "title": "DepreciacionElemento",
             "type": "object",
@@ -1691,7 +1687,10 @@
                     "$ref": "#/definitions/models.ElementosMovimiento"
                 },
                 "Entradas": {
-                    "$ref": "#/definitions/11627.\u003cnil\u003e.Movimiento"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Movimiento"
+                    }
                 },
                 "Salida": {
                     "$ref": "#/definitions/models.Movimiento"

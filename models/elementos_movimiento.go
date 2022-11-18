@@ -31,7 +31,7 @@ type ElementosMovimiento struct {
 
 type Historial struct {
 	Elemento     *ElementosMovimiento
-	Entradas     *[]Movimiento
+	Entradas     []*Movimiento
 	Salida       *Movimiento
 	Traslados    []*Movimiento
 	Depreciacion *Movimiento
