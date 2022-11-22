@@ -83,13 +83,15 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 				em.vida_util,
 				em.elemento_acta_id,
 				em.valor_total valor_presente,
-				date_part('day', fecha_corte - (m.fecha_modificacion::date)::timestamp) / 365 delta_tiempo
+				(delta_dias + delta_meses * 30) / 360 delta_tiempo
 			FROM
 				movimientos_arka.elementos_movimiento em,
 				movimientos_arka.movimiento m,
 				movimientos_arka.estado_movimiento sm,
 				movimientos_arka.formato_tipo_movimiento fm,
-				fecha_corte
+				fecha_corte,
+				EXTRACT(month FROM AGE(fecha_corte, m.fecha_modificacion - interval '1 day')) delta_meses,
+				EXTRACT(day FROM AGE(fecha_corte, m.fecha_modificacion - interval '1 day')) delta_dias
 			WHERE
 				fm.codigo_abreviacion = 'SAL'
 				AND sm.nombre = 'Salida Aprobada'
@@ -122,13 +124,15 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 				ne.vida_util,
 				em.elemento_acta_id,
 				ne.valor_libros valor_presente,
-				date_part('day', fecha_corte - ((fecha + INTERVAL '1 day')::date)::timestamp) / 365 delta_tiempo
+                (delta_dias + delta_meses * 30) / 360 delta_tiempo
 			FROM
 				movimientos_arka.novedad_elemento ne,
 				movimientos_arka.elementos_movimiento em,
 				movimientos_arka.movimiento m,
 				to_date(m.detalle->>'FechaCorte', 'YYYY-MM-DD') AS fecha,
-				fecha_corte
+				fecha_corte,
+				EXTRACT(month FROM AGE(fecha_corte, fecha + interval '1 day')) delta_meses,
+				EXTRACT(day FROM AGE(fecha_corte, fecha + interval '1 day')) delta_dias
 			WHERE
 				fecha < fecha_corte
 				AND	ne.elemento_movimiento_id = em.id
@@ -225,14 +229,16 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 			ne.valor_residual,
 			ne.vida_util,
 			ne.valor_libros valor_presente,
-			date_part('day', fecha_corte - ((fecha + INTERVAL '1 day')::date)::timestamp) / 365 delta_tiempo
+			(delta_dias + delta_meses * 30) delta_tiempo
 		FROM
 			movimientos_arka.novedad_elemento ne,
 			movimientos_arka.elementos_movimiento em,
 			movimientos_arka.movimiento m,
 			to_date(m.detalle->>'FechaCorte', 'YYYY-MM-DD') AS fecha,
 			fecha_corte,
-			elemento
+			elemento,
+			EXTRACT(month FROM AGE(fecha_corte, fecha + interval '1 day')) delta_meses,
+			EXTRACT(day FROM AGE(fecha_corte, fecha + interval '1 day')) delta_dias
 		WHERE
 			fecha < fecha_corte
 			AND em.id = elemento.id
@@ -245,14 +251,16 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 			em.valor_residual,
 			em.vida_util,
 			em.valor_total valor_presente,
-			date_part('day', fecha_corte - (m.fecha_modificacion::date)::timestamp) / 365 delta_tiempo
+			(delta_dias + delta_meses * 30) delta_tiempo
 		FROM
 			movimientos_arka.elementos_movimiento em,
 			movimientos_arka.movimiento m,
 			movimientos_arka.estado_movimiento sm,
 			movimientos_arka.formato_tipo_movimiento fm,
 			fecha_corte,
-			elemento
+			elemento,
+			EXTRACT(month FROM AGE(fecha_corte, m.fecha_modificacion - interval '1 day')) delta_meses,
+			EXTRACT(day FROM AGE(fecha_corte, m.fecha_modificacion - interval '1 day')) delta_dias
 		WHERE
 			fm.codigo_abreviacion = 'SAL'
 			AND sm.nombre = 'Salida Aprobada'
@@ -273,16 +281,16 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 			ref.valor_residual,
 			CASE
 				WHEN
-					ref.vida_util > ref.delta_tiempo
+					ref.vida_util > ref.delta_tiempo / 360
 				THEN
-					ref.vida_util - ref.delta_tiempo
+					ref.vida_util - ref.delta_tiempo / 360
 				ELSE 0
 			END vida_util,
 			CASE
 				WHEN
-					ref.vida_util > ref.delta_tiempo
+					ref.vida_util > ref.delta_tiempo / 360
 				THEN
-					ref.valor_presente - (ref.valor_presente - ref.valor_residual) * ref.delta_tiempo / ref.vida_util
+					ref.valor_presente - (ref.valor_presente - ref.valor_residual) * ref.delta_tiempo / (ref.vida_util * 360)
 				ELSE ref.valor_residual
 			END valor_libros
 		FROM
