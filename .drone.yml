@@ -172,6 +172,9 @@ steps:
     - master
     event:
     - push
+  ref:
+    exclude:
+      - refs/tags/**
 
 - name: update_aws_ecs
   image: golang:1.17
