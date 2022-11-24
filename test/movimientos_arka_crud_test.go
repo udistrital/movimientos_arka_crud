@@ -4,16 +4,16 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"io/ioutil"
 	"reflect"
 	"strconv"
 	"strings"
 
-	"github.com/cucumber/godog"
 	"github.com/astaxie/beego"
+	"github.com/cucumber/godog"
 	"github.com/xeipuuv/gojsonschema"
 )
 
@@ -126,7 +126,6 @@ func iSendRequestToWhereBodyIsJson(arg1, arg2, arg3 string) error {
 
 }
 
-
 //@theResponseCodeShouldBe valida el codigo de respuesta
 func theResponseCodeShouldBe(arg1 string) error {
 	if resStatus != arg1 {
@@ -153,8 +152,6 @@ func theResponseShouldMatchJson(arg1 string) error {
 			return nil
 		} else {
 			return fmt.Errorf("Errores : %s", result.Errors())
-
-			return nil
 		}
 	}
 	if div[13] == "I" {
