@@ -83,13 +83,14 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 				em.vida_util,
 				em.elemento_acta_id,
 				em.valor_total valor_presente,
-				(delta_dias + delta_meses * 30) / 360 delta_tiempo
+				(delta_dias + delta_meses * 30 + delta_year * 360) / 360 delta_tiempo
 			FROM
 				movimientos_arka.elementos_movimiento em,
 				movimientos_arka.movimiento m,
 				movimientos_arka.estado_movimiento sm,
 				movimientos_arka.formato_tipo_movimiento fm,
 				fecha_corte,
+				EXTRACT(year FROM AGE(fecha_corte, m.fecha_modificacion - interval '1 day')) delta_year,
 				EXTRACT(month FROM AGE(fecha_corte, m.fecha_modificacion - interval '1 day')) delta_meses,
 				EXTRACT(day FROM AGE(fecha_corte, m.fecha_modificacion - interval '1 day')) delta_dias
 			WHERE
@@ -124,13 +125,14 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 				ne.vida_util,
 				em.elemento_acta_id,
 				ne.valor_libros valor_presente,
-                (delta_dias + delta_meses * 30) / 360 delta_tiempo
+                (delta_dias + delta_meses * 30 + delta_year * 360) / 360 delta_tiempo
 			FROM
 				movimientos_arka.novedad_elemento ne,
 				movimientos_arka.elementos_movimiento em,
 				movimientos_arka.movimiento m,
 				to_date(m.detalle->>'FechaCorte', 'YYYY-MM-DD') AS fecha,
 				fecha_corte,
+				EXTRACT(year FROM AGE(fecha_corte, fecha + interval '1 day')) delta_year,
 				EXTRACT(month FROM AGE(fecha_corte, fecha + interval '1 day')) delta_meses,
 				EXTRACT(day FROM AGE(fecha_corte, fecha + interval '1 day')) delta_dias
 			WHERE
@@ -171,7 +173,7 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 				referencia ref
 		)
 		
-		SELECT * from delta_valor`
+		SELECT * from delta_valor;`
 
 	if _, err = o.Raw(query, fechaCorte).QueryRows(elementos); err != nil {
 		return err
@@ -229,7 +231,7 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 			ne.valor_residual,
 			ne.vida_util,
 			ne.valor_libros valor_presente,
-			(delta_dias + delta_meses * 30) delta_tiempo
+			(delta_dias + delta_meses * 30 + delta_year * 360) delta_tiempo
 		FROM
 			movimientos_arka.novedad_elemento ne,
 			movimientos_arka.elementos_movimiento em,
@@ -237,6 +239,7 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 			to_date(m.detalle->>'FechaCorte', 'YYYY-MM-DD') AS fecha,
 			fecha_corte,
 			elemento,
+			EXTRACT(year FROM AGE(fecha_corte, fecha + interval '1 day')) delta_year,
 			EXTRACT(month FROM AGE(fecha_corte, fecha + interval '1 day')) delta_meses,
 			EXTRACT(day FROM AGE(fecha_corte, fecha + interval '1 day')) delta_dias
 		WHERE
@@ -251,7 +254,7 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 			em.valor_residual,
 			em.vida_util,
 			em.valor_total valor_presente,
-			(delta_dias + delta_meses * 30) delta_tiempo
+			(delta_dias + delta_meses * 30 + delta_year * 360) delta_tiempo
 		FROM
 			movimientos_arka.elementos_movimiento em,
 			movimientos_arka.movimiento m,
@@ -259,6 +262,7 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 			movimientos_arka.formato_tipo_movimiento fm,
 			fecha_corte,
 			elemento,
+			EXTRACT(year FROM AGE(fecha_corte, m.fecha_modificacion - interval '1 day')) delta_year,
 			EXTRACT(month FROM AGE(fecha_corte, m.fecha_modificacion - interval '1 day')) delta_meses,
 			EXTRACT(day FROM AGE(fecha_corte, m.fecha_modificacion - interval '1 day')) delta_dias
 		WHERE
