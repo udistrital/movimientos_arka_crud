@@ -83,7 +83,22 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 				em.vida_util,
 				em.elemento_acta_id,
 				em.valor_total valor_presente,
-				(delta_dias + delta_meses * 30 + delta_year * 360) / 360 delta_tiempo
+				CASE
+					WHEN
+						delta_dias > 1 AND (
+							EXTRACT(day FROM (DATE_TRUNC('month', m.fecha_modificacion) + interval '1 month - 1 day')) = 31 AND (
+								EXTRACT(month FROM fecha_corte - 1) != EXTRACT(month FROM m.fecha_modificacion) OR
+								EXTRACT(year FROM fecha_corte - 1) != EXTRACT(year FROM m.fecha_modificacion)
+							) OR (
+								EXTRACT(day FROM fecha_corte - 1) = 31 AND delta_meses = 0 AND delta_year = 0
+							)
+						)
+					THEN
+						delta_dias - 1
+					ELSE
+						delta_dias
+				END delta_dias,
+				(delta_meses * 30) + (delta_year * 360) AS delta_dias_
 			FROM
 				movimientos_arka.elementos_movimiento em,
 				movimientos_arka.movimiento m,
@@ -125,7 +140,22 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 				ne.vida_util,
 				em.elemento_acta_id,
 				ne.valor_libros valor_presente,
-                (delta_dias + delta_meses * 30 + delta_year * 360) / 360 delta_tiempo
+				CASE
+					WHEN
+						delta_dias > 1 AND (
+							EXTRACT(day FROM (DATE_TRUNC('month', fecha) + interval '1 month - 1 day')) = 31 AND (
+								EXTRACT(month FROM fecha_corte - 1) != EXTRACT(month FROM fecha) OR
+								EXTRACT(year FROM fecha_corte - 1) != EXTRACT(year FROM fecha)
+							) OR (
+								EXTRACT(day FROM fecha_corte - 1) = 31 AND delta_meses = 0 AND delta_year = 0
+							)
+						)
+					THEN
+						delta_dias - 1
+					ELSE
+						delta_dias
+				END delta_dias,
+				(delta_meses * 30) + (delta_year * 360) AS delta_dias_
 			FROM
 				movimientos_arka.novedad_elemento ne,
 				movimientos_arka.elementos_movimiento em,
@@ -139,8 +169,6 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 				fecha < fecha_corte
 				AND	ne.elemento_movimiento_id = em.id
 				AND ne.movimiento_id = m.id
-				AND ne.vida_util > 0
-				AND ne.valor_libros > ne.valor_residual
 				AND em.id NOT IN (
 					SELECT
 						bajas.id
@@ -160,17 +188,20 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 				con_novedad dp
 		), delta_valor AS (
 			SELECT
-				ref.elemento_movimiento_id,
-				ref.elemento_acta_id,
+				elemento_movimiento_id,
+				elemento_acta_id,
 				CASE
 					WHEN
-						ref.vida_util > ref.delta_tiempo
+						360 * vida_util - delta_dias - delta_dias_ > 1
 					THEN
-						(ref.valor_presente - ref.valor_residual) * ref.delta_tiempo / ref.vida_util
-					ELSE ref.valor_presente - ref.valor_residual
+						(valor_presente - valor_residual) * (delta_dias + delta_dias_) / (vida_util * 360)
+					ELSE valor_presente - valor_residual
 				END delta_valor
 			FROM
-				referencia ref
+				referencia
+			WHERE
+				vida_util > 0
+				AND valor_presente > valor_residual
 		)
 		
 		SELECT * from delta_valor;`
@@ -231,7 +262,22 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 			ne.valor_residual,
 			ne.vida_util,
 			ne.valor_libros valor_presente,
-			(delta_dias + delta_meses * 30 + delta_year * 360) delta_tiempo
+			CASE
+				WHEN
+					delta_dias > 1 AND	(
+						EXTRACT(day FROM (DATE_TRUNC('month', fecha) + interval '1 month - 1 day')) = 31 AND (
+							EXTRACT(month FROM fecha_corte) != EXTRACT(month FROM fecha) OR
+							EXTRACT(year FROM fecha_corte) != EXTRACT(year FROM fecha)
+						)
+					) OR (
+						EXTRACT(day FROM fecha_corte) = 31 AND delta_meses = 0 AND delta_year = 0
+					)
+				THEN
+					delta_dias - 1
+				ELSE
+					delta_dias
+			END delta_dias,
+			(delta_meses * 30) + (delta_year * 360) AS delta_dias_
 		FROM
 			movimientos_arka.novedad_elemento ne,
 			movimientos_arka.elementos_movimiento em,
@@ -254,7 +300,22 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 			em.valor_residual,
 			em.vida_util,
 			em.valor_total valor_presente,
-			(delta_dias + delta_meses * 30 + delta_year * 360) delta_tiempo
+			CASE
+				WHEN
+					delta_dias > 1 AND	(
+						EXTRACT(day FROM (DATE_TRUNC('month', m.fecha_modificacion) + interval '1 month - 1 day')) = 31 AND (
+							EXTRACT(month FROM fecha_corte) != EXTRACT(month FROM m.fecha_modificacion) OR
+							EXTRACT(year FROM fecha_corte) != EXTRACT(year FROM m.fecha_modificacion)
+						)
+					) OR (
+						EXTRACT(day FROM fecha_corte) = 31 AND delta_meses = 0 AND delta_year = 0
+					)
+				THEN
+					delta_dias - 1
+				ELSE
+					delta_dias
+			END delta_dias,
+			(delta_meses * 30) + (delta_year * 360) AS delta_dias_
 		FROM
 			movimientos_arka.elementos_movimiento em,
 			movimientos_arka.movimiento m,
@@ -282,23 +343,23 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 				)
 	), delta AS (
 		SELECT
-			ref.valor_residual,
+			valor_residual,
 			CASE
 				WHEN
-					ref.vida_util > ref.delta_tiempo / 360
+					360 * vida_util - delta_dias - delta_dias_ > 1
 				THEN
-					ref.vida_util - ref.delta_tiempo / 360
+					vida_util - (delta_dias + delta_dias_) / 360
 				ELSE 0
 			END vida_util,
 			CASE
 				WHEN
-					ref.vida_util > ref.delta_tiempo / 360
+					360 * vida_util - delta_dias - delta_dias_ > 1
 				THEN
-					ref.valor_presente - (ref.valor_presente - ref.valor_residual) * ref.delta_tiempo / (ref.vida_util * 360)
-				ELSE ref.valor_residual
+					valor_presente - (valor_presente - valor_residual) * (delta_dias + delta_dias_) / (vida_util * 360)
+				ELSE valor_residual
 			END valor_libros
 		FROM
-			referencia ref
+			referencia
 	)
 
 	INSERT INTO movimientos_arka.novedad_elemento (

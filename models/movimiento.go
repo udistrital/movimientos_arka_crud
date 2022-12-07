@@ -203,12 +203,12 @@ func GetTrasladosByTerceroId(terceroId int, porRecibir bool, traslados *[]Movimi
 
 	query :=
 		`SELECT	m.id
-	FROM movimientos_arka.movimiento m,
-		movimientos_arka.formato_tipo_movimiento fm`
+	FROM ` + Esquema + `.movimiento m,` +
+			Esquema + `.formato_tipo_movimiento fm`
 
 	if porRecibir {
 		query += `,
-		movimientos_arka.estado_movimiento em`
+		` + Esquema + `.estado_movimiento em`
 	}
 
 	query +=
@@ -263,8 +263,8 @@ func GetBajasByTerceroId(terceroId int, bajas *[]interface{}) (err error) {
 	query :=
 		`
 		SELECT	m.id
-		FROM movimientos_arka.movimiento m,
-			movimientos_arka.estado_movimiento sm
+		FROM ` + Esquema + `.movimiento m,` +
+			Esquema + `.estado_movimiento sm
 		WHERE 
 			sm.nombre LIKE 'Baja%'
 			AND m.estado_movimiento_id = sm.id
@@ -288,3 +288,40 @@ func GetBajasByTerceroId(terceroId int, bajas *[]interface{}) (err error) {
 
 	return
 }
+
+// GetBodegaByTerceroId Retorna la lista de solicitudes de bodega de consumo por un funcionario determinado
+func GetBodegaByTerceroId(terceroId int, solicitudes *[]interface{}) (err error) {
+
+	o := orm.NewOrm()
+
+	var ids []int
+
+	query :=
+		`
+		SELECT	m.id
+		FROM ` + Esquema + `.movimiento m,` +
+			Esquema + `.formato_tipo_movimiento fm
+		WHERE 
+			fm.codigo_abreviacion = 'SOL_BOD'
+			AND m.formato_tipo_movimiento_id = fm.id
+			AND m.detalle ->> 'Funcionario' = ?;
+		`
+
+	if _, err = o.Raw(query, terceroId).QueryRows(&ids); err != nil {
+		return err
+	}
+
+	if len(ids) == 0 {
+		return
+	}
+
+	if l, err := GetAllMovimiento(
+		map[string]string{"Id__in": strings.Trim(strings.Replace(fmt.Sprint(ids), " ", "|", -1), "[]")}, []string{}, nil, nil, 0, -1); err != nil {
+		return err
+	} else {
+		*solicitudes = l
+	}
+
+	return
+}
+
