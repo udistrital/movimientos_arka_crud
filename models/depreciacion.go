@@ -169,8 +169,6 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 				fecha < fecha_corte
 				AND	ne.elemento_movimiento_id = em.id
 				AND ne.movimiento_id = m.id
-				AND ne.vida_util > 0
-				AND ne.valor_libros > ne.valor_residual
 				AND em.id NOT IN (
 					SELECT
 						bajas.id
@@ -194,13 +192,16 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 				elemento_acta_id,
 				CASE
 					WHEN
-						vida_util > (delta_dias + delta_dias_) / 360
+						360 * vida_util - delta_dias - delta_dias_ > 1
 					THEN
 						(valor_presente - valor_residual) * (delta_dias + delta_dias_) / (vida_util * 360)
-					ELSE ref.valor_presente - ref.valor_residual
+					ELSE valor_presente - valor_residual
 				END delta_valor
 			FROM
-				referencia ref
+				referencia
+			WHERE
+				vida_util > 0
+				AND valor_presente > valor_residual
 		)
 		
 		SELECT * from delta_valor;`
@@ -345,20 +346,20 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 			valor_residual,
 			CASE
 				WHEN
-					vida_util > (delta_dias + delta_dias_)  / 360
+					360 * vida_util - delta_dias - delta_dias_ > 1
 				THEN
 					vida_util - (delta_dias + delta_dias_) / 360
 				ELSE 0
 			END vida_util,
 			CASE
 				WHEN
-					vida_util > (delta_dias + delta_dias_) / 360
+					360 * vida_util - delta_dias - delta_dias_ > 1
 				THEN
 					valor_presente - (valor_presente - valor_residual) * (delta_dias + delta_dias_) / (vida_util * 360)
 				ELSE valor_residual
 			END valor_libros
 		FROM
-			referencia ref
+			referencia
 	)
 
 	INSERT INTO movimientos_arka.novedad_elemento (
