@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"io/ioutil"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
@@ -232,14 +233,14 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 		return
 	}
 
-	if _, err := o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id", m.MovimientoId).All(cierre); err != nil {
-		return err
+	if _, err = o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id", m.MovimientoId).All(cierre); err != nil {
+		return
 	} else if cierre.EstadoMovimientoId.Nombre != "Cierre En Curso" {
 		return nil
 	}
 
-	if _, err := o.QueryTable(new(EstadoMovimiento)).RelatedSel().Filter("Nombre", "Cierre Aprobado").All(cierre.EstadoMovimientoId); err != nil {
-		return err
+	if _, err = o.QueryTable(new(EstadoMovimiento)).RelatedSel().Filter("Nombre", "Cierre Aprobado").All(cierre.EstadoMovimientoId); err != nil {
+		return
 	}
 
 	var detalle FormatoCierre
@@ -385,8 +386,11 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 		elemento;`
 
 	p, err := o.Raw(query).Prepare()
+	if err != nil {
+		return err
+	}
 	for _, el := range m.ElementoMovimientoId {
-		_, err := p.Exec(detalle.FechaCorte, el, m.MovimientoId)
+		_, err = p.Exec(detalle.FechaCorte, el, m.MovimientoId)
 		if err != nil {
 			return err
 		}
@@ -394,6 +398,17 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 
 	if err := p.Close(); err != nil {
 		return err
+	}
+
+	script, err_ := ioutil.ReadFile("models/aprobar_cierre_inmuebles.sql")
+	if err_ != nil {
+		err = err_
+		return
+	}
+
+	_, err = o.Raw(string(script), detalle.FechaCorte, m.MovimientoId).Exec()
+	if err != nil {
+		return
 	}
 
 	detalle.RazonRechazo = ""
