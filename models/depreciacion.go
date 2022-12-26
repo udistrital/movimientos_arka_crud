@@ -178,6 +178,18 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 					WHERE
 						bajas.id = em.id
 				)
+				AND em.id IN (
+					SELECT
+						em.id
+					FROM
+						movimientos_arka.movimiento m,
+						movimientos_arka.elementos_movimiento em,
+						movimientos_arka.formato_tipo_movimiento fm
+					WHERE
+						fm.codigo_abreviacion = 'SAL'
+						AND m.formato_tipo_movimiento_id = fm.id
+						AND em.movimiento_id = m.id
+				)
 			ORDER BY 1 DESC, fecha DESC
 		), referencia AS (
 			SELECT *
