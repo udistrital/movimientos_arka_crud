@@ -29,8 +29,6 @@ func (c *DepreciacionController) URLMapping() {
 // @router / [post]
 func (c *DepreciacionController) Post() {
 
-	defer errorctrl.ErrorControlController(c.Controller, "DepreciacionController - Unhandled Error!")
-
 	var v models.TransaccionCierre
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err != nil {
 		logs.Error(err)
@@ -57,8 +55,6 @@ func (c *DepreciacionController) Post() {
 // @Failure 404 not found resource
 // @router / [get]
 func (c *DepreciacionController) GetCorte() {
-
-	defer errorctrl.ErrorControlController(c.Controller, "DepreciacionController")
 
 	var fecha string
 	if fecha_ := c.GetString("fechaCorte"); fecha_ == "" {

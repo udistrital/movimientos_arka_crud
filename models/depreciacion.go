@@ -248,7 +248,7 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 	if _, err = o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id", m.MovimientoId).All(cierre); err != nil {
 		return
 	} else if cierre.EstadoMovimientoId.Nombre != "Cierre En Curso" {
-		return nil
+		return
 	}
 
 	if _, err = o.QueryTable(new(EstadoMovimiento)).RelatedSel().Filter("Nombre", "Cierre Aprobado").All(cierre.EstadoMovimientoId); err != nil {
@@ -401,6 +401,7 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 	if err != nil {
 		return err
 	}
+
 	for _, el := range m.ElementoMovimientoId {
 		_, err = p.Exec(detalle.FechaCorte, el, m.MovimientoId)
 		if err != nil {
@@ -408,13 +409,13 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 		}
 	}
 
-	if err := p.Close(); err != nil {
-		return err
+	if err = p.Close(); err != nil {
+		return
 	}
 
-	script, err_ := ioutil.ReadFile("models/aprobar_cierre_inmuebles.sql")
-	if err_ != nil {
-		err = err_
+	var script []byte
+	script, err = ioutil.ReadFile("models/aprobar_inmuebles.sql")
+	if err != nil {
 		return
 	}
 
