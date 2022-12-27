@@ -414,17 +414,17 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 		return
 	}
 
-	var script []byte
-	script, err = ioutil.ReadFile("../scripts/aprobar_inmuebles.sql")
-	if err != nil {
-		return
-	}
-
 	path, err := os.Getwd()
 	if err != nil {
 		logs.Info(err)
 	}
 	logs.Info(path)
+
+	var script []byte
+	script, err = ioutil.ReadFile("../scripts/aprobar_inmuebles.sql")
+	if err != nil {
+		return
+	}
 
 	_, err = o.Raw(string(script), detalle.FechaCorte, m.MovimientoId).Exec()
 	if err != nil {
