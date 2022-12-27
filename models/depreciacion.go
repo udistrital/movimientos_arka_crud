@@ -414,7 +414,7 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 	}
 
 	var script []byte
-	script, err = ioutil.ReadFile("models/aprobar_inmuebles.sql")
+	script, err = ioutil.ReadFile("aprobar_inmuebles.sql")
 	if err != nil {
 		return
 	}
