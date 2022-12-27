@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"io/ioutil"
+	"os"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
@@ -414,10 +415,16 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 	}
 
 	var script []byte
-	script, err = ioutil.ReadFile("aprobar_inmuebles.sql")
+	script, err = ioutil.ReadFile("../scripts/aprobar_inmuebles.sql")
 	if err != nil {
 		return
 	}
+
+	path, err := os.Getwd()
+	if err != nil {
+		logs.Info(err)
+	}
+	logs.Info(path)
 
 	_, err = o.Raw(string(script), detalle.FechaCorte, m.MovimientoId).Exec()
 	if err != nil {
