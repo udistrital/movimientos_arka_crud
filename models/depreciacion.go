@@ -245,13 +245,13 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 		return
 	}
 
-	if _, err = o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id", m.MovimientoId).All(cierre); err != nil {
+	if err = o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id", m.MovimientoId).One(cierre); err != nil {
 		return
 	} else if cierre.EstadoMovimientoId.Nombre != "Cierre En Curso" {
 		return
 	}
 
-	if _, err = o.QueryTable(new(EstadoMovimiento)).RelatedSel().Filter("Nombre", "Cierre Aprobado").All(cierre.EstadoMovimientoId); err != nil {
+	if err = o.QueryTable(new(EstadoMovimiento)).Filter("Nombre", "Cierre Aprobado").One(cierre.EstadoMovimientoId); err != nil {
 		return
 	}
 
