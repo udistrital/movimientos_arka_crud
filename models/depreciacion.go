@@ -431,9 +431,7 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 		cierre.Detalle = string(dt)
 	}
 
-	if _, err = o.Update(cierre, "Detalle", "EstadoMovimientoId"); err != nil {
-		return err
-	}
+	err = UpdateMovimientoById(cierre)
 
 	return
 }
