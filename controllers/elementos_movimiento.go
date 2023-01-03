@@ -1,3 +1,4 @@
+//Prueba despliegue
 package controllers
 
 import (
@@ -214,26 +215,29 @@ func (c *ElementosMovimientoController) GetByFuncionario() {
 		if err == nil {
 			err = errors.New("Se debe especificar un funcionario válido")
 		}
-		panic(errorctrl.Error("GetByFuncionario - c.GetInt(\":funcionarioId\")", err, "400"))
+		panic(errorctrl.Error(`GetByFuncionario - c.GetInt(":funcionarioId")`, err, "400"))
 	} else {
 		id = v
 	}
 
-	if el, err := models.GetElementosFuncionario(id); err == nil {
-		c.Data["json"] = el
-	} else {
+	var elementos = make([]int, 0)
+	if err := models.GetElementosFuncionario(id, &elementos); err != nil {
 		logs.Error(err)
 		c.Data["system"] = err
 		c.Abort("404")
 	}
+
+	c.Data["json"] = elementos
 	c.ServeJSON()
 }
 
 // GetHistorial ...
 // @Title Get Historial de un elemento
 // @Description Consulta los movimientos que ha tenido un elemento
-// @Param	id path string true "id del elemento"
-// @Param	final	query 	bool	false	"Indica si se incluye unicamente el ultimo traslado"
+// @Param	id			path	string	true	"id del elemento"
+// @Param	final		query	bool	false	"Indica si se incluye unicamente el ultimo traslado"
+// @Param	acta		query	bool	false	"Indica si consulta por el elemento del acta o de la salida"
+// @Param	entradas	query	bool	false	"Indica si consulta las entradas"
 // @Success 200 {object} models.Historial
 // @Failure 404 not found resource
 // @router /historial/:id [get]
@@ -246,24 +250,40 @@ func (c *ElementosMovimientoController) GetHistorial() {
 		if err == nil {
 			err = errors.New("Se debe especificar un elemento válido")
 		}
-		panic(errorctrl.Error("GetHistorial - c.GetInt(\":id\")", err, "400"))
+		panic(errorctrl.Error(`GetHistorial - c.GetInt(":id")`, err, "400"))
 	} else {
 		id = v
 	}
 
 	var final bool
 	if v, err := c.GetBool("final", false); err != nil {
-		panic(errorctrl.Error("GetHistorial - c.GetBool(\"final\", false)", err, "400"))
+		panic(errorctrl.Error(`GetHistorial - c.GetBool("final", false)`, err, "400"))
 	} else {
 		final = v
 	}
 
-	if el, err := models.GetHistorialElemento(id, final); err == nil {
-		c.Data["json"] = el
+	var acta bool
+	if v, err := c.GetBool("acta", false); err != nil {
+		panic(errorctrl.Error(`GetHistorial - c.GetBool("final", false)`, err, "400"))
 	} else {
+		acta = v
+	}
+
+	var entradas bool
+	if v, err := c.GetBool("entradas", false); err != nil {
+		panic(errorctrl.Error(`GetHistorial - c.GetBool("entradas", false)`, err, "400"))
+	} else {
+		entradas = v
+	}
+
+	var historial models.Historial
+	if err := models.GetHistorialElemento(id, acta, entradas, final, &historial); err != nil {
 		logs.Error(err)
 		c.Data["system"] = err
 		c.Abort("404")
+	} else {
+		c.Data["json"] = historial
 	}
+
 	c.ServeJSON()
 }

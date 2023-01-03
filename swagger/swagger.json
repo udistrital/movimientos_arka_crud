@@ -238,6 +238,18 @@
                         "name": "final",
                         "description": "Indica si se incluye unicamente el ultimo traslado",
                         "type": "boolean"
+                    },
+                    {
+                        "in": "query",
+                        "name": "acta",
+                        "description": "Indica si consulta por el elemento del acta o de la salida",
+                        "type": "boolean"
+                    },
+                    {
+                        "in": "query",
+                        "name": "entradas",
+                        "description": "Indica si consulta las entradas",
+                        "type": "boolean"
                     }
                 ],
                 "responses": {
@@ -768,6 +780,70 @@
                     },
                     "400": {
                         "description": "the request contains incorrect syntax"
+                    }
+                }
+            }
+        },
+        "/movimiento/baja/{tercero_id}": {
+            "get": {
+                "tags": [
+                    "movimiento"
+                ],
+                "description": "Consulta las bajas solicitadas por un tercero determinado.",
+                "operationId": "MovimientoController.Get Bajas Solicitadas By Tercero",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "tercero_id",
+                        "description": "TerceroId de quien consulta la lista de bajas",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Movimiento"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found resource"
+                    }
+                }
+            }
+        },
+        "/movimiento/bodega/{tercero_id}": {
+            "get": {
+                "tags": [
+                    "movimiento"
+                ],
+                "description": "Consulta las solicitudes de bodega de consumo solicitadas por un tercero determinado.",
+                "operationId": "MovimientoController.Get Solicitudes de bodega By Tercero",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "tercero_id",
+                        "description": "TerceroId de quien consulta la lista de solicitudes",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Movimiento"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "not found resource"
                     }
                 }
             }
@@ -1638,6 +1714,15 @@
                 },
                 "Depreciacion": {
                     "$ref": "#/definitions/models.Movimiento"
+                },
+                "Elemento": {
+                    "$ref": "#/definitions/models.ElementosMovimiento"
+                },
+                "Entradas": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Movimiento"
+                    }
                 },
                 "Salida": {
                     "$ref": "#/definitions/models.Movimiento"

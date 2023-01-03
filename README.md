@@ -80,9 +80,9 @@ Pruebas unitarias
 
 ## Estado CI
 
-| Develop | Relese 1.1.0 | Master |
+| Develop | Relese 1.1.3 | Master |
 | -- | -- | -- |
-| [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/movimientos_arka_crud/status.svg?ref=refs/heads/develop)](https://hubci.portaloas.udistrital.edu.co/udistrital/movimientos_arka_crud) | [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/movimientos_arka_crud/status.svg?ref=refs/heads/release/1.1.0)](https://hubci.portaloas.udistrital.edu.co/udistrital/movimientos_arka_crud) | [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/movimientos_arka_crud/status.svg?ref=refs/heads/master)](https://hubci.portaloas.udistrital.edu.co/udistrital/movimientos_arka_crud) |
+| [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/movimientos_arka_crud/status.svg?ref=refs/heads/develop)](https://hubci.portaloas.udistrital.edu.co/udistrital/movimientos_arka_crud) | [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/movimientos_arka_crud/status.svg?ref=refs/heads/release/1.1.3)](https://hubci.portaloas.udistrital.edu.co/udistrital/movimientos_arka_crud) | [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/movimientos_arka_crud/status.svg?ref=refs/heads/master)](https://hubci.portaloas.udistrital.edu.co/udistrital/movimientos_arka_crud) |
 
 ## Modelo de Datos
 
