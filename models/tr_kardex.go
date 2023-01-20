@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
@@ -13,6 +14,19 @@ type TrKardex struct {
 }
 type KardexGeneral struct {
 	Movimiento []*TrKardex
+}
+
+type Apertura struct {
+	CantidadMinima     int
+	CantidadMaxima     int
+	ElementoCatalogoId int
+	FechaCreacion      time.Time
+	MetodoValoracion   int
+	SaldoCantidad      float64
+	SaldoValor         float64
+	Unidad             float64
+	ValorUnitario      float64
+	ValorTotal         float64
 }
 
 // AddTransaccionProduccionAcademica Transacción para registrar toda la información de un grupo asociándolo a un catálogo
@@ -205,7 +219,8 @@ func RechazarSolicitud(id *Movimiento) (err error) {
 	return
 }
 
-func GetAllAperturas(conSaldo bool) (ids []ElementosMovimiento, err error) {
+func GetAllAperturas(conSaldo bool) (aperturas []Apertura, err error) {
+
 	o := orm.NewOrm()
 	err = o.Begin()
 
@@ -213,12 +228,12 @@ func GetAllAperturas(conSaldo bool) (ids []ElementosMovimiento, err error) {
 		return
 	}
 
-	var ids_ []int
 	query :=
 		`
 	WITH aperturas AS (
 		SELECT DISTINCT ON (1)
-			em.elemento_catalogo_id
+			em.elemento_catalogo_id,
+			m.detalle
 		FROM
 			movimientos_arka.elementos_movimiento em,
 			movimientos_arka.movimiento m,
@@ -230,8 +245,13 @@ func GetAllAperturas(conSaldo bool) (ids []ElementosMovimiento, err error) {
 	), saldo AS (
 		SELECT DISTINCT ON (1)
 			em.elemento_catalogo_id,
-			em.fecha_creacion,
-			em.*
+			m.fecha_creacion,
+			em.saldo_cantidad,
+			em.saldo_valor,
+			em.unidad,
+			em.valor_total,
+			em.valor_unitario,
+			aperturas.detalle
 		FROM
 			movimientos_arka.elementos_movimiento em,
 			movimientos_arka.movimiento m,
@@ -245,7 +265,11 @@ func GetAllAperturas(conSaldo bool) (ids []ElementosMovimiento, err error) {
 		ORDER BY 1, 2 DESC
 	)
 
-	SELECT id FROM saldo
+	SELECT *,
+		detalle ->> 'Metodo_Valoracion' metodo_valoracion,
+		detalle ->> 'Cantidad_Minima' cantidad_minima,
+		detalle ->> 'Cantidad_Maxima' cantidad_maxima
+	FROM saldo
 	`
 
 	if conSaldo {
@@ -255,10 +279,6 @@ func GetAllAperturas(conSaldo bool) (ids []ElementosMovimiento, err error) {
 		`
 	}
 
-	if _, err = o.Raw(query).QueryRows(&ids_); err != nil {
-		return
-	}
-
-	_, err = o.QueryTable(new(ElementosMovimiento)).RelatedSel().Filter("Id__in", ids_).All(&ids)
+	_, err = o.Raw(query).QueryRows(&aperturas)
 	return
 }
