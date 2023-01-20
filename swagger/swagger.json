@@ -1381,6 +1381,35 @@
                 }
             }
         },
+        "/tr_kardex/aperturas": {
+            "get": {
+                "tags": [
+                    "tr_kardex"
+                ],
+                "description": "get SoporteMovimiento by id",
+                "operationId": "TrkardexController.Consulta el detalle de las fichas kardex y el saldo actual.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "ConSaldo",
+                        "description": "Filtra las fichas kardex que tienen existencias",
+                        "required": true,
+                        "type": "boolean"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.ElementosMovimiento"
+                        }
+                    },
+                    "404": {
+                        "description": "not found resource"
+                    }
+                }
+            }
+        },
         "/tr_kardex/rechazar_solicitud/": {
             "post": {
                 "tags": [

@@ -405,6 +405,15 @@ func init() {
 
     beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:TrkardexController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:TrkardexController"],
         beego.ControllerComments{
+            Method: "GetExistencias",
+            Router: "/aperturas",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:TrkardexController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:TrkardexController"],
+        beego.ControllerComments{
             Method: "PostRechazarSolicitud",
             Router: "/rechazar_solicitud/",
             AllowHTTPMethods: []string{"post"},

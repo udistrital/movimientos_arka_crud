@@ -45,6 +45,29 @@ func (c *TrkardexController) GetOne() {
 	c.ServeJSON()
 }
 
+// GetExistencias
+// @Title Consulta el detalle de las fichas kardex y el saldo actual.
+// @Description get SoporteMovimiento by id
+// @Param	ConSaldo	query	bool	true	"Filtra las fichas kardex que tienen existencias"
+// @Success 200 {object} models.ElementosMovimiento
+// @Failure 404 not found resource
+// @router /aperturas [get]
+func (c *TrkardexController) GetExistencias() {
+
+	saldo, _ := c.GetBool("ConSaldo")
+	v, err := models.GetAllAperturas(saldo)
+	if err != nil {
+		logs.Error(err)
+		//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
+		c.Data["system"] = err
+		c.Abort("404")
+	} else {
+		c.Data["json"] = v
+	}
+
+	c.ServeJSON()
+}
+
 // Post ...
 // @Title Create
 // @Description create SalidaGeneral

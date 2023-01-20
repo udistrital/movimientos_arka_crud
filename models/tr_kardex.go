@@ -204,3 +204,61 @@ func RechazarSolicitud(id *Movimiento) (err error) {
 	}
 	return
 }
+
+func GetAllAperturas(conSaldo bool) (ids []ElementosMovimiento, err error) {
+	o := orm.NewOrm()
+	err = o.Begin()
+
+	if err != nil {
+		return
+	}
+
+	var ids_ []int
+	query :=
+		`
+	WITH aperturas AS (
+		SELECT DISTINCT ON (1)
+			em.elemento_catalogo_id
+		FROM
+			movimientos_arka.elementos_movimiento em,
+			movimientos_arka.movimiento m,
+			movimientos_arka.formato_tipo_movimiento tm
+		WHERE
+				tm.codigo_abreviacion = 'AP_KDX'
+			AND m.formato_tipo_movimiento_id = tm.id
+			AND em.movimiento_id = m.id
+	), saldo AS (
+		SELECT DISTINCT ON (1)
+			em.elemento_catalogo_id,
+			em.fecha_creacion,
+			em.*
+		FROM
+			movimientos_arka.elementos_movimiento em,
+			movimientos_arka.movimiento m,
+			movimientos_arka.formato_tipo_movimiento tm,
+			aperturas
+		WHERE
+				tm.codigo_abreviacion IN ('AP_KDX', 'ENT_KDX', 'SAL_KDX')
+			AND m.formato_tipo_movimiento_id = tm.id
+			AND em.movimiento_id = m.id
+			AND aperturas.elemento_catalogo_id = em.elemento_catalogo_id
+		ORDER BY 1, 2 DESC
+	)
+
+	SELECT id FROM saldo
+	`
+
+	if conSaldo {
+		query +=
+			`
+		WHERE saldo_cantidad > 0;
+		`
+	}
+
+	if _, err = o.Raw(query).QueryRows(&ids_); err != nil {
+		return
+	}
+
+	_, err = o.QueryTable(new(ElementosMovimiento)).RelatedSel().Filter("Id__in", ids_).All(&ids)
+	return
+}
