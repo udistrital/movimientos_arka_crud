@@ -60,43 +60,31 @@ func AddTransaccionSalida(n *SalidaGeneral) (err error) {
 }
 
 // AddTransaccionProduccionAcademica Transacción para registrar toda la información de un grupo asociándolo a un catálogo
-func GetTransaccionSalida(id int) (Salida map[string]interface{}, err error) {
+func GetTransaccionSalida(id int) (salida map[string]interface{}, err error) {
 	o := orm.NewOrm()
-	err = o.Begin()
-
-	defer func() {
-		if r := recover(); r != nil {
-			o.Rollback()
-			logs.Error(r)
-		} else {
-			o.Commit()
-		}
-	}()
-
-	if err != nil {
-		logs.Error(err)
-		return
-	}
 
 	var elementos []interface{}
 	var movimiento Movimiento
+	salida = map[string]interface{}{}
 
-	if _, err := o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id", id).All(&movimiento); err != nil {
-		panic(err.Error())
+	_, err = o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id", id).All(&movimiento)
+	if err != nil || movimiento.Id == 0 {
+		return
 	}
 
 	query := map[string]string{"MovimientoId__Id": strconv.Itoa(id)}
 	fields := []string{"Id", "ElementoActaId", "Unidad", "ValorUnitario", "ValorTotal", "SaldoCantidad", "SaldoValor", "VidaUtil", "ValorResidual"}
-	if elementos, err = GetAllElementosMovimiento(query, fields, nil, nil, 0, -1); err != nil {
-		panic(err.Error())
+	elementos, err = GetAllElementosMovimiento(query, fields, nil, nil, 0, -1)
+	if err != nil {
+		return
 	}
 
-	Salida = map[string]interface{}{
+	salida = map[string]interface{}{
 		"Salida":    movimiento,
 		"Elementos": elementos,
 	}
 
-	return Salida, nil
+	return
 }
 
 // PutTransaccionSalida Transacción para registrar todas las salidas asociadas a una entrada

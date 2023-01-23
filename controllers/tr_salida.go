@@ -23,8 +23,8 @@ func (c *TrSalidaController) URLMapping() {
 
 // GetOne ...
 // @Title Get One
-// @Description get SoporteMovimiento by id
-// @Param	id		path 	string	true		"The key for staticblock"
+// @Description Consulta el detalle de una salida así como sus elementos asociados
+// @Param	id	path	string	true	"Id de la salida"
 // @Success 200 {object} models.Movimiento
 // @Failure 404 not found resource
 // @router /:id [get]

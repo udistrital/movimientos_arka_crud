@@ -1537,13 +1537,13 @@
                 "tags": [
                     "tr_salida"
                 ],
-                "description": "get SoporteMovimiento by id",
+                "description": "Consulta el detalle de una salida así como sus elementos asociados",
                 "operationId": "TrSalidaController.Get One",
                 "parameters": [
                     {
                         "in": "path",
                         "name": "id",
-                        "description": "The key for staticblock",
+                        "description": "Id de la salida",
                         "required": true,
                         "type": "string"
                     }
