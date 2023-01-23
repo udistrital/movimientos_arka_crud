@@ -87,63 +87,6 @@ func AddTransaccionKardex(n *KardexGeneral) (err error) {
 	return
 }
 
-// AddTransaccionProduccionAcademica Transacción para registrar toda la información de un grupo asociándolo a un catálogo
-func GetTransaccionKardex(id int) (Salida map[string]interface{}, err error) {
-	o := orm.NewOrm()
-	err = o.Begin()
-
-	if err != nil {
-		return
-	}
-
-	defer func() {
-		if r := recover(); r != nil {
-			o.Rollback()
-			logs.Error(r)
-		} else {
-			o.Commit()
-		}
-	}()
-		fmt.Println("ok")
-
-	
-	var elementos []ElementosMovimiento
-	var Elementos []map[string]interface{}
-
-	v := &Movimiento{Id: id}
-	if err = o.Read(v); err == nil {
-
-		if _, err := o.QueryTable(new(ElementosMovimiento)).RelatedSel().Filter("Activo",true).Filter("ElementoCatalogoId__Id",id).All(&elementos); err != nil{
-			panic(err.Error())
-		} else {
-
-			for _, elemento := range elementos {
-				Elementos = append(Elementos, map[string]interface{}{
-					"Id":					elemento.Id,                
-					"ElementoActaId":    	elemento.ElementoActaId,
-					"Unidad":            	elemento.Unidad,
-					"ValorUnitario":     	elemento.ValorUnitario,
-					"ValorTotal":        	elemento.ValorTotal,
-					"SaldoCantidad":     	elemento.SaldoCantidad,
-					"SaldoValor":        	elemento.SaldoValor,
-					"Activo":            	elemento.Activo,
-					"FechaCreacion":     	elemento.FechaCreacion,
-					"FechaModificacion": 	elemento.FechaModificacion,
-					// "MovimientoId":      	elemento.MovimientoId,
-				})
-			}
-			Salida = map[string]interface{}{
-				"Salida": v,
-				"Elementos": Elementos,
-			}
-			
-			return Salida, nil
-		}
-	} else {
-		return nil, err
-	}
-}
-
 func ResponderSolicitud(Solicitud *KardexGeneral) (err error) {
 
 	o := orm.NewOrm()

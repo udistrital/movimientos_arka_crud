@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
@@ -20,29 +19,6 @@ type TrkardexController struct {
 func (c *TrkardexController) URLMapping() {
 	c.Mapping("Post", c.Post)
 	c.Mapping("Post", c.PostRespuestaSolicitud)
-	c.Mapping("Get", c.GetOne)
-}
-
-// GetOne ...
-// @Title Get One
-// @Description get SoporteMovimiento by id
-// @Param	id		path 	string	true		"The key for staticblock"
-// @Success 200 {object} models.Movimiento
-// @Failure 404 not found resource
-// @router /:id [get]
-func (c *TrkardexController) GetOne() {
-	idStr := c.Ctx.Input.Param(":id")
-	id, _ := strconv.Atoi(idStr)
-	v, err := models.GetTransaccionKardex(id)
-	if err != nil {
-		logs.Error(err)
-		//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
-		c.Data["system"] = err
-		c.Abort("404")
-	} else {
-		c.Data["json"] = v
-	}
-	c.ServeJSON()
 }
 
 // GetExistencias
