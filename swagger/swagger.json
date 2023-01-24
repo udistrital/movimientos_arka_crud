@@ -1381,6 +1381,35 @@
                 }
             }
         },
+        "/tr_kardex/aperturas": {
+            "get": {
+                "tags": [
+                    "tr_kardex"
+                ],
+                "description": "get SoporteMovimiento by id",
+                "operationId": "TrkardexController.Consulta el detalle de las fichas kardex y el saldo actual.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "ConSaldo",
+                        "description": "Filtra las fichas kardex que tienen existencias",
+                        "required": true,
+                        "type": "boolean"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.ElementosMovimiento"
+                        }
+                    },
+                    "404": {
+                        "description": "not found resource"
+                    }
+                }
+            }
+        },
         "/tr_kardex/rechazar_solicitud/": {
             "post": {
                 "tags": [
@@ -1439,35 +1468,6 @@
                     },
                     "403": {
                         "description": "body is empty"
-                    }
-                }
-            }
-        },
-        "/tr_kardex/{id}": {
-            "get": {
-                "tags": [
-                    "tr_kardex"
-                ],
-                "description": "get SoporteMovimiento by id",
-                "operationId": "TrkardexController.Get One",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "The key for staticblock",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/models.Movimiento"
-                        }
-                    },
-                    "404": {
-                        "description": "not found resource"
                     }
                 }
             }
@@ -1537,13 +1537,13 @@
                 "tags": [
                     "tr_salida"
                 ],
-                "description": "get SoporteMovimiento by id",
+                "description": "Consulta el detalle de una salida así como sus elementos asociados",
                 "operationId": "TrSalidaController.Get One",
                 "parameters": [
                     {
                         "in": "path",
                         "name": "id",
-                        "description": "The key for staticblock",
+                        "description": "Id de la salida",
                         "required": true,
                         "type": "string"
                     }
