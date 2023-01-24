@@ -1,7 +1,7 @@
 package models
 
 import (
-	"fmt"
+	"errors"
 	"time"
 
 	"github.com/astaxie/beego/logs"
@@ -13,7 +13,7 @@ type TrKardex struct {
 	Elementos []*ElementosMovimiento
 }
 type KardexGeneral struct {
-	Movimiento []*TrKardex
+	Movimiento *[]*TrKardex
 }
 
 type Apertura struct {
@@ -29,11 +29,11 @@ type Apertura struct {
 	ValorTotal         float64
 }
 
-// AddTransaccionProduccionAcademica Transacción para registrar toda la información de un grupo asociándolo a un catálogo
+// AddTransaccionKardex Nuevo registro a una ficha kárdex
 func AddTransaccionKardex(n *KardexGeneral) (err error) {
 	o := orm.NewOrm()
-	err = o.Begin()
 
+	err = o.Begin()
 	if err != nil {
 		return
 	}
@@ -46,40 +46,37 @@ func AddTransaccionKardex(n *KardexGeneral) (err error) {
 			o.Commit()
 		}
 	}()
-		fmt.Println("ok")
 
+	for _, m := range *n.Movimiento {
 
-	for _, m := range n.Movimiento {
+		idSalida, err_ := o.Insert(m.Kardex)
+		if err_ != nil {
+			return err_
+		}
 
+		mov := Movimiento{Id: int(idSalida)}
+		for _, elemento := range m.Elementos {
+			elemento.MovimientoId = &mov
+			var elemento__ ElementosMovimiento
+			id__ := elemento.Id
+			elemento.Id = 0
 
-		fmt.Println(m.Kardex.Detalle)
-		if idSalida, err := o.Insert(m.Kardex); err == nil {
-			fmt.Println(idSalida)
-			mov := Movimiento{Id : int(idSalida)}
-			for _, elemento := range m.Elementos {
-				elemento.MovimientoId = &mov
-				var elemento__ ElementosMovimiento
-				id__ := elemento.Id
-				elemento.Id = 0;
-				fmt.Println("elemento" ,elemento)
-
-				if _, err := o.Insert(elemento); err == nil {
-					if _, err := o.QueryTable(new(ElementosMovimiento)).RelatedSel().Filter("Id",id__).All(&elemento__) ; err == nil {
-						fmt.Println(elemento__)
-						elemento__.Activo = false
-						if _, err := o.Update(&elemento__, "Activo"); err != nil {
-							panic(err.Error())
-						}
-					}
-
-				} else {
-					panic(err.Error())
-				}
+			_, err = o.Insert(elemento)
+			if err != nil {
+				return
 			}
-			fmt.Println("ok2")
-			
-		} else {
-			panic(err.Error())
+
+			_, err = o.QueryTable(new(ElementosMovimiento)).RelatedSel().Filter("Id", id__).All(&elemento__)
+			if err != nil {
+				return
+			}
+
+			elemento__.Activo = false
+			_, err = o.Update(&elemento__, "Activo")
+			if err != nil {
+				return
+			}
+
 		}
 
 	}
@@ -88,10 +85,9 @@ func AddTransaccionKardex(n *KardexGeneral) (err error) {
 }
 
 func ResponderSolicitud(Solicitud *KardexGeneral) (err error) {
-
 	o := orm.NewOrm()
-	err = o.Begin()
 
+	err = o.Begin()
 	if err != nil {
 		return
 	}
@@ -104,35 +100,30 @@ func ResponderSolicitud(Solicitud *KardexGeneral) (err error) {
 			o.Commit()
 		}
 	}()
-		fmt.Println("ok")
 
-	if err := AddTransaccionKardex(Solicitud); err == nil {
-		id := Solicitud.Movimiento[0].Kardex.MovimientoPadreId
-		
-		var elemento__ Movimiento
-		fmt.Println("asdkjsdfhsdlfkghsldfkjghlsdkf")
-		fmt.Println(id)
-		fmt.Println(id.EstadoMovimientoId)
-		fmt.Println(id)
-		if _, err := o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id",id.Id).All(&elemento__) ; err == nil {
-			fmt.Println(elemento__)
-			
-			elemento__.EstadoMovimientoId = id.EstadoMovimientoId
-			elemento__.Detalle = id.Detalle
-			if _, err := o.Update(&elemento__, "EstadoMovimientoId", "Detalle"); err != nil {
-				panic(err.Error())
-			}
-		}
-
+	err = AddTransaccionKardex(Solicitud)
+	if err != nil {
+		return
 	}
+
+	solicitud := *Solicitud.Movimiento
+	var elemento__ Movimiento
+	_, err = o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id", solicitud[0].Kardex.MovimientoPadreId.Id).All(&elemento__)
+	if err != nil {
+		return
+	}
+
+	elemento__.EstadoMovimientoId = solicitud[0].Kardex.MovimientoPadreId.EstadoMovimientoId
+	elemento__.Detalle = solicitud[0].Kardex.MovimientoPadreId.Detalle
+	_, err = o.Update(&elemento__, "EstadoMovimientoId", "Detalle")
 	return
 
 }
 
 func RechazarSolicitud(id *Movimiento) (err error) {
 	o := orm.NewOrm()
-	err = o.Begin()
 
+	err = o.Begin()
 	if err != nil {
 		return
 	}
@@ -145,20 +136,19 @@ func RechazarSolicitud(id *Movimiento) (err error) {
 			o.Commit()
 		}
 	}()
-		fmt.Println("ok")
 
-		var elemento__ Movimiento
-	if _, err := o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id",id.Id).All(&elemento__) ; err == nil {
-		fmt.Println(elemento__)
-		
-		elemento__.EstadoMovimientoId = id.EstadoMovimientoId
-		elemento__.Detalle = id.Detalle
-		if _, err := o.Update(&elemento__, "EstadoMovimientoId", "Detalle"); err != nil {
-			panic(err.Error())
+	var solicitud Movimiento
+	err = o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id", id.Id).One(&solicitud)
+	if err != nil || solicitud.EstadoMovimientoId.Nombre != "Solicitud Pendiente" {
+		if err == nil {
+			err = errors.New(`solicitud.EstadoMovimientoId.Nombre != "Solicitud Pendiente"`)
 		}
-	} else {
-		panic(err.Error())
+		return
 	}
+
+	solicitud.EstadoMovimientoId = id.EstadoMovimientoId
+	solicitud.Detalle = id.Detalle
+	_, err = o.Update(&solicitud, "EstadoMovimientoId", "Detalle")
 	return
 }
 

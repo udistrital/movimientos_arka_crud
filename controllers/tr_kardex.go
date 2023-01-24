@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
@@ -18,7 +17,6 @@ type TrkardexController struct {
 // URLMapping ...
 func (c *TrkardexController) URLMapping() {
 	c.Mapping("Post", c.Post)
-	c.Mapping("Post", c.PostRespuestaSolicitud)
 }
 
 // GetExistencias
@@ -53,8 +51,7 @@ func (c *TrkardexController) GetExistencias() {
 // @router / [post]
 func (c *TrkardexController) Post() {
 	var v models.KardexGeneral
-	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
-		fmt.Println(v);
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil && v.Movimiento != nil && len(*v.Movimiento) > 0 {
 		if err := models.AddTransaccionKardex(&v); err == nil {
 			c.Ctx.Output.SetStatus(201)
 			c.Data["json"] = v
@@ -82,8 +79,7 @@ func (c *TrkardexController) Post() {
 // @router /responder_solicitud/ [post]
 func (c *TrkardexController) PostRespuestaSolicitud() {
 	var v models.KardexGeneral
-	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
-		fmt.Println(v);
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil && v.Movimiento != nil && len(*v.Movimiento) > 0 {
 		if err := models.ResponderSolicitud(&v); err == nil {
 			c.Ctx.Output.SetStatus(201)
 			c.Data["json"] = v
@@ -111,15 +107,14 @@ func (c *TrkardexController) PostRespuestaSolicitud() {
 // @router /rechazar_solicitud/ [post]
 func (c *TrkardexController) PostRechazarSolicitud() {
 	var v models.Movimiento
-	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
-		fmt.Println(v);
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil && v.Id > 0 {
 		if err := models.RechazarSolicitud(&v); err == nil {
 			c.Ctx.Output.SetStatus(201)
 			c.Data["json"] = v
 		} else {
 			logs.Error(err)
 			//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
-			c.Data["system"] = err
+			c.Data["system"] = err.Error()
 			c.Abort("400")
 		}
 	} else {
