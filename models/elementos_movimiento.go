@@ -30,12 +30,12 @@ type ElementosMovimiento struct {
 }
 
 type Historial struct {
-	Elemento     *ElementosMovimiento
-	Entradas     []*Movimiento
-	Salida       *Movimiento
-	Traslados    []*Movimiento
-	Depreciacion *Movimiento
-	Baja         *Movimiento
+	Elemento  *ElementosMovimiento
+	Entradas  []*Movimiento
+	Salida    *Movimiento
+	Traslados []*Movimiento
+	Novedades *[]NovedadElemento
+	Baja      *Movimiento
 }
 
 func (t *ElementosMovimiento) TableName() string {
@@ -268,31 +268,29 @@ func GetElementosFuncionario(funcionarioId int, elementos *[]int) (err error) {
 }
 
 // Retorna los movimientos que han involucrado un elemento
-func GetHistorialElemento(elementoId int, acta, entradas, final bool, historial *Historial) (err error) {
+func GetHistorialElemento(elementoId int, acta, entradas, novedades, final bool, historial *Historial) (err error) {
 
 	var ids []int
 
 	o := orm.NewOrm()
-	query_ := make(map[string]string)
+	query := ""
 	if acta {
-		query_["ElementoActaId"] = strconv.Itoa(elementoId)
+		query = "ElementoActaId"
 	} else {
-		query_["Id"] = strconv.Itoa(elementoId)
+		query = "Id"
 	}
 
-	if l, err := GetAllElementosMovimiento(query_, []string{}, nil, nil, 0, 1); err != nil || len(l) != 1 {
-		return err
-	} else if len(l) == 1 {
-		var elemento ElementosMovimiento
-		if err := formatdata.FillStruct(l[0], &elemento); err != nil {
-			return err
-		}
-		elementoId = elemento.Id
-		historial.Elemento = &elemento
-		historial.Salida = elemento.MovimientoId
+	var elemento ElementosMovimiento
+	_, err = o.QueryTable(new(ElementosMovimiento)).RelatedSel().Filter(query, strconv.Itoa(elementoId)).All(&elemento)
+	if err != nil || elemento.Id == 0 {
+		return
 	}
 
-	query :=
+	elementoId = elemento.Id
+	historial.Elemento = &elemento
+	historial.Salida = elemento.MovimientoId
+
+	query =
 		`SELECT
 			m.id
 		FROM
@@ -304,21 +302,23 @@ func GetHistorialElemento(elementoId int, acta, entradas, final bool, historial 
 			AND m.detalle->'Elementos' @> ?
 		ORDER BY
 			m.id DESC`
-
 	if final {
 		query += " LIMIT 1"
 	}
 
-	if _, err = o.Raw(query, elementoId).QueryRows(&ids); err != nil {
-		return err
+	_, err = o.Raw(query, elementoId).QueryRows(&ids)
+	if err != nil {
+		return
 	} else if ids != nil && len(ids) > 0 {
-		if l, err := GetAllMovimiento(
-			map[string]string{"Id__in": ArrayToString(ids, "|")}, []string{}, nil, nil, 0, -1); err != nil {
+		l, err := GetAllMovimiento(
+			map[string]string{"Id__in": ArrayToString(ids, "|")}, []string{}, nil, nil, 0, -1)
+		if err != nil {
 			return err
-		} else {
-			if err := formatdata.FillStruct(l, &historial.Traslados); err != nil {
-				return err
-			}
+		}
+
+		err = formatdata.FillStruct(l, &historial.Traslados)
+		if err != nil {
+			return err
 		}
 	}
 
@@ -336,7 +336,8 @@ func GetHistorialElemento(elementoId int, acta, entradas, final bool, historial 
 		ORDER BY m.id DESC
 		LIMIT 1`
 
-	if _, err = o.Raw(query, elementoId).QueryRows(&ids); err != nil {
+	_, err = o.Raw(query, elementoId).QueryRows(&ids)
+	if err != nil {
 		return err
 	} else if ids != nil && len(ids) > 0 {
 		if l, err := GetAllMovimiento(
@@ -365,17 +366,50 @@ func GetHistorialElemento(elementoId int, acta, entradas, final bool, historial 
 			AND m.detalle->'elementos' @> ?
 		ORDER BY m.id DESC;`
 
-		if _, err = o.Raw(query, elementoId).QueryRows(&ids); err != nil {
+		_, err = o.Raw(query, elementoId).QueryRows(&ids)
+		if err != nil {
 			return err
 		} else if ids != nil && len(ids) > 0 {
-			if l, err := GetAllMovimiento(
-				map[string]string{"Id__in": ArrayToString(ids, "|")}, []string{}, nil, nil, 0, -1); err != nil {
+			l, err := GetAllMovimiento(map[string]string{"Id__in": ArrayToString(ids, "|")}, []string{}, nil, nil, 0, -1)
+			if err != nil {
 				return err
-			} else {
-				if err := formatdata.FillStruct(l, &historial.Entradas); err != nil {
-					return err
-				}
 			}
+
+			err = formatdata.FillStruct(l, &historial.Entradas)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if novedades {
+		ids = []int{}
+		query = `
+		SELECT
+			ne.id
+		FROM
+			movimientos_arka.movimiento m,
+			movimientos_arka.novedad_elemento ne,
+			to_date(m.detalle->>'FechaCorte', 'YYYY-MM-DD') AS fecha
+		WHERE
+				ne.elemento_movimiento_id = ?
+			AND	ne.movimiento_id = m.id
+		ORDER BY fecha DESC`
+		if final {
+			query += " LIMIT 1"
+		}
+
+		_, err = o.Raw(query, elementoId).QueryRows(&ids)
+		if err != nil {
+			return err
+		} else if ids != nil && len(ids) > 0 {
+			l, err := GetAllNovedadElemento(
+				map[string]string{"Id__in": ArrayToString(ids, "|")}, []string{}, nil, nil, 0, -1)
+			if err != nil {
+				return err
+			}
+
+			err = formatdata.FillStruct(l, &historial.Novedades)
 		}
 	}
 
