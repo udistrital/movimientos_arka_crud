@@ -1712,9 +1712,6 @@
                 "Baja": {
                     "$ref": "#/definitions/models.Movimiento"
                 },
-                "Depreciacion": {
-                    "$ref": "#/definitions/models.Movimiento"
-                },
                 "Elemento": {
                     "$ref": "#/definitions/models.ElementosMovimiento"
                 },
@@ -1722,6 +1719,12 @@
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.Movimiento"
+                    }
+                },
+                "Novedades": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.NovedadElemento"
                     }
                 },
                 "Salida": {
@@ -1861,21 +1864,6 @@
                     "format": "int64"
                 },
                 "MovimientoId": {
-                    "$ref": "#/definitions/models.Movimiento"
-                }
-            }
-        },
-        "models.TrKardex": {
-            "title": "TrKardex",
-            "type": "object",
-            "properties": {
-                "Elementos": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.ElementosMovimiento"
-                    }
-                },
-                "Kardex": {
                     "$ref": "#/definitions/models.Movimiento"
                 }
             }
