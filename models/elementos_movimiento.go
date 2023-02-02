@@ -359,12 +359,14 @@ func GetHistorialElemento(elementoId int, acta, entradas, novedades, final bool,
 			m.id
 		FROM
 			movimientos_arka.movimiento m,
-			movimientos_arka.estado_movimiento sm
+			movimientos_arka.estado_movimiento sm,
+			jsonb_array_elements(m.detalle #> '{elementos}') elementos,
+			to_date(m.detalle->>'FechaCorte', 'YYYY-MM-DD') AS fecha
 		WHERE
-			sm.nombre LIKE 'Entrada%'
+				sm.nombre LIKE 'Entrada%'
 			AND m.estado_movimiento_id = sm.id
-			AND m.detalle->'elementos' @> ?
-		ORDER BY m.id DESC;`
+			AND (elementos ->> 'Id')::int = ?
+		ORDER BY fecha DESC;`
 
 		_, err = o.Raw(query, elementoId).QueryRows(&ids)
 		if err != nil {
