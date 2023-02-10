@@ -1757,11 +1757,22 @@
                 "Activo": {
                     "type": "boolean"
                 },
+                "Consecutivo": {
+                    "type": "string"
+                },
+                "ConsecutivoId": {
+                    "type": "integer",
+                    "format": "int64"
+                },
                 "Detalle": {
                     "type": "string"
                 },
                 "EstadoMovimientoId": {
                     "$ref": "#/definitions/models.EstadoMovimiento"
+                },
+                "FechaCorte": {
+                    "type": "string",
+                    "format": "datetime"
                 },
                 "FechaCreacion": {
                     "type": "string",
