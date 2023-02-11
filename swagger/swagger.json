@@ -50,13 +50,13 @@
                 }
             }
         },
-        "/depreciacion/": {
+        "/cierre/": {
             "get": {
                 "tags": [
-                    "depreciacion"
+                    "cierre"
                 ],
                 "description": "Retorna lista de elementos disponibles para liquidar depreciacion a una fecha de corte determinada",
-                "operationId": "DepreciacionController.GetCorte",
+                "operationId": "CierreController.GetCorte",
                 "parameters": [
                     {
                         "in": "query",
@@ -83,10 +83,10 @@
             },
             "post": {
                 "tags": [
-                    "depreciacion"
+                    "cierre"
                 ],
                 "description": "Crea las novedades correspondientes a un cierre determinado y actualiza el cierre",
-                "operationId": "DepreciacionController.Post",
+                "operationId": "CierreController.Post",
                 "parameters": [
                     {
                         "in": "body",
@@ -1979,8 +1979,8 @@
             "description": "BajasController\n"
         },
         {
-            "name": "depreciacion",
-            "description": "BajasController\n"
+            "name": "cierre",
+            "description": "CierreController\n"
         }
     ]
 }

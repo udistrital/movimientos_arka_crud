@@ -35,13 +35,13 @@ paths:
               type: integer
         "404":
           description: not found resource
-  /depreciacion/:
+  /cierre/:
     get:
       tags:
-      - depreciacion
+      - cierre
       description: Retorna lista de elementos disponibles para liquidar depreciacion
         a una fecha de corte determinada
-      operationId: DepreciacionController.GetCorte
+      operationId: CierreController.GetCorte
       parameters:
       - in: query
         name: fechaCorte
@@ -59,10 +59,10 @@ paths:
           description: not found resource
     post:
       tags:
-      - depreciacion
+      - cierre
       description: Crea las novedades correspondientes a un cierre determinado y actualiza
         el cierre
-      operationId: DepreciacionController.Post
+      operationId: CierreController.Post
       parameters:
       - in: body
         name: body
@@ -1334,6 +1334,6 @@ tags:
 - name: bajas
   description: |
     BajasController
-- name: depreciacion
+- name: cierre
   description: |
-    BajasController
+    CierreController

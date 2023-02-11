@@ -27,39 +27,25 @@ type TransaccionCierre struct {
 // la transacción contable correspondiente a la depreciación dada una fecha de corte
 func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) {
 
-	o := orm.NewOrm()
-
-	// Se confirma que la fecha de corte no es anterior a la de un cierre existente
-	query :=
-		`SELECT m.id
-		FROM
-			movimientos_arka.movimiento m,
-			movimientos_arka.formato_tipo_movimiento fm,
-			movimientos_arka.estado_movimiento sm,
-			TO_DATE(?, 'YYYY-MM-DD') AS fecha_corte,
-			TO_DATE(m.detalle->>'FechaCorte', 'YYYY-MM-DD') AS fecha
-		WHERE
-			fm.codigo_abreviacion = 'CRR'
-			AND sm.nombre = 'Cierre Aprobado'
-			AND m.formato_tipo_movimiento_id = fm.id
-			AND m.estado_movimiento_id = sm.id
-			AND fecha >= fecha_corte
-		LIMIT 1;`
-
-	cierres := make([]*Movimiento, 0)
-	if _, err = o.Raw(query, fechaCorte).QueryRows(&cierres); err != nil {
-		return err
-	} else if len(cierres) > 0 {
-		return
+	query_ := map[string]string{
+		"FormatoTipoMovimientoId__CodigoAbreviacion": "CRR",
+		"EstadoMovimientoId__Nombre":                 "Cierre Aprobado",
+		"FechaCorte__gte":                            fechaCorte,
 	}
 
+	cierres, err := GetAllMovimiento(query_, nil, nil, nil, 0, 1)
+	if err != nil || len(cierres) > 0 {
+		return err
+	}
+
+	o := orm.NewOrm()
 	// Los elementos se determinan de la siguiente manera
 	// + Elementos sin novedad y vida útil > 0
 	// + Novedades con vida útil > 0
 	// - Elementos solicitados para baja antes de la fecha de corte
-	query =
-		`WITH fecha_corte AS (
-			SELECT (TO_DATE(?, 'YYYY-MM-DD') + INTERVAL '1 day')::date fecha_corte
+	query :=
+		`WITH fecha_corte_ AS (
+			SELECT (TO_DATE(?, 'YYYY-MM-DD') + INTERVAL '1 day')::date fecha_corte_
 		), bajas AS (
 			SELECT
 				em.id
@@ -68,11 +54,11 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 				movimientos_arka.elementos_movimiento em,
 				movimientos_arka.formato_tipo_movimiento fm,
 				jsonb_array_elements(m.detalle -> 'Elementos') AS elem,
-				fecha_corte
+				fecha_corte_
 			WHERE
 				fm.codigo_abreviacion LIKE 'BJ%'
 				AND m.formato_tipo_movimiento_id = fm.id
-				AND m.fecha_creacion < fecha_corte
+				AND m.fecha_creacion < fecha_corte_
 				AND em.id = CAST(elem as INTEGER)
 		), sin_novedad AS (
 			SELECT
@@ -84,11 +70,11 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 				CASE
 					WHEN
 						delta_dias > 1 AND (
-							EXTRACT(day FROM (DATE_TRUNC('month', m.fecha_modificacion) + interval '1 month - 1 day')) = 31 AND (
-								EXTRACT(month FROM fecha_corte - 1) != EXTRACT(month FROM m.fecha_modificacion) OR
-								EXTRACT(year FROM fecha_corte - 1) != EXTRACT(year FROM m.fecha_modificacion)
+							EXTRACT(day FROM (DATE_TRUNC('month', m.fecha_corte) + interval '1 month - 1 day')) = 31 AND (
+								EXTRACT(month FROM fecha_corte_ - 1) != EXTRACT(month FROM m.fecha_corte) OR
+								EXTRACT(year FROM fecha_corte_ - 1) != EXTRACT(year FROM m.fecha_corte)
 							) OR (
-								EXTRACT(day FROM fecha_corte - 1) = 31 AND delta_meses = 0 AND delta_year = 0
+								EXTRACT(day FROM fecha_corte_ - 1) = 31 AND delta_meses = 0 AND delta_year = 0
 							)
 						)
 					THEN
@@ -102,15 +88,15 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 				movimientos_arka.movimiento m,
 				movimientos_arka.estado_movimiento sm,
 				movimientos_arka.formato_tipo_movimiento fm,
-				fecha_corte,
-				EXTRACT(year FROM AGE(fecha_corte, m.fecha_modificacion - interval '1 day')) delta_year,
-				EXTRACT(month FROM AGE(fecha_corte, m.fecha_modificacion - interval '1 day')) delta_meses,
-				EXTRACT(day FROM AGE(fecha_corte, m.fecha_modificacion - interval '1 day')) delta_dias
+				fecha_corte_,
+				EXTRACT(year FROM AGE(fecha_corte_, m.fecha_corte - interval '1 day')) delta_year,
+				EXTRACT(month FROM AGE(fecha_corte_, m.fecha_corte - interval '1 day')) delta_meses,
+				EXTRACT(day FROM AGE(fecha_corte_, m.fecha_corte - interval '1 day')) delta_dias
 			WHERE
 				fm.codigo_abreviacion = 'SAL'
 				AND sm.nombre = 'Salida Aprobada'
 				AND m.formato_tipo_movimiento_id  = fm.id
-				AND m.fecha_modificacion < fecha_corte
+				AND m.fecha_corte < fecha_corte_
 				AND m.estado_movimiento_id = sm.id
 				AND em.movimiento_id = m.id
 				AND em.valor_total > 0
@@ -141,11 +127,11 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 				CASE
 					WHEN
 						delta_dias > 1 AND (
-							EXTRACT(day FROM (DATE_TRUNC('month', fecha) + interval '1 month - 1 day')) = 31 AND (
-								EXTRACT(month FROM fecha_corte - 1) != EXTRACT(month FROM fecha) OR
-								EXTRACT(year FROM fecha_corte - 1) != EXTRACT(year FROM fecha)
+							EXTRACT(day FROM (DATE_TRUNC('month', m.fecha_corte) + interval '1 month - 1 day')) = 31 AND (
+								EXTRACT(month FROM fecha_corte_ - 1) != EXTRACT(month FROM m.fecha_corte) OR
+								EXTRACT(year FROM fecha_corte_ - 1) != EXTRACT(year FROM m.fecha_corte)
 							) OR (
-								EXTRACT(day FROM fecha_corte - 1) = 31 AND delta_meses = 0 AND delta_year = 0
+								EXTRACT(day FROM fecha_corte_ - 1) = 31 AND delta_meses = 0 AND delta_year = 0
 							)
 						)
 					THEN
@@ -158,13 +144,12 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 				movimientos_arka.novedad_elemento ne,
 				movimientos_arka.elementos_movimiento em,
 				movimientos_arka.movimiento m,
-				to_date(m.detalle->>'FechaCorte', 'YYYY-MM-DD') AS fecha,
-				fecha_corte,
-				EXTRACT(year FROM AGE(fecha_corte, fecha + interval '1 day')) delta_year,
-				EXTRACT(month FROM AGE(fecha_corte, fecha + interval '1 day')) delta_meses,
-				EXTRACT(day FROM AGE(fecha_corte, fecha + interval '1 day')) delta_dias
+				fecha_corte_,
+				EXTRACT(year FROM AGE(fecha_corte_, m.fecha_corte + interval '1 day')) delta_year,
+				EXTRACT(month FROM AGE(fecha_corte_, m.fecha_corte + interval '1 day')) delta_meses,
+				EXTRACT(day FROM AGE(fecha_corte_, m.fecha_corte + interval '1 day')) delta_dias
 			WHERE
-				fecha < fecha_corte
+					m.fecha_corte < fecha_corte_
 				AND	ne.elemento_movimiento_id = em.id
 				AND ne.movimiento_id = m.id
 				AND em.id NOT IN (
@@ -187,7 +172,7 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 						AND m.formato_tipo_movimiento_id = fm.id
 						AND em.movimiento_id = m.id
 				)
-			ORDER BY 1 DESC, fecha DESC
+			ORDER BY 1 DESC, m.fecha_corte DESC
 		), referencia AS (
 			SELECT *
 			FROM
