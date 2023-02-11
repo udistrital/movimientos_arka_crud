@@ -8,10 +8,8 @@ import (
 )
 
 type FormatoCierre struct {
-	ConsecutivoId int
-	Consecutivo   string
-	FechaCorte    string
-	RazonRechazo  string
+	FechaCorte   string
+	RazonRechazo string
 }
 
 type DepreciacionElemento struct {
