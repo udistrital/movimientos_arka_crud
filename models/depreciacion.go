@@ -1,6 +1,9 @@
 package models
 
 import (
+	"strings"
+
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 )
@@ -31,172 +34,155 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 	// + Elementos sin novedad y vida útil > 0
 	// + Novedades con vida útil > 0
 	// - Elementos solicitados para baja antes de la fecha de corte
-	query :=
-		`WITH fecha_corte_ AS (
-			SELECT (TO_DATE(?, 'YYYY-MM-DD') + INTERVAL '1 day')::date fecha_corte_
-		), bajas AS (
-			SELECT
-				em.id
-			FROM
-				movimientos_arka.movimiento m,
-				movimientos_arka.elementos_movimiento em,
-				movimientos_arka.formato_tipo_movimiento fm,
-				jsonb_array_elements(m.detalle -> 'Elementos') AS elem,
-				fecha_corte_
-			WHERE
-				fm.codigo_abreviacion LIKE 'BJ%'
-				AND m.formato_tipo_movimiento_id = fm.id
-				AND m.fecha_creacion < fecha_corte_
-				AND em.id = CAST(elem as INTEGER)
-		), sin_novedad AS (
-			SELECT
-				em.id elemento_movimiento_id,
-				em.valor_residual,
-				em.vida_util,
-				em.elemento_acta_id,
-				em.valor_total valor_presente,
-				CASE
-					WHEN
-						delta_dias > 1 AND (
-							EXTRACT(day FROM (DATE_TRUNC('month', m.fecha_corte) + interval '1 month - 1 day')) = 31 AND (
-								EXTRACT(month FROM fecha_corte_ - 1) != EXTRACT(month FROM m.fecha_corte) OR
-								EXTRACT(year FROM fecha_corte_ - 1) != EXTRACT(year FROM m.fecha_corte)
-							) OR (
-								EXTRACT(day FROM fecha_corte_ - 1) = 31 AND delta_meses = 0 AND delta_year = 0
-							)
-						)
-					THEN
-						delta_dias - 1
-					ELSE
-						delta_dias
-				END delta_dias,
-				(delta_meses * 30) + (delta_year * 360) AS delta_dias_
-			FROM
-				movimientos_arka.elementos_movimiento em,
-				movimientos_arka.movimiento m,
-				movimientos_arka.estado_movimiento sm,
-				movimientos_arka.formato_tipo_movimiento fm,
-				fecha_corte_,
-				EXTRACT(year FROM AGE(fecha_corte_, m.fecha_corte - interval '1 day')) delta_year,
-				EXTRACT(month FROM AGE(fecha_corte_, m.fecha_corte - interval '1 day')) delta_meses,
-				EXTRACT(day FROM AGE(fecha_corte_, m.fecha_corte - interval '1 day')) delta_dias
-			WHERE
-				fm.codigo_abreviacion = 'SAL'
-				AND sm.nombre = 'Salida Aprobada'
-				AND m.formato_tipo_movimiento_id  = fm.id
-				AND m.fecha_corte < fecha_corte_
-				AND m.estado_movimiento_id = sm.id
-				AND em.movimiento_id = m.id
-				AND em.valor_total > 0
-				AND em.vida_util > 0
-				AND em.id NOT IN (
-					SELECT 
-						em.id
-					FROM
-						movimientos_arka.novedad_elemento ne,
-						movimientos_arka.movimiento m
-					WHERE
-							ne.movimiento_id = m.id
-						AND	ne.elemento_movimiento_id = em.id
-						AND m.fecha_corte < fecha_corte_
-				)
-				AND em.id NOT IN (
-					SELECT
-						em.id
-					FROM
-						bajas
-					WHERE
-						bajas.id = em.id
-				)
-		), con_novedad AS (
-			SELECT DISTINCT ON (1)
-				ne.elemento_movimiento_id,
-				ne.valor_residual,
-				ne.vida_util,
-				em.elemento_acta_id,
-				ne.valor_libros valor_presente,
-				CASE
-					WHEN
-						delta_dias > 1 AND (
-							EXTRACT(day FROM (DATE_TRUNC('month', m.fecha_corte) + interval '1 month - 1 day')) = 31 AND (
-								EXTRACT(month FROM fecha_corte_ - 1) != EXTRACT(month FROM m.fecha_corte) OR
-								EXTRACT(year FROM fecha_corte_ - 1) != EXTRACT(year FROM m.fecha_corte)
-							) OR (
-								EXTRACT(day FROM fecha_corte_ - 1) = 31 AND delta_meses = 0 AND delta_year = 0
-							)
-						)
-					THEN
-						delta_dias - 1
-					ELSE
-						delta_dias
-				END delta_dias,
-				(delta_meses * 30) + (delta_year * 360) AS delta_dias_
-			FROM
-				movimientos_arka.novedad_elemento ne,
-				movimientos_arka.elementos_movimiento em,
-				movimientos_arka.movimiento m,
-				fecha_corte_,
-				EXTRACT(year FROM AGE(fecha_corte_, m.fecha_corte + interval '1 day')) delta_year,
-				EXTRACT(month FROM AGE(fecha_corte_, m.fecha_corte + interval '1 day')) delta_meses,
-				EXTRACT(day FROM AGE(fecha_corte_, m.fecha_corte + interval '1 day')) delta_dias
-			WHERE
-					m.fecha_corte < fecha_corte_
-				AND	ne.elemento_movimiento_id = em.id
-				AND ne.movimiento_id = m.id
-				AND em.id NOT IN (
-					SELECT
-						em.id
-					FROM 
-						bajas
-					WHERE
-						bajas.id = em.id
-				)
-				AND em.id IN (
-					SELECT
-						em.id
-					FROM
-						movimientos_arka.movimiento m,
-						movimientos_arka.elementos_movimiento em,
-						movimientos_arka.formato_tipo_movimiento fm
-					WHERE
-						fm.codigo_abreviacion = 'SAL'
-						AND m.formato_tipo_movimiento_id = fm.id
-						AND em.movimiento_id = m.id
-				)
-			ORDER BY 1 DESC, m.fecha_corte DESC
-		), referencia AS (
-			SELECT *
-			FROM
-				sin_novedad ndp
-			UNION
-			SELECT *
-			FROM
-				con_novedad dp
-		), delta_valor AS (
-			SELECT
-				elemento_movimiento_id,
-				elemento_acta_id,
-				CASE
-					WHEN
-						360 * vida_util - delta_dias - delta_dias_ > 1
-					THEN
-						(valor_presente - valor_residual) * (delta_dias + delta_dias_) / (vida_util * 360)
-					ELSE valor_presente - valor_residual
-				END delta_valor
-			FROM
-				referencia
-			WHERE
-				vida_util > 0
-				AND valor_presente > valor_residual
-		)
-		
-		SELECT * from delta_valor;`
 
-	if _, err = o.Raw(query, fechaCorte).QueryRows(elementos); err != nil {
-		return err
-	}
+	_, err = o.Raw(getScriptCorte(), fechaCorte).QueryRows(elementos)
 
 	return
+}
+
+func getScriptCorte() string {
+
+	const script = `
+	WITH fecha_corte_ AS (
+		SELECT (TO_DATE(?, 'YYYY-MM-DD'))::date fecha_corte_
+	), bajas AS (
+		SELECT
+			em.id
+		FROM
+			ESQUEMA.movimiento m,
+			ESQUEMA.elementos_movimiento em,
+			ESQUEMA.formato_tipo_movimiento fm,
+			jsonb_array_elements(m.detalle -> 'Elementos') AS elem,
+			fecha_corte_
+		WHERE
+			fm.codigo_abreviacion LIKE 'BJ%'
+			AND m.formato_tipo_movimiento_id = fm.id
+			AND m.fecha_creacion < fecha_corte_
+			AND em.id = CAST(elem as INTEGER)
+	), con_novedad AS (
+		SELECT DISTINCT ON (1)
+			ne.elemento_movimiento_id,
+			m.fecha_corte,
+			ne.valor_residual,
+			ne.vida_util,
+			em.elemento_acta_id,
+			ne.valor_libros valor_presente
+		FROM
+			ESQUEMA.novedad_elemento ne,
+			ESQUEMA.elementos_movimiento em,
+			ESQUEMA.movimiento m,
+			fecha_corte_
+		WHERE
+				m.fecha_corte < fecha_corte_ + 1
+			AND	ne.elemento_movimiento_id = em.id
+			AND ne.movimiento_id = m.id
+			AND em.id NOT IN (
+				SELECT
+					em.id
+				FROM 
+					bajas
+				WHERE
+					bajas.id = em.id
+			)
+			AND em.id IN (
+				SELECT
+					em.id
+				FROM
+					ESQUEMA.movimiento m,
+					ESQUEMA.elementos_movimiento em,
+					ESQUEMA.formato_tipo_movimiento fm
+				WHERE
+					fm.codigo_abreviacion = 'SAL'
+					AND m.formato_tipo_movimiento_id = fm.id
+					AND em.movimiento_id = m.id
+			)
+		ORDER BY 1 DESC, m.fecha_corte DESC
+	), sin_novedad AS (
+		SELECT
+			em.id elemento_movimiento_id,
+			m.fecha_corte - 1 fecha_corte,
+			em.valor_residual,
+			em.vida_util,
+			em.elemento_acta_id,
+			em.valor_total valor_presente
+		FROM
+			ESQUEMA.elementos_movimiento em,
+			ESQUEMA.movimiento m,
+			ESQUEMA.estado_movimiento sm,
+			ESQUEMA.formato_tipo_movimiento fm,
+			fecha_corte_
+		WHERE
+				fm.codigo_abreviacion = 'SAL'
+			AND sm.nombre = 'Salida Aprobada'
+			AND m.formato_tipo_movimiento_id  = fm.id
+			AND m.fecha_corte < fecha_corte_ + 1
+			AND m.estado_movimiento_id = sm.id
+			AND em.movimiento_id = m.id
+			AND em.valor_total > 0
+			AND em.vida_util > 0
+			AND em.id NOT IN (
+				SELECT elemento_movimiento_id
+				FROM con_novedad
+			)
+			AND em.id NOT IN (
+				SELECT
+					em.id
+				FROM
+					bajas
+				WHERE
+					bajas.id = em.id
+			)
+	), referencia AS (
+		SELECT *
+		FROM sin_novedad
+		UNION
+		SELECT *
+		FROM con_novedad
+	), referencia_completo AS (
+		SELECT
+			referencia.*,
+			CASE
+				WHEN
+					delta_dias > 1 AND (
+						EXTRACT(day FROM (DATE_TRUNC('month', referencia.fecha_corte) + interval '1 month - 1 day')) = 31 AND (
+							delta_meses > 0 OR delta_year > 0
+						) OR (
+							EXTRACT(day FROM fecha_corte_) = 31 AND delta_meses = 0 AND delta_year = 0
+						)
+					)
+				THEN
+					delta_dias - 1
+				ELSE
+					delta_dias
+			END delta_dias,
+			(delta_meses * 30) + (delta_year * 360) AS delta_dias_
+		FROM
+			referencia,
+			fecha_corte_,
+			EXTRACT(year FROM AGE(fecha_corte_, referencia.fecha_corte)) delta_year,
+			EXTRACT(month FROM AGE(fecha_corte_, referencia.fecha_corte)) delta_meses,
+			EXTRACT(day FROM AGE(fecha_corte_, referencia.fecha_corte)) delta_dias
+	), delta_valor AS (
+		SELECT
+			elemento_movimiento_id,
+			elemento_acta_id,
+			CASE
+				WHEN
+					360 * vida_util - delta_dias - delta_dias_ > 1
+				THEN
+					(valor_presente - valor_residual) * (delta_dias + delta_dias_) / (vida_util * 360)
+				ELSE valor_presente - valor_residual
+			END delta_valor
+		FROM referencia_completo
+		WHERE
+			vida_util > 0
+			AND valor_presente > valor_residual
+	)
+	
+	SELECT * from delta_valor;
+	`
+
+	return replaceSquema(script)
 }
 
 // SubmitCierre Actualiza el cierre y genera las novedades correspondientes
@@ -224,26 +210,39 @@ func SubmitCierre(cierre *Movimiento) (err error) {
 		return
 	}
 
-	query := `
+	_, err = o.Raw(getScriptAprobacion(), cierre.Id).Exec()
+	if err != nil {
+		return err
+	}
+
+	cierre.Detalle = "{}"
+	_, err = o.Update(cierre, "Detalle", "EstadoMovimientoId")
+
+	return
+}
+
+func getScriptAprobacion() string {
+
+	const script = `
 	WITH cierre AS (
 		SELECT
 			id,
-			fecha_corte + 1 AS fecha_corte_
-		FROM movimientos_arka.movimiento
+			fecha_corte AS fecha_corte_
+		FROM ESQUEMA.movimiento
 		WHERE id = ?
 	), bajas AS (
 		SELECT
 			em.id
 		FROM
-			movimientos_arka.movimiento m,
-			movimientos_arka.elementos_movimiento em,
-			movimientos_arka.formato_tipo_movimiento fm,
+			ESQUEMA.movimiento m,
+			ESQUEMA.elementos_movimiento em,
+			ESQUEMA.formato_tipo_movimiento fm,
 			jsonb_array_elements(m.detalle -> 'Elementos') AS elem,
 			cierre
 		WHERE
 			fm.codigo_abreviacion LIKE 'BJ%'
 			AND m.formato_tipo_movimiento_id = fm.id
-			AND m.fecha_creacion < cierre.fecha_corte_
+			AND m.fecha_creacion < cierre.fecha_corte_ + 1
 			AND em.id = CAST(elem as INTEGER)
 	), con_novedad AS (
 		SELECT DISTINCT ON (1)
@@ -251,92 +250,53 @@ func SubmitCierre(cierre *Movimiento) (err error) {
 			m.fecha_corte,
 			ne.valor_residual,
 			ne.vida_util,
-			ne.valor_libros,
-			CASE
-				WHEN
-					delta_dias > 1 AND (
-						EXTRACT(day FROM (DATE_TRUNC('month', m.fecha_corte) + interval '1 month - 1 day')) = 31 AND (
-							EXTRACT(month FROM cierre.fecha_corte_ - 1) != EXTRACT(month FROM m.fecha_corte) OR
-							EXTRACT(year FROM cierre.fecha_corte_ - 1) != EXTRACT(year FROM m.fecha_corte)
-						) OR (
-							EXTRACT(day FROM cierre.fecha_corte_ - 1) = 31 AND delta_meses = 0 AND delta_year = 0
-						)
-					)
-				THEN
-					delta_dias - 1
-				ELSE
-					delta_dias
-			END delta_dias,
-			(delta_meses * 30) + (delta_year * 360) AS delta_dias_
+			ne.valor_libros
 		FROM
-			movimientos_arka.novedad_elemento ne,
-			movimientos_arka.elementos_movimiento em,
-			movimientos_arka.movimiento m,
-			cierre,
-			EXTRACT(year FROM AGE(cierre.fecha_corte_, m.fecha_corte + 1)) delta_year,
-			EXTRACT(month FROM AGE(cierre.fecha_corte_, m.fecha_corte + 1)) delta_meses,
-			EXTRACT(day FROM AGE(cierre.fecha_corte_, m.fecha_corte + 1)) delta_dias
+			ESQUEMA.novedad_elemento ne,
+			ESQUEMA.elementos_movimiento em,
+			ESQUEMA.movimiento m,
+			cierre
 		WHERE
-				m.fecha_corte < cierre.fecha_corte_
+				m.fecha_corte < cierre.fecha_corte_ + 1
 			AND	ne.elemento_movimiento_id = em.id
 			AND ne.movimiento_id = m.id
 			AND em.id IN (
 				SELECT
 					em.id
 				FROM 
-					movimientos_arka.elementos_movimiento em,
-					movimientos_arka.movimiento m,
-					movimientos_arka.formato_tipo_movimiento fm
+					ESQUEMA.elementos_movimiento em,
+					ESQUEMA.movimiento m,
+					ESQUEMA.formato_tipo_movimiento fm
 				WHERE
-						fm.codigo_abreviacion = 'SAL'
+					fm.codigo_abreviacion IN ('SAL', 'INM_REG')
 					AND m.formato_tipo_movimiento_id = fm.id
 					AND em.movimiento_id = m.id
 			)
 			AND em.id NOT IN (
-				SELECT
-					em.id
-				FROM
-					bajas
-				WHERE
-					bajas.id = em.id
+				SELECT em.id
+				FROM bajas
+				WHERE bajas.id = em.id
 			)
 		ORDER BY 1 DESC, m.fecha_corte DESC
 	), sin_novedad AS (
 		SELECT
 			em.id elemento_movimiento_id,
+			m.fecha_corte - 1 fecha_corte,
 			em.valor_residual,
 			em.vida_util,
-			em.valor_total valor_libros,
-			CASE
-				WHEN
-					delta_dias > 1 AND (
-						EXTRACT(day FROM (DATE_TRUNC('month', m.fecha_corte) + interval '1 month - 1 day')) = 31 AND (
-							delta_meses > 0 OR delta_year > 0
-						) OR (
-							EXTRACT(day FROM cierre.fecha_corte_ - 1) = 31 AND delta_meses = 0 AND delta_year = 0
-						)
-					)
-				THEN
-					delta_dias - 1
-				ELSE
-					delta_dias
-			END delta_dias,
-			(delta_meses * 30) + (delta_year * 360) AS delta_dias_
+			em.valor_total valor_libros
 		FROM
-			movimientos_arka.elementos_movimiento em,
-			movimientos_arka.movimiento m,
-			movimientos_arka.estado_movimiento sm,
-			movimientos_arka.formato_tipo_movimiento fm,
-			cierre,
-			EXTRACT(year FROM AGE(cierre.fecha_corte_, m.fecha_corte - 1)) delta_year,
-			EXTRACT(month FROM AGE(cierre.fecha_corte_, m.fecha_corte - 1)) delta_meses,
-			EXTRACT(day FROM AGE(cierre.fecha_corte_, m.fecha_corte - 1)) delta_dias
+			ESQUEMA.elementos_movimiento em,
+			ESQUEMA.movimiento m,
+			ESQUEMA.estado_movimiento sm,
+			ESQUEMA.formato_tipo_movimiento fm,
+			cierre
 		WHERE
-				fm.codigo_abreviacion = 'SAL'
-			AND sm.nombre = 'Salida Aprobada'
+				fm.codigo_abreviacion IN ('SAL', 'INM_REG')
+			AND sm.nombre IN ('Salida Aprobada', 'Bienes inmuebles registrados')
 			AND m.formato_tipo_movimiento_id  = fm.id
 			AND m.estado_movimiento_id = sm.id
-			AND m.fecha_corte < cierre.fecha_corte_
+			AND m.fecha_corte < cierre.fecha_corte_ + 1
 			AND em.movimiento_id = m.id
 			AND em.valor_total > 0
 			AND em.vida_util > 0
@@ -345,148 +305,29 @@ func SubmitCierre(cierre *Movimiento) (err error) {
 				FROM con_novedad
 			)
 			AND em.id NOT IN (
-				SELECT
-					em.id
-				FROM
-					bajas
-				WHERE
-					bajas.id = em.id
+				SELECT em.id
+				FROM bajas
+				WHERE bajas.id = em.id
 			)
 	), referencia AS (
-		SELECT
-			elemento_movimiento_id,
-			valor_residual,
-			vida_util,
-			valor_libros,
-			delta_dias,
-			delta_dias_
-		FROM
-			con_novedad
+		SELECT *
+		FROM con_novedad
 		WHERE
 				vida_util > 0
 			AND valor_libros > 0
 		UNION
 		SELECT *
-		FROM
-			sin_novedad
-	), delta AS (
+		FROM sin_novedad
+	), referencia_completo AS (
 		SELECT
-			elemento_movimiento_id,
-			valor_residual,
-			CASE
-				WHEN
-					360 * vida_util - delta_dias - delta_dias_ > 1
-				THEN
-					vida_util - (delta_dias + delta_dias_) / 360
-				ELSE 0
-			END vida_util,
-			CASE
-				WHEN
-					360 * vida_util - delta_dias - delta_dias_ > 1
-				THEN
-					valor_libros - (valor_libros - valor_residual) * (delta_dias + delta_dias_) / (vida_util * 360)
-				ELSE valor_residual
-			END valor_libros
-		FROM
-			referencia
-	)
-
-	INSERT INTO movimientos_arka.novedad_elemento (
-			vida_util,
-			valor_libros,
-			valor_residual,
-			elemento_movimiento_id,
-			movimiento_id,
-			activo,
-			fecha_modificacion,
-			fecha_creacion)
-	SELECT
-		delta.vida_util,
-		delta.valor_libros,
-		delta.valor_residual,
-		delta.elemento_movimiento_id,
-		cierre.id,
-		true,
-		now(),
-		now()
-	FROM
-		delta,
-		cierre;
-	`
-
-	_, err = o.Raw(query, cierre.Id).Exec()
-	if err != nil {
-		return err
-	}
-
-	script := `
-	WITH cierre AS (
-		SELECT
-			id,
-			fecha_corte + 1 AS fecha_corte_
-		FROM movimientos_arka.movimiento
-		WHERE id = ?
-	), con_novedad AS (
-		SELECT DISTINCT ON (1)
-			ne.elemento_movimiento_id,
-			m.fecha_corte,
-			ne.valor_residual,
-			ne.vida_util,
-			ne.valor_libros,
+			referencia.*,
 			CASE
 				WHEN
 					delta_dias > 1 AND (
-						EXTRACT(day FROM (DATE_TRUNC('month', m.fecha_corte) + interval '1 month - 1 day')) = 31 AND (
-							EXTRACT(month FROM cierre.fecha_corte_ - 1) != EXTRACT(month FROM m.fecha_corte) OR
-							EXTRACT(year FROM cierre.fecha_corte_ - 1) != EXTRACT(year FROM m.fecha_corte)
-						) OR (
-							EXTRACT(day FROM cierre.fecha_corte_ - 1) = 31 AND delta_meses = 0 AND delta_year = 0
-						)
-					)
-				THEN
-					delta_dias - 1
-				ELSE
-					delta_dias
-			END delta_dias,
-			(delta_meses * 30) + (delta_year * 360) AS delta_dias_
-		FROM
-			movimientos_arka.novedad_elemento ne,
-			movimientos_arka.elementos_movimiento em,
-			movimientos_arka.movimiento m,
-			cierre,
-			EXTRACT(year FROM AGE(cierre.fecha_corte_, m.fecha_corte - 1)) delta_year,
-			EXTRACT(month FROM AGE(cierre.fecha_corte_, m.fecha_corte - 1)) delta_meses,
-			EXTRACT(day FROM AGE(cierre.fecha_corte_, m.fecha_corte - 1)) delta_dias
-		WHERE
-				m.fecha_corte < cierre.fecha_corte_
-			AND	ne.elemento_movimiento_id = em.id
-			AND ne.movimiento_id = m.id
-			AND em.id IN (
-				SELECT
-					em.id
-				FROM 
-					movimientos_arka.elementos_movimiento em,
-					movimientos_arka.movimiento m,
-					movimientos_arka.formato_tipo_movimiento fm
-				WHERE
-						fm.codigo_abreviacion = 'INM_REG'
-					AND m.formato_tipo_movimiento_id = fm.id
-					AND em.movimiento_id = m.id
-			)
-		ORDER BY 1 DESC, m.fecha_corte DESC
-	), sin_novedad AS (
-		SELECT
-			em.id elemento_movimiento_id,
-			em.valor_residual,
-			em.vida_util,
-			em.valor_total valor_libros,
-			CASE
-				WHEN
-					delta_dias > 1 AND (
-						EXTRACT(day FROM (DATE_TRUNC('month', m.fecha_corte) + interval '1 month - 1 day')) = 31 AND (
+						EXTRACT(day FROM (DATE_TRUNC('month', referencia.fecha_corte) + interval '1 month - 1 day')) = 31 AND (
 							delta_meses > 0 OR delta_year > 0
 						) OR (
-							EXTRACT(day FROM cierre.fecha_corte_ - 1) = 31 AND delta_meses = 0 AND delta_year = 0
+							EXTRACT(day FROM cierre.fecha_corte_) = 31 AND delta_meses = 0 AND delta_year = 0
 						)
 					)
 				THEN
@@ -496,41 +337,11 @@ func SubmitCierre(cierre *Movimiento) (err error) {
 			END delta_dias,
 			(delta_meses * 30) + (delta_year * 360) AS delta_dias_
 		FROM
-			movimientos_arka.elementos_movimiento em,
-			movimientos_arka.movimiento m,
-			movimientos_arka.formato_tipo_movimiento fm,
 			cierre,
-			EXTRACT(day FROM AGE(cierre.fecha_corte_, m.fecha_corte - 1)) delta_dias,
-			EXTRACT(month FROM AGE(cierre.fecha_corte_, m.fecha_corte - 1)) delta_meses,
-			EXTRACT(year FROM AGE(cierre.fecha_corte_, m.fecha_corte - 1)) delta_year
-		WHERE
-				fm.codigo_abreviacion = 'INM_REG'
-			AND m.formato_tipo_movimiento_id  = fm.id
-			AND m.fecha_corte < cierre.fecha_corte_
-			AND em.movimiento_id = m.id
-			AND em.valor_total > 0
-			AND em.vida_util > 0
-			AND em.id NOT IN (
-				SELECT elemento_movimiento_id
-				FROM con_novedad
-			)
-	), referencia AS (
-		SELECT
-			elemento_movimiento_id,
-			valor_residual,
-			vida_util,
-			valor_libros,
-			delta_dias,
-			delta_dias_
-		FROM
-			con_novedad
-		WHERE
-				vida_util > 0
-			AND valor_libros > 0
-		UNION
-		SELECT *
-		FROM
-			sin_novedad
+			referencia,
+			EXTRACT(year FROM AGE(cierre.fecha_corte_, referencia.fecha_corte)) delta_year,
+			EXTRACT(month FROM AGE(cierre.fecha_corte_, referencia.fecha_corte)) delta_meses,
+			EXTRACT(day FROM AGE(cierre.fecha_corte_, referencia.fecha_corte)) delta_dias
 	), delta AS (
 		SELECT
 			elemento_movimiento_id,
@@ -549,11 +360,10 @@ func SubmitCierre(cierre *Movimiento) (err error) {
 					valor_libros - (valor_libros - valor_residual) * (delta_dias + delta_dias_) / (vida_util * 360)
 				ELSE valor_residual
 			END valor_libros
-		FROM
-			referencia
+		FROM referencia_completo
 	)
-	
-	INSERT INTO movimientos_arka.novedad_elemento (
+
+	INSERT INTO ESQUEMA.novedad_elemento (
 			vida_util,
 			valor_libros,
 			valor_residual,
@@ -575,14 +385,10 @@ func SubmitCierre(cierre *Movimiento) (err error) {
 		delta,
 		cierre;
 	`
+	return replaceSquema(script)
+}
 
-	_, err = o.Raw(string(script), cierre.Id).Exec()
-	if err != nil {
-		return
-	}
-
-	cierre.Detalle = "{}"
-	_, err = o.Update(cierre, "Detalle", "EstadoMovimientoId")
-
-	return
+func replaceSquema(script string) string {
+	Esquema = beego.AppConfig.String("PGschemas")
+	return strings.ReplaceAll(script, "ESQUEMA", Esquema)
 }
