@@ -69,10 +69,12 @@ paths:
         description: body for NovedadElemento content
         required: true
         schema:
-          $ref: '#/definitions/models.TransaccionCierre'
+          $ref: '#/definitions/models.Movimiento'
       responses:
         "201":
-          description: '{int} models.TransaccionCierre'
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Movimiento'
         "400":
           description: the request contains incorrect syntax
   /elementos_movimiento/:
@@ -1294,18 +1296,6 @@ definitions:
           $ref: '#/definitions/models.ElementosMovimiento'
       Salida:
         $ref: '#/definitions/models.Movimiento'
-  models.TransaccionCierre:
-    title: TransaccionCierre
-    type: object
-    properties:
-      ElementoMovimientoId:
-        type: array
-        items:
-          type: integer
-          format: int64
-      MovimientoId:
-        type: integer
-        format: int64
 tags:
 - name: formato_tipo_movimiento
   description: |

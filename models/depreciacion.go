@@ -11,10 +11,6 @@ type DepreciacionElemento struct {
 	ElementoActaId       int
 }
 
-type TransaccionCierre struct {
-	MovimientoId int
-}
-
 // GetCorteDepreciacion Retorna los valores y detalles necesarios para generar
 // la transacción contable correspondiente a la depreciación dada una fecha de corte
 func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) {
@@ -204,7 +200,7 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 }
 
 // SubmitCierre Actualiza el cierre y genera las novedades correspondientes
-func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
+func SubmitCierre(cierre *Movimiento) (err error) {
 
 	o := orm.NewOrm()
 	err = o.Begin()
@@ -218,11 +214,7 @@ func SubmitCierre(m *TransaccionCierre, cierre *Movimiento) (err error) {
 		}
 	}()
 
-	if m.MovimientoId <= 0 {
-		return
-	}
-
-	if err = o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id", m.MovimientoId).One(cierre); err != nil {
+	if err = o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id", cierre.Id).One(cierre); err != nil {
 		return
 	} else if cierre.EstadoMovimientoId.Nombre != "Cierre En Curso" || cierre.FechaCorte == nil {
 		return

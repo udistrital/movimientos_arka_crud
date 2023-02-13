@@ -24,28 +24,27 @@ func (c *CierreController) URLMapping() {
 // Post ...
 // @Title Post
 // @Description Crea las novedades correspondientes a un cierre determinado y actualiza el cierre
-// @Param	body	body	models.TransaccionCierre	true	"body for NovedadElemento content"
-// @Success 201 {int} models.TransaccionCierre
+// @Param	body	body	models.Movimiento	true	"body for NovedadElemento content"
+// @Success	201	{object}	models.Movimiento
 // @Failure 400 the request contains incorrect syntax
 // @router / [post]
 func (c *CierreController) Post() {
 
-	var v models.TransaccionCierre
+	var v models.Movimiento
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err != nil {
 		logs.Error(err)
 		panic(errorctrl.Error(`Post - json.Unmarshal(c.Ctx.Input.RequestBody, &v)`, err, "400"))
 	}
 
-	if v.MovimientoId == 0 {
+	if v.Id == 0 {
 		err := "Debe especificar un cierre para ser aprobado"
 		logs.Error(err)
 		panic(errorctrl.Error(`Post - v.MovimientoId == 0`, err, "400"))
 	}
 
-	var m models.Movimiento
-	if err := models.SubmitCierre(&v, &m); err == nil {
+	if err := models.SubmitCierre(&v); err == nil {
 		c.Ctx.Output.SetStatus(201)
-		c.Data["json"] = m
+		c.Data["json"] = v
 	} else {
 		logs.Error(err)
 		c.Data["system"] = err
