@@ -35,13 +35,13 @@ paths:
               type: integer
         "404":
           description: not found resource
-  /depreciacion/:
+  /cierre/:
     get:
       tags:
-      - depreciacion
+      - cierre
       description: Retorna lista de elementos disponibles para liquidar depreciacion
         a una fecha de corte determinada
-      operationId: DepreciacionController.GetCorte
+      operationId: CierreController.GetCorte
       parameters:
       - in: query
         name: fechaCorte
@@ -59,20 +59,22 @@ paths:
           description: not found resource
     post:
       tags:
-      - depreciacion
+      - cierre
       description: Crea las novedades correspondientes a un cierre determinado y actualiza
         el cierre
-      operationId: DepreciacionController.Post
+      operationId: CierreController.Post
       parameters:
       - in: body
         name: body
         description: body for NovedadElemento content
         required: true
         schema:
-          $ref: '#/definitions/models.TransaccionCierre'
+          $ref: '#/definitions/models.Movimiento'
       responses:
         "201":
-          description: '{int} models.TransaccionCierre'
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Movimiento'
         "400":
           description: the request contains incorrect syntax
   /elementos_movimiento/:
@@ -1294,18 +1296,6 @@ definitions:
           $ref: '#/definitions/models.ElementosMovimiento'
       Salida:
         $ref: '#/definitions/models.Movimiento'
-  models.TransaccionCierre:
-    title: TransaccionCierre
-    type: object
-    properties:
-      ElementoMovimientoId:
-        type: array
-        items:
-          type: integer
-          format: int64
-      MovimientoId:
-        type: integer
-        format: int64
 tags:
 - name: formato_tipo_movimiento
   description: |
@@ -1334,6 +1324,6 @@ tags:
 - name: bajas
   description: |
     BajasController
-- name: depreciacion
+- name: cierre
   description: |
-    BajasController
+    CierreController

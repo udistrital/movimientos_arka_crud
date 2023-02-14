@@ -17,8 +17,6 @@ type TrRevisionBaja struct {
 }
 
 type FormatoBaja struct {
-	Consecutivo    string
-	ConsecutivoId  int
 	DependenciaId  int
 	Elementos      []int
 	FechaRevisionA string

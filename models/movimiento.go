@@ -45,13 +45,11 @@ func AddMovimiento(m *Movimiento) (id int64, err error) {
 
 // GetMovimientoById retrieves Movimiento by Id. Returns error if
 // Id doesn't exist
-func GetMovimientoById(id int) (v *Movimiento, err error) {
+func GetMovimientoById(id int) (v Movimiento, err error) {
 	o := orm.NewOrm()
-	v = &Movimiento{Id: id}
-	if err = o.Read(v); err == nil {
-		return v, nil
-	}
-	return nil, err
+	err = o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id", id).One(&v)
+
+	return
 }
 
 // GetAllMovimiento retrieves all Movimiento matches certain condition. Returns empty list if
@@ -154,19 +152,49 @@ func UpdateMovimientoById(m *Movimiento) (err error) {
 // the record to be deleted doesn't exist
 func DeleteMovimiento(id int) (err error) {
 	o := orm.NewOrm()
-	v := Movimiento{Id: id}
+	query := ""
 	// ascertain id exists in the database
-	if err = o.Read(&v); err == nil {
-		var num int64
-		if num, err = o.Delete(&Movimiento{Id: id}); err == nil {
-			fmt.Println("Number of records deleted in database:", num)
-		}
+
+	// query =
+	// 	`delete from movimientos_arka.movimiento
+	// 	WHERE id = 1745;`
+
+	// _, err = o.Raw(query).Exec()
+	// return err
+	// if err != nil {
+	// }
+
+	query =
+		`delete from movimientos_arka.novedad_elemento
+			WHERE movimiento_id IN ` +
+			` (select m.id from
+				movimientos_arka.movimiento m,
+				movimientos_arka.formato_tipo_movimiento fm
+			where fm.codigo_abreviacion = 'CRR'
+			and m.formato_tipo_movimiento_id = fm.id);`
+
+	_, err = o.Raw(query).Exec()
+	if err != nil {
+		return err
 	}
+
+	query =
+		`delete from movimientos_arka.movimiento
+			WHERE formato_tipo_movimiento_id = ` +
+			` (select id from movimientos_arka.formato_tipo_movimiento
+			where codigo_abreviacion = 'CRR');`
+	if _, err = o.Raw(query).Exec(); err != nil {
+		return err
+	}
+	// `UPDATE catalogo.cuentas_subgrupo
+	// SET subtipo_movimiento_id = 54
+	// WHERE subtipo_movimiento_id = 30;`
+
 	return
 }
 
 // GetEntradaByActa Retorna la entrada asociada a un acta determinada
-func GetEntradaByActa(acta_recibido_id int) (entrada *Movimiento, err error) {
+func GetEntradaByActa(acta_recibido_id int) (entrada Movimiento, err error) {
 
 	o := orm.NewOrm()
 	var ids []int
@@ -176,22 +204,22 @@ func GetEntradaByActa(acta_recibido_id int) (entrada *Movimiento, err error) {
 	WHERE m.detalle ->> 'acta_recibido_id' = ?;`
 
 	if _, err = o.Raw(query, acta_recibido_id).QueryRows(&ids); err != nil {
-		return nil, err
+		return entrada, err
 	}
 
 	if len(ids) == 0 {
-		return nil, nil
+		return entrada, err
 	}
 
 	if l, err := GetAllMovimiento(
 		map[string]string{"Id": strconv.Itoa(ids[0])}, []string{}, nil, nil, 0, -1); err != nil {
-		return nil, err
+		return entrada, err
 	} else {
 		var movs []*Movimiento
 		if err := formatdata.FillStruct(l, &movs); err != nil {
-			return nil, err
+			return entrada, err
 		}
-		entrada = movs[0]
+		entrada = *movs[0]
 	}
 
 	return entrada, nil
@@ -328,3 +356,32 @@ func GetBodegaByTerceroId(terceroId int, solicitudes *[]interface{}) (err error)
 	return
 }
 
+// `DELETE FROM movimientos_arka.soporte_movimiento
+// WHERE movimiento_id IN (
+// SELECT m.id
+// FROM movimientos_arka.formato_tipo_movimiento fm,
+// movimientos_arka.movimiento m
+// WHERE fm.codigo_abreviacion IN ('BJ_HT', 'BJ_DÑ')
+// );`
+// `DELETE FROM movimientos_arka.novedad_elemento
+// WHERE movimiento_id IN (
+// SELECT m.id
+// FROM movimientos_arka.formato_tipo_movimiento fm,
+// movimientos_arka.movimiento m
+// WHERE fm.codigo_abreviacion IN ('BJ_HT', 'BJ_DÑ')
+// );`
+// `DELETE FROM movimientos_arka.movimiento
+// WHERE id IN (
+// SELECT m.id
+// FROM movimientos_arka.formato_tipo_movimiento fm,
+// movimientos_arka.movimiento m
+// WHERE fm.codigo_abreviacion IN ('TR')
+// AND m.formato_tipo_movimiento_id = fm.id
+// );`
+// `delete
+// FROM acta_recibido.historico_acta ha
+// WHERE estado_acta_id IN (
+// SELECT ea.id
+// FROM acta_recibido.estado_acta ea
+// WHERE ea.codigo_abreviacion = 'AsociadoEntrada'
+// );`

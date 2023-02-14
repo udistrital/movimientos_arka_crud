@@ -70,9 +70,9 @@ func init() {
 			),
 		),
 
-		beego.NSNamespace("/depreciacion",
+		beego.NSNamespace("/cierre",
 			beego.NSInclude(
-				&controllers.DepreciacionController{},
+				&controllers.CierreController{},
 			),
 		),
 	)
