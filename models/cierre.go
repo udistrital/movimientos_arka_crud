@@ -57,7 +57,6 @@ func getScriptCorte() string {
 		WHERE
 			fm.codigo_abreviacion LIKE 'BJ%'
 			AND m.formato_tipo_movimiento_id = fm.id
-			AND m.fecha_creacion < fecha_corte_
 			AND em.id = CAST(elem as INTEGER)
 	), con_novedad AS (
 		SELECT DISTINCT ON (1)
@@ -79,7 +78,7 @@ func getScriptCorte() string {
 			AND em.id NOT IN (
 				SELECT
 					em.id
-				FROM 
+				FROM
 					bajas
 				WHERE
 					bajas.id = em.id
@@ -178,7 +177,7 @@ func getScriptCorte() string {
 			vida_util > 0
 			AND valor_presente > valor_residual
 	)
-	
+
 	SELECT * from delta_valor;
 	`
 
@@ -263,7 +262,7 @@ func getScriptAprobacion() string {
 			AND em.id IN (
 				SELECT
 					em.id
-				FROM 
+				FROM
 					ESQUEMA.elementos_movimiento em,
 					ESQUEMA.movimiento m,
 					ESQUEMA.formato_tipo_movimiento fm
