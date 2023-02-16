@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
@@ -9,13 +10,13 @@ import (
 	"github.com/udistrital/utils_oas/errorctrl"
 )
 
-// BajasController
-type DepreciacionController struct {
+// CierreController
+type CierreController struct {
 	beego.Controller
 }
 
 // URLMapping ...
-func (c *DepreciacionController) URLMapping() {
+func (c *CierreController) URLMapping() {
 	c.Mapping("GetCorte", c.GetCorte)
 	c.Mapping("Post", c.Post)
 }
@@ -23,22 +24,27 @@ func (c *DepreciacionController) URLMapping() {
 // Post ...
 // @Title Post
 // @Description Crea las novedades correspondientes a un cierre determinado y actualiza el cierre
-// @Param	body	body	models.TransaccionCierre	true	"body for NovedadElemento content"
-// @Success 201 {int} models.TransaccionCierre
+// @Param	body	body	models.Movimiento	true	"body for NovedadElemento content"
+// @Success	201	{object}	models.Movimiento
 // @Failure 400 the request contains incorrect syntax
 // @router / [post]
-func (c *DepreciacionController) Post() {
+func (c *CierreController) Post() {
 
-	var v models.TransaccionCierre
+	var v models.Movimiento
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err != nil {
 		logs.Error(err)
 		panic(errorctrl.Error(`Post - json.Unmarshal(c.Ctx.Input.RequestBody, &v)`, err, "400"))
 	}
 
-	var m models.Movimiento
-	if err := models.SubmitCierre(&v, &m); err == nil {
+	if v.Id == 0 {
+		err := "Debe especificar un cierre para ser aprobado"
+		logs.Error(err)
+		panic(errorctrl.Error(`Post - v.MovimientoId == 0`, err, "400"))
+	}
+
+	if err := models.SubmitCierre(&v); err == nil {
 		c.Ctx.Output.SetStatus(201)
-		c.Data["json"] = m
+		c.Data["json"] = v
 	} else {
 		logs.Error(err)
 		c.Data["system"] = err
@@ -54,7 +60,7 @@ func (c *DepreciacionController) Post() {
 // @Success 200 {object} []models.DepreciacionElemento
 // @Failure 404 not found resource
 // @router / [get]
-func (c *DepreciacionController) GetCorte() {
+func (c *CierreController) GetCorte() {
 
 	var fecha string
 	if fecha_ := c.GetString("fechaCorte"); fecha_ == "" {
@@ -62,6 +68,11 @@ func (c *DepreciacionController) GetCorte() {
 		panic(errorctrl.Error(`GetCorte - c.GetString("fechaCorte")`, err, "400"))
 	} else {
 		fecha = fecha_
+	}
+
+	_, err := time.Parse("2006-01-02", fecha)
+	if err != nil {
+		panic(errorctrl.Error(`GetCorte - time.Parse("2006-01-02", fecha)`, err, "400"))
 	}
 
 	elementos := make([]*models.DepreciacionElemento, 0)

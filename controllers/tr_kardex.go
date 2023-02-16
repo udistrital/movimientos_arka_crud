@@ -2,8 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
-	"strconv"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
@@ -19,21 +17,19 @@ type TrkardexController struct {
 // URLMapping ...
 func (c *TrkardexController) URLMapping() {
 	c.Mapping("Post", c.Post)
-	c.Mapping("Post", c.PostRespuestaSolicitud)
-	c.Mapping("Get", c.GetOne)
 }
 
-// GetOne ...
-// @Title Get One
+// GetExistencias
+// @Title Consulta el detalle de las fichas kardex y el saldo actual.
 // @Description get SoporteMovimiento by id
-// @Param	id		path 	string	true		"The key for staticblock"
-// @Success 200 {object} models.Movimiento
+// @Param	ConSaldo	query	bool	true	"Filtra las fichas kardex que tienen existencias"
+// @Success 200 {object} models.ElementosMovimiento
 // @Failure 404 not found resource
-// @router /:id [get]
-func (c *TrkardexController) GetOne() {
-	idStr := c.Ctx.Input.Param(":id")
-	id, _ := strconv.Atoi(idStr)
-	v, err := models.GetTransaccionKardex(id)
+// @router /aperturas [get]
+func (c *TrkardexController) GetExistencias() {
+
+	saldo, _ := c.GetBool("ConSaldo")
+	v, err := models.GetAllAperturas(saldo)
 	if err != nil {
 		logs.Error(err)
 		//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
@@ -42,6 +38,7 @@ func (c *TrkardexController) GetOne() {
 	} else {
 		c.Data["json"] = v
 	}
+
 	c.ServeJSON()
 }
 
@@ -54,8 +51,7 @@ func (c *TrkardexController) GetOne() {
 // @router / [post]
 func (c *TrkardexController) Post() {
 	var v models.KardexGeneral
-	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
-		fmt.Println(v);
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil && v.Movimiento != nil && len(*v.Movimiento) > 0 {
 		if err := models.AddTransaccionKardex(&v); err == nil {
 			c.Ctx.Output.SetStatus(201)
 			c.Data["json"] = v
@@ -83,8 +79,7 @@ func (c *TrkardexController) Post() {
 // @router /responder_solicitud/ [post]
 func (c *TrkardexController) PostRespuestaSolicitud() {
 	var v models.KardexGeneral
-	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
-		fmt.Println(v);
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil && v.Movimiento != nil && len(*v.Movimiento) > 0 {
 		if err := models.ResponderSolicitud(&v); err == nil {
 			c.Ctx.Output.SetStatus(201)
 			c.Data["json"] = v
@@ -112,15 +107,14 @@ func (c *TrkardexController) PostRespuestaSolicitud() {
 // @router /rechazar_solicitud/ [post]
 func (c *TrkardexController) PostRechazarSolicitud() {
 	var v models.Movimiento
-	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
-		fmt.Println(v);
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil && v.Id > 0 {
 		if err := models.RechazarSolicitud(&v); err == nil {
 			c.Ctx.Output.SetStatus(201)
 			c.Data["json"] = v
 		} else {
 			logs.Error(err)
 			//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
-			c.Data["system"] = err
+			c.Data["system"] = err.Error()
 			c.Abort("400")
 		}
 	} else {

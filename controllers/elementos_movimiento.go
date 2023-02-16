@@ -277,7 +277,7 @@ func (c *ElementosMovimientoController) GetHistorial() {
 	}
 
 	var historial models.Historial
-	if err := models.GetHistorialElemento(id, acta, entradas, final, &historial); err != nil {
+	if err := models.GetHistorialElemento(id, acta, entradas, true, final, &historial); err != nil {
 		logs.Error(err)
 		c.Data["system"] = err
 		c.Abort("404")

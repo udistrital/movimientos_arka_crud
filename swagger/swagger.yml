@@ -35,13 +35,13 @@ paths:
               type: integer
         "404":
           description: not found resource
-  /depreciacion/:
+  /cierre/:
     get:
       tags:
-      - depreciacion
+      - cierre
       description: Retorna lista de elementos disponibles para liquidar depreciacion
         a una fecha de corte determinada
-      operationId: DepreciacionController.GetCorte
+      operationId: CierreController.GetCorte
       parameters:
       - in: query
         name: fechaCorte
@@ -59,20 +59,22 @@ paths:
           description: not found resource
     post:
       tags:
-      - depreciacion
+      - cierre
       description: Crea las novedades correspondientes a un cierre determinado y actualiza
         el cierre
-      operationId: DepreciacionController.Post
+      operationId: CierreController.Post
       parameters:
       - in: body
         name: body
         description: body for NovedadElemento content
         required: true
         schema:
-          $ref: '#/definitions/models.TransaccionCierre'
+          $ref: '#/definitions/models.Movimiento'
       responses:
         "201":
-          description: '{int} models.TransaccionCierre'
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Movimiento'
         "400":
           description: the request contains incorrect syntax
   /elementos_movimiento/:
@@ -921,23 +923,24 @@ paths:
             $ref: '#/definitions/models.KardexGeneral'
         "403":
           description: body is empty
-  /tr_kardex/{id}:
+  /tr_kardex/aperturas:
     get:
       tags:
       - tr_kardex
       description: get SoporteMovimiento by id
-      operationId: TrkardexController.Get One
+      operationId: TrkardexController.Consulta el detalle de las fichas kardex y el
+        saldo actual.
       parameters:
-      - in: path
-        name: id
-        description: The key for staticblock
+      - in: query
+        name: ConSaldo
+        description: Filtra las fichas kardex que tienen existencias
         required: true
-        type: string
+        type: boolean
       responses:
         "200":
           description: ""
           schema:
-            $ref: '#/definitions/models.Movimiento'
+            $ref: '#/definitions/models.ElementosMovimiento'
         "404":
           description: not found resource
   /tr_kardex/rechazar_solicitud/:
@@ -1024,12 +1027,12 @@ paths:
     get:
       tags:
       - tr_salida
-      description: get SoporteMovimiento by id
+      description: Consulta el detalle de una salida así como sus elementos asociados
       operationId: TrSalidaController.Get One
       parameters:
       - in: path
         name: id
-        description: The key for staticblock
+        description: Id de la salida
         required: true
         type: string
       responses:
@@ -1148,14 +1151,16 @@ definitions:
     properties:
       Baja:
         $ref: '#/definitions/models.Movimiento'
-      Depreciacion:
-        $ref: '#/definitions/models.Movimiento'
       Elemento:
         $ref: '#/definitions/models.ElementosMovimiento'
       Entradas:
         type: array
         items:
           $ref: '#/definitions/models.Movimiento'
+      Novedades:
+        type: array
+        items:
+          $ref: '#/definitions/models.NovedadElemento'
       Salida:
         $ref: '#/definitions/models.Movimiento'
       Traslados:
@@ -1176,10 +1181,18 @@ definitions:
     properties:
       Activo:
         type: boolean
+      Consecutivo:
+        type: string
+      ConsecutivoId:
+        type: integer
+        format: int64
       Detalle:
         type: string
       EstadoMovimientoId:
         $ref: '#/definitions/models.EstadoMovimiento'
+      FechaCorte:
+        type: string
+        format: datetime
       FechaCreacion:
         type: string
         format: datetime
@@ -1253,16 +1266,6 @@ definitions:
         format: int64
       MovimientoId:
         $ref: '#/definitions/models.Movimiento'
-  models.TrKardex:
-    title: TrKardex
-    type: object
-    properties:
-      Elementos:
-        type: array
-        items:
-          $ref: '#/definitions/models.ElementosMovimiento'
-      Kardex:
-        $ref: '#/definitions/models.Movimiento'
   models.TrRevisionBaja:
     title: TrRevisionBaja
     type: object
@@ -1293,18 +1296,6 @@ definitions:
           $ref: '#/definitions/models.ElementosMovimiento'
       Salida:
         $ref: '#/definitions/models.Movimiento'
-  models.TransaccionCierre:
-    title: TransaccionCierre
-    type: object
-    properties:
-      ElementoMovimientoId:
-        type: array
-        items:
-          type: integer
-          format: int64
-      MovimientoId:
-        type: integer
-        format: int64
 tags:
 - name: formato_tipo_movimiento
   description: |
@@ -1333,6 +1324,6 @@ tags:
 - name: bajas
   description: |
     BajasController
-- name: depreciacion
+- name: cierre
   description: |
-    BajasController
+    CierreController
