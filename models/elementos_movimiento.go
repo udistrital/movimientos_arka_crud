@@ -34,7 +34,7 @@ type Historial struct {
 	Entradas  []*Movimiento
 	Salida    *Movimiento
 	Traslados []*Movimiento
-	Novedades *[]NovedadElemento
+	Novedades []NovedadElemento
 	Baja      *Movimiento
 }
 
@@ -360,13 +360,12 @@ func GetHistorialElemento(elementoId int, acta, entradas, novedades, final bool,
 		FROM
 			movimientos_arka.movimiento m,
 			movimientos_arka.estado_movimiento sm,
-			jsonb_array_elements(m.detalle #> '{elementos}') elementos,
-			to_date(m.detalle->>'FechaCorte', 'YYYY-MM-DD') AS fecha
+			jsonb_array_elements(m.detalle #> '{elementos}') elementos
 		WHERE
 				sm.nombre LIKE 'Entrada%'
 			AND m.estado_movimiento_id = sm.id
 			AND (elementos ->> 'Id')::int = ?
-		ORDER BY fecha DESC;`
+		ORDER BY m.fecha_corte DESC;`
 
 		_, err = o.Raw(query, elementoId).QueryRows(&ids)
 		if err != nil {
@@ -391,12 +390,11 @@ func GetHistorialElemento(elementoId int, acta, entradas, novedades, final bool,
 			ne.id
 		FROM
 			movimientos_arka.movimiento m,
-			movimientos_arka.novedad_elemento ne,
-			to_date(m.detalle->>'FechaCorte', 'YYYY-MM-DD') AS fecha
+			movimientos_arka.novedad_elemento ne
 		WHERE
 				ne.elemento_movimiento_id = ?
 			AND	ne.movimiento_id = m.id
-		ORDER BY fecha DESC`
+		ORDER BY m.fecha_corte DESC`
 		if final {
 			query += " LIMIT 1"
 		}

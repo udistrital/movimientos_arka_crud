@@ -53,21 +53,26 @@ func PostRevisionComite(n *TrRevisionBaja) (ids []int, err error) {
 		estadoString = "Baja Rechazada"
 	}
 
-	if _, err = o.QueryTable(new(EstadoMovimiento)).RelatedSel().Filter("Nombre", estadoString).All(&estado); err != nil {
-		panic(err.Error())
+	err = o.QueryTable(new(EstadoMovimiento)).RelatedSel().Filter("Nombre", estadoString).One(&estado)
+	if err != nil {
+		return
 	}
 
 	for _, id := range n.Bajas {
 		v := Movimiento{Id: id}
 
-		if err = o.Read(&v); err != nil {
-			panic(err)
+		err = o.Read(&v)
+		if err != nil {
+			return
 		}
 
 		v.EstadoMovimientoId = &estado
+		v.FechaCorte = &v.FechaCreacion
+
 		var detalle FormatoBaja
-		if err := json.Unmarshal([]byte(v.Detalle), &detalle); err != nil {
-			panic(err)
+		err = json.Unmarshal([]byte(v.Detalle), &detalle)
+		if err != nil {
+			return
 		}
 
 		if !n.Aprobacion {
@@ -84,8 +89,9 @@ func PostRevisionComite(n *TrRevisionBaja) (ids []int, err error) {
 					Activo:               true,
 				}
 
-				if _, err = o.Insert(&novedad); err != nil {
-					panic(err.Error())
+				_, err = o.Insert(&novedad)
+				if err != nil {
+					return
 				}
 
 			}
@@ -98,11 +104,12 @@ func PostRevisionComite(n *TrRevisionBaja) (ids []int, err error) {
 			v.Detalle = string(detalle_[:])
 		}
 
-		if _, err = o.Update(&v); err != nil {
-			panic(err)
+		_, err = o.Update(&v, "Detalle", "FechaCorte", "EstadoMovimientoId")
+		if err != nil {
+			return
 		}
 		ids = append(ids, id)
 	}
 
-	return ids, nil
+	return
 }
