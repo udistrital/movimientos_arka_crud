@@ -384,33 +384,8 @@ func GetHistorialElemento(elementoId int, acta, entradas, novedades, final bool,
 	}
 
 	if novedades {
-		ids = []int{}
-		query = `
-		SELECT
-			ne.id
-		FROM
-			movimientos_arka.movimiento m,
-			movimientos_arka.novedad_elemento ne
-		WHERE
-				ne.elemento_movimiento_id = ?
-			AND	ne.movimiento_id = m.id
-		ORDER BY m.fecha_corte DESC`
-		if final {
-			query += " LIMIT 1"
-		}
-
-		_, err = o.Raw(query, elementoId).QueryRows(&ids)
-		if err != nil {
-			return err
-		} else if ids != nil && len(ids) > 0 {
-			l, err := GetAllNovedadElemento(
-				map[string]string{"Id__in": ArrayToString(ids, "|")}, []string{}, nil, nil, 0, -1)
-			if err != nil {
-				return err
-			}
-
-			err = formatdata.FillStruct(l, &historial.Novedades)
-		}
+		_, err = o.QueryTable(new(NovedadElemento)).RelatedSel().
+			Filter("ElementoMovimientoId__Id", elementoId).OrderBy("-MovimientoId__FechaCorte").Limit(1).All(&historial.Novedades)
 	}
 
 	return
