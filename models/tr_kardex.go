@@ -13,7 +13,7 @@ type TrKardex struct {
 	Elementos []*ElementosMovimiento
 }
 type KardexGeneral struct {
-	Movimiento *[]*TrKardex
+	Movimiento []TrKardex
 }
 
 type Apertura struct {
@@ -47,7 +47,7 @@ func AddTransaccionKardex(n *KardexGeneral) (err error) {
 		}
 	}()
 
-	for _, m := range *n.Movimiento {
+	for _, m := range n.Movimiento {
 
 		idSalida, err_ := o.Insert(m.Kardex)
 		if err_ != nil {
@@ -106,7 +106,7 @@ func ResponderSolicitud(Solicitud *KardexGeneral) (err error) {
 		return
 	}
 
-	solicitud := *Solicitud.Movimiento
+	solicitud := Solicitud.Movimiento
 	var elemento__ Movimiento
 	_, err = o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id", solicitud[0].Kardex.MovimientoPadreId.Id).All(&elemento__)
 	if err != nil {

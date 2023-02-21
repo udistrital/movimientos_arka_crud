@@ -385,7 +385,9 @@ func GetHistorialElemento(elementoId int, acta, entradas, novedades, final bool,
 
 	if novedades {
 		_, err = o.QueryTable(new(NovedadElemento)).RelatedSel().
-			Filter("ElementoMovimientoId__Id", elementoId).OrderBy("-MovimientoId__FechaCorte").Limit(1).All(&historial.Novedades)
+			Filter("ElementoMovimientoId__Id", elementoId).
+			OrderBy("-MovimientoId__FechaCorte").
+			Limit(1).All(&historial.Novedades)
 	}
 
 	return

@@ -51,7 +51,7 @@ func (c *TrkardexController) GetExistencias() {
 // @router / [post]
 func (c *TrkardexController) Post() {
 	var v models.KardexGeneral
-	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil && v.Movimiento != nil && len(*v.Movimiento) > 0 {
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil && v.Movimiento != nil && len(v.Movimiento) > 0 {
 		if err := models.AddTransaccionKardex(&v); err == nil {
 			c.Ctx.Output.SetStatus(201)
 			c.Data["json"] = v
@@ -79,7 +79,7 @@ func (c *TrkardexController) Post() {
 // @router /responder_solicitud/ [post]
 func (c *TrkardexController) PostRespuestaSolicitud() {
 	var v models.KardexGeneral
-	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil && v.Movimiento != nil && len(*v.Movimiento) > 0 {
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil && v.Movimiento != nil && len(v.Movimiento) > 0 {
 		if err := models.ResponderSolicitud(&v); err == nil {
 			c.Ctx.Output.SetStatus(201)
 			c.Data["json"] = v
