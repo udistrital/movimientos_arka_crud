@@ -1882,6 +1882,21 @@
                 }
             }
         },
+        "models.TrKardex": {
+            "title": "TrKardex",
+            "type": "object",
+            "properties": {
+                "Elementos": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ElementosMovimiento"
+                    }
+                },
+                "Kardex": {
+                    "$ref": "#/definitions/models.Movimiento"
+                }
+            }
+        },
         "models.TrRevisionBaja": {
             "title": "TrRevisionBaja",
             "type": "object",
