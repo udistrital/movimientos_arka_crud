@@ -141,7 +141,7 @@ func UpdateMovimientoById(m *Movimiento) (err error) {
 	// ascertain id exists in the database
 	if err = o.Read(&v); err == nil {
 		var num int64
-		if num, err = o.Update(m, "Detalle"); err == nil {
+		if num, err = o.Update(m); err == nil {
 			fmt.Println("Number of records updated in database:", num)
 		}
 	}
@@ -152,54 +152,13 @@ func UpdateMovimientoById(m *Movimiento) (err error) {
 // the record to be deleted doesn't exist
 func DeleteMovimiento(id int) (err error) {
 	o := orm.NewOrm()
-	query := ""
+	v := Movimiento{Id: id}
 	// ascertain id exists in the database
-
-	query =
-		`delete from movimientos_arka.movimiento
-	WHERE formato_tipo_movimiento_id = ` +
-			` (select id from movimientos_arka.formato_tipo_movimiento
-	where codigo_abreviacion = 'SOL_TRD');`
-	_, err = o.Raw(query).Exec()
-	return err
-	if err != nil {
-	}
-
-	query =
-		`delete from movimientos_arka.novedad_elemento
-			WHERE movimiento_id IN ` +
-			` (select m.id from
-				movimientos_arka.movimiento m,
-				movimientos_arka.formato_tipo_movimiento fm
-			where fm.codigo_abreviacion = 'BJ_DÑ'
-			and m.formato_tipo_movimiento_id = fm.id);`
-
-	_, err = o.Raw(query).Exec()
-	if err != nil {
-		return err
-	}
-
-	query =
-		`delete from movimientos_arka.soporte_movimiento
-		WHERE movimiento_id IN ` +
-			` (select m.id from
-			movimientos_arka.movimiento m,
-			movimientos_arka.formato_tipo_movimiento fm
-		where fm.codigo_abreviacion = 'BJ_DÑ'
-		and m.formato_tipo_movimiento_id = fm.id);`
-
-	_, err = o.Raw(query).Exec()
-	if err != nil {
-		return err
-	}
-
-	query =
-		`delete from movimientos_arka.movimiento
-			WHERE formato_tipo_movimiento_id = ` +
-			` (select id from movimientos_arka.formato_tipo_movimiento
-			where codigo_abreviacion = 'BJ_DÑ');`
-	if _, err = o.Raw(query).Exec(); err != nil {
-		return err
+	if err = o.Read(&v); err == nil {
+		var num int64
+		if num, err = o.Delete(&Movimiento{Id: id}); err == nil {
+			fmt.Println("Number of records deleted in database:", num)
+		}
 	}
 	return
 }
