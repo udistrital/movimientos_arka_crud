@@ -199,19 +199,19 @@ func SubmitCierre(cierre *Movimiento) (err error) {
 		}
 	}()
 
-	if err = o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id", cierre.Id).One(cierre); err != nil {
-		return
-	} else if cierre.EstadoMovimientoId.Nombre != "Cierre En Curso" || cierre.FechaCorte == nil {
+	err = o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id", cierre.Id).One(cierre)
+	if err != nil || cierre.EstadoMovimientoId.Nombre != "Cierre En Curso" || cierre.FechaCorte == nil {
 		return
 	}
 
-	if err = o.QueryTable(new(EstadoMovimiento)).Filter("Nombre", "Cierre Aprobado").One(cierre.EstadoMovimientoId); err != nil {
+	err = o.QueryTable(new(EstadoMovimiento)).Filter("Nombre", "Cierre Aprobado").One(cierre.EstadoMovimientoId)
+	if err != nil {
 		return
 	}
 
 	_, err = o.Raw(getScriptAprobacion(), cierre.Id).Exec()
 	if err != nil {
-		return err
+		return
 	}
 
 	cierre.Detalle = "{}"

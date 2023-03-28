@@ -270,9 +270,8 @@ func GetElementosFuncionario(funcionarioId int, elementos *[]int) (err error) {
 // Retorna los movimientos que han involucrado un elemento
 func GetHistorialElemento(elementoId int, acta, entradas, novedades, final bool, historial *Historial) (err error) {
 
-	var ids []int
-
 	o := orm.NewOrm()
+
 	query := ""
 	if acta {
 		query = "ElementoActaId"
@@ -306,10 +305,11 @@ func GetHistorialElemento(elementoId int, acta, entradas, novedades, final bool,
 		query += " LIMIT 1"
 	}
 
+	var ids []int
 	_, err = o.Raw(query, elementoId).QueryRows(&ids)
 	if err != nil {
 		return
-	} else if ids != nil && len(ids) > 0 {
+	} else if len(ids) > 0 {
 		l, err := GetAllMovimiento(
 			map[string]string{"Id__in": ArrayToString(ids, "|")}, []string{}, nil, nil, 0, -1)
 		if err != nil {
@@ -338,8 +338,8 @@ func GetHistorialElemento(elementoId int, acta, entradas, novedades, final bool,
 
 	_, err = o.Raw(query, elementoId).QueryRows(&ids)
 	if err != nil {
-		return err
-	} else if ids != nil && len(ids) > 0 {
+		return
+	} else if len(ids) > 0 {
 		if l, err := GetAllMovimiento(
 			map[string]string{"Id__in": ArrayToString(ids, "|")}, []string{}, nil, nil, 0, -1); err != nil {
 			return err
@@ -369,8 +369,8 @@ func GetHistorialElemento(elementoId int, acta, entradas, novedades, final bool,
 
 		_, err = o.Raw(query, elementoId).QueryRows(&ids)
 		if err != nil {
-			return err
-		} else if ids != nil && len(ids) > 0 {
+			return
+		} else if len(ids) > 0 {
 			l, err := GetAllMovimiento(map[string]string{"Id__in": ArrayToString(ids, "|")}, []string{}, nil, nil, 0, -1)
 			if err != nil {
 				return err
