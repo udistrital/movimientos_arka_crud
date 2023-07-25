@@ -3,41 +3,30 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-beta" last-position="0,0" last-zoom="1"
-	 default-owner="postgres">
-<role name="desarrollooas"
-      superuser="true"
-      createdb="true"
-      replication="true"
-      createrole="true"
-      inherit="true"
-      login="true"
-      encrypted="true"
-      password="********">
-</role>
-
-<database name="bd_oas" encoding="UTF8" lc-collate="en_US.UTF-8" lc-ctype="en_US.UTF-8">
+<dbmodel pgmodeler-ver="0.9.3" use-changelog="false" last-position="0,0" last-zoom="1" max-obj-count="8"
+	 default-schema="public" default-owner="postgres">
+<database name="postgres" encoding="UTF8" lc-collate="en_US.UTF-8" lc-ctype="en_US.UTF-8" is-template="false" allow-conns="true">
 	<role name="postgres"/>
 	<tablespace name="pg_default"/>
+	<comment><![CDATA[default administrative connection database]]></comment>
 </database>
 
-<schema name="public" rect-visible="true" fill-color="#e1e1e1" sql-disabled="true">
+<schema name="public" layer="0" rect-visible="true" fill-color="#e1e1e1" sql-disabled="true">
 </schema>
 
-<schema name="movimientos_arka" rect-visible="true" fill-color="#babdb6">
+<schema name="movimientos_arka" layer="0" rect-visible="true" fill-color="#62a0ea">
+	<role name="postgres"/>
 </schema>
 
-<sequence name="movimiento_id_seq"
-	 start="1" increment="1"
-	 min-value="1" max-value="2147483647"
-	 cache="1" cycle="false">
+<sequence name="movimiento_id_seq" cycle="false" start="1" increment="1" min-value="1" max-value="2147483647" cache="1">
 	<schema name="movimientos_arka"/>
 	<role name="postgres"/>
 </sequence>
 
-<table name="movimiento">
+<table name="movimiento" layer="0" collapse-mode="2" max-obj-count="14" z-value="0">
 	<schema name="movimientos_arka"/>
-	<position x="1340" y="960"/>
+	<role name="postgres"/>
+	<position x="980" y="280"/>
 	<column name="id" not-null="true" sequence="movimientos_arka.movimiento_id_seq">
 		<type name="integer" length="0"/>
 		<comment><![CDATA[Identificador de la tabla movimiento]]></comment>
@@ -66,29 +55,42 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<column name="estado_movimiento_id" not-null="true">
 		<type name="integer" length="0"/>
 	</column>
+	<column name="consecutivo">
+		<type name="character varying" length="20"/>
+	</column>
+	<column name="consecutivo_id">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="fecha_corte">
+		<type name="date" length="0"/>
+	</column>
 	<constraint name="pk_movimiento" type="pk-constr" table="movimientos_arka.movimiento">
 		<columns names="id" ref-type="src-columns"/>
 		<comment><![CDATA[Llave primaria de la tabla movimiento]]></comment>
 	</constraint>
+	<constraint name="uq_consecutivo" type="uq-constr" table="movimientos_arka.movimiento">
+		<columns names="consecutivo" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="uq_consecutivo_id" type="uq-constr" table="movimientos_arka.movimiento">
+		<columns names="consecutivo_id" ref-type="src-columns"/>
+	</constraint>
 </table>
 
-<sequence name="estado_movimiento_id_seq"
-	 start="1" increment="1"
-	 min-value="1" max-value="2147483647"
-	 cache="1" cycle="false">
+<sequence name="estado_movimiento_id_seq" cycle="false" start="1" increment="1" min-value="1" max-value="2147483647" cache="1">
 	<schema name="movimientos_arka"/>
 	<role name="postgres"/>
 </sequence>
 
-<table name="estado_movimiento">
+<table name="estado_movimiento" layer="0" collapse-mode="2" max-obj-count="7" z-value="0">
 	<schema name="movimientos_arka"/>
+	<role name="postgres"/>
 	<comment><![CDATA[Tabla para almacenar los posibles estados por los que puede pasar un movimiento de almacén]]></comment>
-	<position x="800" y="1200"/>
+	<position x="400" y="600"/>
 	<column name="id" not-null="true" sequence="movimientos_arka.estado_movimiento_id_seq">
 		<type name="integer" length="0"/>
 	</column>
 	<column name="nombre" not-null="true">
-		<type name="character varying" length="20"/>
+		<type name="character varying" length="40"/>
 		<comment><![CDATA[Nombre del estado del movimiento]]></comment>
 	</column>
 	<column name="activo" not-null="true">
@@ -107,20 +109,21 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<constraint name="pk_estado_movimiento" type="pk-constr" table="movimientos_arka.estado_movimiento">
 		<columns names="id" ref-type="src-columns"/>
 	</constraint>
+	<constraint name="uq_nombre_estado_movimiento" type="uq-constr" table="movimientos_arka.estado_movimiento">
+		<columns names="nombre" ref-type="src-columns"/>
+	</constraint>
 </table>
 
-<sequence name="soporte_movimiento_id_seq"
-	 start="1" increment="1"
-	 min-value="1" max-value="2147483647"
-	 cache="1" cycle="false">
+<sequence name="soporte_movimiento_id_seq" cycle="false" start="1" increment="1" min-value="1" max-value="2147483647" cache="1">
 	<schema name="movimientos_arka"/>
 	<role name="postgres"/>
 </sequence>
 
-<table name="soporte_movimiento">
+<table name="soporte_movimiento" layer="0" collapse-mode="2" max-obj-count="7" z-value="0">
 	<schema name="movimientos_arka"/>
+	<role name="postgres"/>
 	<comment><![CDATA[Tabla que almacena los documentos/soportes relacionados a un movimiento, ej: factura, concepto técnico de la red de datos, denuncio, entre otros.]]></comment>
-	<position x="1960" y="760"/>
+	<position x="1700" y="40"/>
 	<column name="id" not-null="true" sequence="movimientos_arka.soporte_movimiento_id_seq">
 		<type name="integer" length="0"/>
 	</column>
@@ -146,18 +149,16 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</constraint>
 </table>
 
-<sequence name="elementos_movimiento_id_seq"
-	 start="1" increment="1"
-	 min-value="1" max-value="2147483647"
-	 cache="1" cycle="false">
+<sequence name="elementos_movimiento_id_seq" cycle="false" start="1" increment="1" min-value="1" max-value="2147483647" cache="1">
 	<schema name="movimientos_arka"/>
 	<role name="postgres"/>
 </sequence>
 
-<table name="elementos_movimiento">
+<table name="elementos_movimiento" layer="0" collapse-mode="2" max-obj-count="16" z-value="0">
 	<schema name="movimientos_arka"/>
+	<role name="postgres"/>
 	<comment><![CDATA[Tabla que almacena los elementos relacionados con un movimiento de almacén]]></comment>
-	<position x="1900" y="1120"/>
+	<position x="1680" y="700"/>
 	<column name="id" not-null="true" sequence="movimientos_arka.elementos_movimiento_id_seq">
 		<type name="integer" length="0"/>
 	</column>
@@ -198,7 +199,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<type name="integer" length="0"/>
 	</column>
 	<column name="vida_util">
-		<type name="numeric" length="10" precision="5"/>
+		<type name="numeric" length="15" precision="10"/>
 	</column>
 	<column name="valor_residual">
 		<type name="numeric" length="20" precision="7"/>
@@ -209,18 +210,16 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</constraint>
 </table>
 
-<sequence name="formato_tipo_movimiento_id_seq"
-	 start="1" increment="1"
-	 min-value="1" max-value="2147483647"
-	 cache="1" cycle="false">
+<sequence name="formato_tipo_movimiento_id_seq" cycle="false" start="1" increment="1" min-value="1" max-value="2147483647" cache="1">
 	<schema name="movimientos_arka"/>
 	<role name="postgres"/>
 </sequence>
 
-<table name="formato_tipo_movimiento">
+<table name="formato_tipo_movimiento" layer="0" collapse-mode="2" max-obj-count="10" z-value="0">
 	<schema name="movimientos_arka"/>
+	<role name="postgres"/>
 	<comment><![CDATA[Tabla para parametrizar los campos de la entrada en el JSON.]]></comment>
-	<position x="800" y="860"/>
+	<position x="380" y="80"/>
 	<column name="id" not-null="true" sequence="movimientos_arka.formato_tipo_movimiento_id_seq">
 		<type name="integer" length="0"/>
 	</column>
@@ -254,24 +253,25 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<constraint name="pk_tipo_entrada" type="pk-constr" table="movimientos_arka.formato_tipo_movimiento">
 		<columns names="id" ref-type="src-columns"/>
 	</constraint>
+	<constraint name="uq_codigo_abreviacion" type="uq-constr" table="movimientos_arka.formato_tipo_movimiento">
+		<columns names="codigo_abreviacion" ref-type="src-columns"/>
+	</constraint>
 </table>
 
-<sequence name="novedad_elemento_id_seq"
-	 start="1" increment="1"
-	 min-value="1" max-value="2147483647"
-	 cache="1" cycle="false">
+<sequence name="novedad_elemento_id_seq" cycle="false" start="1" increment="1" min-value="1" max-value="2147483647" cache="1">
 	<schema name="movimientos_arka"/>
 	<role name="postgres"/>
 </sequence>
 
-<table name="novedad_elemento">
+<table name="novedad_elemento" layer="0" collapse-mode="2" max-obj-count="12" z-value="0">
 	<schema name="movimientos_arka"/>
-	<position x="2500" y="860"/>
+	<role name="postgres"/>
+	<position x="1660" y="320"/>
 	<column name="id" not-null="true" sequence="movimientos_arka.novedad_elemento_id_seq">
 		<type name="integer" length="0"/>
 	</column>
 	<column name="vida_util" not-null="true">
-		<type name="numeric" length="10" precision="5"/>
+		<type name="numeric" length="15" precision="10"/>
 	</column>
 	<column name="valor_libros" not-null="true">
 		<type name="numeric" length="20" precision="7"/>
@@ -344,46 +344,53 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<columns names="id" ref-type="dst-columns"/>
 </constraint>
 
-<relationship name="rel_movimiento_formato_tipo_movimiento" type="relfk"
+<relationship name="rel_movimiento_formato_tipo_movimiento" type="relfk" layer="0"
+	 custom-color="#6f1acc"
 	 src-table="movimientos_arka.movimiento"
-	 dst-table="movimientos_arka.formato_tipo_movimiento"
-	 src-required="false" dst-required="false"/>
+	 dst-table="movimientos_arka.formato_tipo_movimiento" reference-fk="fk_movimiento_formato_tipo_movimiento"
+	 src-required="false" dst-required="true"/>
 
-<relationship name="rel_movimiento_estado_movimiento" type="relfk"
+<relationship name="rel_movimiento_estado_movimiento" type="relfk" layer="0"
+	 custom-color="#fe5bca"
 	 src-table="movimientos_arka.movimiento"
-	 dst-table="movimientos_arka.estado_movimiento"
-	 src-required="false" dst-required="false"/>
+	 dst-table="movimientos_arka.estado_movimiento" reference-fk="fk_movimiento_estado_movimiento"
+	 src-required="false" dst-required="true"/>
 
-<relationship name="rel_movimiento_movimiento" type="relfk"
+<relationship name="rel_movimiento_movimiento" type="relfk" layer="0"
+	 custom-color="#aad0c8"
 	 src-table="movimientos_arka.movimiento"
-	 dst-table="movimientos_arka.movimiento"
+	 dst-table="movimientos_arka.movimiento" reference-fk="fk_movimiento_padre"
 	 src-required="false" dst-required="false">
 	<line>
-		<position x="1710.83" y="1065.3"/>
-	<position x="1710.83" y="949"/>
-	<position x="1579.89" y="949"/>
+		<position x="1389.38" y="394.733"/>
+	<position x="1389.38" y="270.1"/>
+	<position x="1246.32" y="270.1"/>
 	</line>
 </relationship>
 
-<relationship name="rel_soporte_movimiento_movimiento" type="relfk"
+<relationship name="rel_soporte_movimiento_movimiento" type="relfk" layer="0"
+	 custom-color="#6984f4"
 	 src-table="movimientos_arka.soporte_movimiento"
-	 dst-table="movimientos_arka.movimiento"
-	 src-required="false" dst-required="false"/>
+	 dst-table="movimientos_arka.movimiento" reference-fk="fk_soporte_movimiento_movimiento"
+	 src-required="false" dst-required="true"/>
 
-<relationship name="rel_elementos_movimiento_movimiento" type="relfk"
+<relationship name="rel_elementos_movimiento_movimiento" type="relfk" layer="0"
+	 custom-color="#58bb10"
 	 src-table="movimientos_arka.elementos_movimiento"
-	 dst-table="movimientos_arka.movimiento"
+	 dst-table="movimientos_arka.movimiento" reference-fk="fk_elementos_movimiento_movimiento"
 	 src-required="false" dst-required="false"/>
 
-<relationship name="rel_novedad_elemento_elementos_movimiento" type="relfk"
+<relationship name="rel_novedad_elemento_elementos_movimiento" type="relfk" layer="0"
+	 custom-color="#b55b4d"
 	 src-table="movimientos_arka.novedad_elemento"
-	 dst-table="movimientos_arka.elementos_movimiento"
-	 src-required="false" dst-required="false"/>
+	 dst-table="movimientos_arka.elementos_movimiento" reference-fk="fk_novedad_elemento_elementos_movimiento"
+	 src-required="false" dst-required="true"/>
 
-<relationship name="rel_novedad_elemento_movimiento" type="relfk"
+<relationship name="rel_novedad_elemento_movimiento" type="relfk" layer="0"
+	 custom-color="#5c9d13"
 	 src-table="movimientos_arka.novedad_elemento"
-	 dst-table="movimientos_arka.movimiento"
-	 src-required="false" dst-required="false"/>
+	 dst-table="movimientos_arka.movimiento" reference-fk="fk_novedad_elemento_movimiento"
+	 src-required="false" dst-required="true"/>
 
 <permission>
 	<object name="movimientos_arka" type="schema"/>
@@ -391,19 +398,9 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<privileges create="true" usage="true"/>
 </permission>
 <permission>
-	<object name="movimientos_arka" type="schema"/>
-	<roles names="desarrollooas"/>
-	<privileges usage="true"/>
-</permission>
-<permission>
 	<object name="movimientos_arka.movimiento" type="table"/>
 	<roles names="postgres"/>
 	<privileges select="true" delete="true" insert="true" update="true" truncate="true" references="true" trigger="true"/>
-</permission>
-<permission>
-	<object name="movimientos_arka.movimiento" type="table"/>
-	<roles names="desarrollooas"/>
-	<privileges select="true" delete="true" insert="true" update="true"/>
 </permission>
 <permission>
 	<object name="movimientos_arka.estado_movimiento" type="table"/>
@@ -411,19 +408,9 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<privileges select="true" delete="true" insert="true" update="true" truncate="true" references="true" trigger="true"/>
 </permission>
 <permission>
-	<object name="movimientos_arka.estado_movimiento" type="table"/>
-	<roles names="desarrollooas"/>
-	<privileges select="true" delete="true" insert="true" update="true"/>
-</permission>
-<permission>
 	<object name="movimientos_arka.soporte_movimiento" type="table"/>
 	<roles names="postgres"/>
 	<privileges select="true" delete="true" insert="true" update="true" truncate="true" references="true" trigger="true"/>
-</permission>
-<permission>
-	<object name="movimientos_arka.soporte_movimiento" type="table"/>
-	<roles names="desarrollooas"/>
-	<privileges select="true" delete="true" insert="true" update="true"/>
 </permission>
 <permission>
 	<object name="movimientos_arka.elementos_movimiento" type="table"/>
@@ -431,18 +418,8 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<privileges select="true" delete="true" insert="true" update="true" truncate="true" references="true" trigger="true"/>
 </permission>
 <permission>
-	<object name="movimientos_arka.elementos_movimiento" type="table"/>
-	<roles names="desarrollooas"/>
-	<privileges select="true" delete="true" insert="true" update="true"/>
-</permission>
-<permission>
 	<object name="movimientos_arka.formato_tipo_movimiento" type="table"/>
 	<roles names="postgres"/>
 	<privileges select="true" delete="true" insert="true" update="true" truncate="true" references="true" trigger="true"/>
-</permission>
-<permission>
-	<object name="movimientos_arka.formato_tipo_movimiento" type="table"/>
-	<roles names="desarrollooas"/>
-	<privileges select="true" delete="true" insert="true" update="true"/>
 </permission>
 </dbmodel>
