@@ -16,6 +16,51 @@ func init() {
             Filters: nil,
             Params: nil})
 
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:CentroCostosController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:CentroCostosController"],
+        beego.ControllerComments{
+            Method: "Post",
+            Router: "/",
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:CentroCostosController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:CentroCostosController"],
+        beego.ControllerComments{
+            Method: "GetAll",
+            Router: "/",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:CentroCostosController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:CentroCostosController"],
+        beego.ControllerComments{
+            Method: "GetOne",
+            Router: "/:id",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:CentroCostosController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:CentroCostosController"],
+        beego.ControllerComments{
+            Method: "Put",
+            Router: "/:id",
+            AllowHTTPMethods: []string{"put"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:CentroCostosController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:CentroCostosController"],
+        beego.ControllerComments{
+            Method: "Delete",
+            Router: "/:id",
+            AllowHTTPMethods: []string{"delete"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:CierreController"] = append(beego.GlobalControllerRouter["github.com/udistrital/movimientos_arka_crud/controllers:CierreController"],
         beego.ControllerComments{
             Method: "Post",
