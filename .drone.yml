@@ -16,6 +16,7 @@ steps:
     branch:
     - develop
     - feature/*
+    - hotfix/*
     - release/*
     event:
     - push
@@ -29,6 +30,7 @@ steps:
     branch:
     - develop
     - feature/*
+    - hotfix/*
     - release/*
     event:
     - push
@@ -42,13 +44,13 @@ steps:
     branch:
     - develop
     - feature/*
+    - hotfix/*
     - release/*
     event:
     - push
 
 - name: go_run_test
-  failure: ignore
-  image: golang:1.17
+  image: golang:1.18
   commands:
   - go get -t
   - go get github.com/smartystreets/goconvey/convey
@@ -56,7 +58,7 @@ steps:
   - go get github.com/axw/gocov/...
   - go get github.com/AlekSi/gocov-xml
   - go get -u github.com/jstemmer/go-junit-report
-  - golangci-lint run ./... | tee report.xml
+  - golangci-lint run | tee report.xml
   # - gocov test ./... | gocov-xml > coverage.xml
   # - go test -v ./... | go-junit-report > test.xml
   when:
@@ -78,7 +80,7 @@ steps:
       from_secret: SONAR_TOKEN
 
 - name: go_build
-  image: golang:1.17
+  image: golang:1.18
   commands:
   - go get -t
   - GOOS=linux GOARCH=amd64 go build -o main
@@ -177,7 +179,7 @@ steps:
       - refs/tags/**
 
 - name: update_aws_ecs
-  image: golang:1.17
+  image: golang:1.18
   environment:
     AWS_ACCESS_KEY_ID:
       from_secret: AWS_ACCESS_KEY_ID
@@ -215,7 +217,6 @@ steps:
     - push
 
 - name: notify_telegram
-  failure: ignore
   image: appleboy/drone-telegram
   settings:
     token:
