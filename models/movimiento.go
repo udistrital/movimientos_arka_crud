@@ -19,8 +19,8 @@ type Movimiento struct {
 	Consecutivo             *string                `orm:"column(consecutivo);null"`
 	FechaCorte              *time.Time             `orm:"column(fecha_corte);null"`
 	Detalle                 string                 `orm:"column(detalle);type(jsonb)"`
-	FechaCreacion           time.Time              `orm:"auto_now_add;column(fecha_creacion);type(timestamp without time zone)"`
-	FechaModificacion       time.Time              `orm:"auto_now;column(fecha_modificacion);type(timestamp without time zone)"`
+	FechaCreacion           time.Time              `orm:"column(fecha_creacion);type(timestamp without time zone)"`
+	FechaModificacion       time.Time              `orm:"column(fecha_modificacion);type(timestamp without time zone)"`
 	Activo                  bool                   `orm:"column(activo)"`
 	MovimientoPadreId       *Movimiento            `orm:"column(movimiento_padre_id);rel(fk);null"`
 	FormatoTipoMovimientoId *FormatoTipoMovimiento `orm:"column(formato_tipo_movimiento_id);rel(fk)"`
