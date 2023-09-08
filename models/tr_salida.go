@@ -23,6 +23,7 @@ func AddTransaccionSalida(n *SalidaGeneral) (err error) {
 	defer func() {
 		r := recover()
 		if r != nil {
+			err = r.(error)
 			o.Rollback()
 			logs.Error(r)
 		} else {

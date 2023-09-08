@@ -1166,8 +1166,7 @@ definitions:
       Codigo:
         type: string
       DependenciaId:
-        type: integer
-        format: int64
+        type: string
       FechaCreacion:
         type: string
         format: datetime
@@ -1180,8 +1179,7 @@ definitions:
       Nombre:
         type: string
       SedeId:
-        type: integer
-        format: int64
+        type: string
   models.DepreciacionElemento:
     title: DepreciacionElemento
     type: object

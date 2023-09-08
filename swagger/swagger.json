@@ -1750,8 +1750,7 @@
                     "type": "string"
                 },
                 "DependenciaId": {
-                    "type": "integer",
-                    "format": "int64"
+                    "type": "string"
                 },
                 "FechaCreacion": {
                     "type": "string",
@@ -1769,8 +1768,7 @@
                     "type": "string"
                 },
                 "SedeId": {
-                    "type": "integer",
-                    "format": "int64"
+                    "type": "string"
                 }
             }
         },

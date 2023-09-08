@@ -12,8 +12,8 @@ import (
 
 type CentroCostos struct {
 	Id                int       `orm:"column(id);pk"`
-	DependenciaId     *int      `orm:"column(dependencia_id);null"`
-	SedeId            *int      `orm:"column(sede_id);null"`
+	DependenciaId     string    `orm:"column(dependencia);null"`
+	SedeId            string    `orm:"column(sede);null"`
 	Codigo            string    `orm:"column(codigo)"`
 	Nombre            string    `orm:"column(nombre)"`
 	Activo            bool      `orm:"column(activo)"`
