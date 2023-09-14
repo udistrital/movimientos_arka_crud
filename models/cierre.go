@@ -24,7 +24,7 @@ func GetCorteDepreciacion(fechaCorte string, elementos interface{}) (err error) 
 		"FechaCorte__gte":                            fechaCorte,
 	}
 
-	cierres, err := GetAllMovimiento(query_, nil, nil, nil, 0, 1)
+	cierres, _, err := GetAllMovimiento(query_, nil, nil, nil, 0, 1)
 	if err != nil || len(cierres) > 0 {
 		return err
 	}

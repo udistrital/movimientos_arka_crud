@@ -134,7 +134,7 @@ func (c *MovimientoController) GetAll() {
 		}
 	}
 
-	l, err := models.GetAllMovimiento(query, fields, sortby, order, offset, limit)
+	l, count, err := models.GetAllMovimiento(query, fields, sortby, order, offset, limit)
 	if err != nil {
 		logs.Error(err)
 		//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
@@ -144,6 +144,7 @@ func (c *MovimientoController) GetAll() {
 		if l == nil {
 			l = []interface{}{}
 		}
+		c.Ctx.Output.Header("total-count", strconv.Itoa(int(count)))
 		c.Data["json"] = l
 	}
 	c.ServeJSON()
