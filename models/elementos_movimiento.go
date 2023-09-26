@@ -310,7 +310,7 @@ func GetHistorialElemento(elementoId int, acta, entradas, novedades, final bool,
 	if err != nil {
 		return
 	} else if len(ids) > 0 {
-		l, err := GetAllMovimiento(
+		l, _, err := GetAllMovimiento(
 			map[string]string{"Id__in": ArrayToString(ids, "|")}, []string{}, nil, nil, 0, -1)
 		if err != nil {
 			return err
@@ -340,7 +340,7 @@ func GetHistorialElemento(elementoId int, acta, entradas, novedades, final bool,
 	if err != nil {
 		return
 	} else if len(ids) > 0 {
-		if l, err := GetAllMovimiento(
+		if l, _, err := GetAllMovimiento(
 			map[string]string{"Id__in": ArrayToString(ids, "|")}, []string{}, nil, nil, 0, -1); err != nil {
 			return err
 		} else {
@@ -371,7 +371,7 @@ func GetHistorialElemento(elementoId int, acta, entradas, novedades, final bool,
 		if err != nil {
 			return
 		} else if len(ids) > 0 {
-			l, err := GetAllMovimiento(map[string]string{"Id__in": ArrayToString(ids, "|")}, []string{}, nil, nil, 0, -1)
+			l, _, err := GetAllMovimiento(map[string]string{"Id__in": ArrayToString(ids, "|")}, []string{}, nil, nil, 0, -1)
 			if err != nil {
 				return err
 			}

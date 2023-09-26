@@ -55,7 +55,7 @@ func GetMovimientoById(id int) (v Movimiento, err error) {
 // GetAllMovimiento retrieves all Movimiento matches certain condition. Returns empty list if
 // no records exist
 func GetAllMovimiento(query map[string]string, fields []string, sortby []string, order []string,
-	offset int64, limit int64) (ml []interface{}, err error) {
+	offset int64, limit int64) (ml []interface{}, count int64, err error) {
 	o := orm.NewOrm()
 	qs := o.QueryTable(new(Movimiento)).RelatedSel()
 	// query k=v
@@ -71,6 +71,10 @@ func GetAllMovimiento(query map[string]string, fields []string, sortby []string,
 			qs = qs.Filter(k, v)
 		}
 	}
+	count, err = qs.Count()
+	if err != nil {
+		return
+	}
 	// order by:
 	var sortFields []string
 	if len(sortby) != 0 {
@@ -83,7 +87,8 @@ func GetAllMovimiento(query map[string]string, fields []string, sortby []string,
 				} else if order[i] == "asc" {
 					orderby = v
 				} else {
-					return nil, errors.New("Error: Invalid order. Must be either [asc|desc]")
+					err = errors.New("error: Invalid order. Must be either [asc|desc]")
+					return
 				}
 				sortFields = append(sortFields, orderby)
 			}
@@ -97,16 +102,19 @@ func GetAllMovimiento(query map[string]string, fields []string, sortby []string,
 				} else if order[0] == "asc" {
 					orderby = v
 				} else {
-					return nil, errors.New("Error: Invalid order. Must be either [asc|desc]")
+					err = errors.New("error: Invalid order. Must be either [asc|desc]")
+					return
 				}
 				sortFields = append(sortFields, orderby)
 			}
 		} else if len(sortby) != len(order) && len(order) != 1 {
-			return nil, errors.New("Error: 'sortby', 'order' sizes mismatch or 'order' size is not 1")
+			err = errors.New("error: 'sortby', 'order' sizes mismatch or 'order' size is not 1")
+			return
 		}
 	} else {
 		if len(order) != 0 {
-			return nil, errors.New("Error: unused 'order' fields")
+			err = errors.New("error: unused 'order' fields")
+			return
 		}
 	}
 
@@ -128,9 +136,8 @@ func GetAllMovimiento(query map[string]string, fields []string, sortby []string,
 				ml = append(ml, m)
 			}
 		}
-		return ml, nil
 	}
-	return nil, err
+	return
 }
 
 // UpdateMovimiento updates Movimiento by Id and returns error if
@@ -181,7 +188,7 @@ func GetEntradaByActa(acta_recibido_id int) (entrada *Movimiento, err error) {
 		return nil, nil
 	}
 
-	if l, err := GetAllMovimiento(
+	if l, _, err := GetAllMovimiento(
 		map[string]string{"Id": strconv.Itoa(ids[0])}, []string{}, nil, nil, 0, -1); err != nil {
 		return nil, err
 	} else {
@@ -240,7 +247,7 @@ func GetTrasladosByTerceroId(terceroId int, porRecibir bool, traslados *[]Movimi
 		return nil
 	}
 
-	if l, err := GetAllMovimiento(
+	if l, _, err := GetAllMovimiento(
 		map[string]string{"Id__in": strings.Trim(strings.Replace(fmt.Sprint(ids), " ", "|", -1), "[]")}, []string{}, nil, nil, 0, -1); err != nil {
 		return err
 	} else {
@@ -280,7 +287,7 @@ func GetBajasByTerceroId(terceroId int, bajas *[]interface{}) (err error) {
 		return
 	}
 
-	if l, err := GetAllMovimiento(
+	if l, _, err := GetAllMovimiento(
 		map[string]string{"Id__in": strings.Trim(strings.Replace(fmt.Sprint(ids), " ", "|", -1), "[]")}, []string{}, nil, nil, 0, -1); err != nil {
 		return err
 	} else {
@@ -316,7 +323,7 @@ func GetBodegaByTerceroId(terceroId int, solicitudes *[]interface{}) (err error)
 		return
 	}
 
-	if l, err := GetAllMovimiento(
+	if l, _, err := GetAllMovimiento(
 		map[string]string{"Id__in": strings.Trim(strings.Replace(fmt.Sprint(ids), " ", "|", -1), "[]")}, []string{}, nil, nil, 0, -1); err != nil {
 		return err
 	} else {
