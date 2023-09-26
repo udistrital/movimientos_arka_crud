@@ -1749,9 +1749,8 @@
                 "Codigo": {
                     "type": "string"
                 },
-                "DependenciaId": {
-                    "type": "integer",
-                    "format": "int64"
+                "Dependencia": {
+                    "type": "string"
                 },
                 "FechaCreacion": {
                     "type": "string",
@@ -1768,9 +1767,8 @@
                 "Nombre": {
                     "type": "string"
                 },
-                "SedeId": {
-                    "type": "integer",
-                    "format": "int64"
+                "Sede": {
+                    "type": "string"
                 }
             }
         },

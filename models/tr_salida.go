@@ -12,47 +12,54 @@ type TrSalida struct {
 	Elementos []*ElementosMovimiento
 }
 type SalidaGeneral struct {
-	Salidas []*TrSalida
+	Salidas []TrSalida
 }
 
 // AddTransaccionSalida Transacción para registrar todas las salidas asociadas a una entrada
 func AddTransaccionSalida(n *SalidaGeneral) (err error) {
+
 	o := orm.NewOrm()
-	err = o.Begin()
 
 	defer func() {
-		if r := recover(); r != nil {
+		r := recover()
+		if r != nil {
+			err = r.(error)
 			o.Rollback()
 			logs.Error(r)
 		} else {
 			o.Commit()
 		}
 	}()
+
+	err = o.Begin()
 	if err != nil {
-		logs.Error(err)
 		return
 	}
 
 	var estado EstadoMovimiento
-	if _, err = o.QueryTable(new(EstadoMovimiento)).RelatedSel().Filter("Nombre", "Entrada Con Salida").All(&estado); err != nil {
-		panic(err.Error())
+	err = o.QueryTable(new(EstadoMovimiento)).RelatedSel().Filter("Nombre", "Entrada Con Salida").One(&estado)
+	if err != nil {
+		panic(err)
 	}
+
 	n.Salidas[0].Salida.MovimientoPadreId.EstadoMovimientoId = &estado
 	if _, err = o.Update(n.Salidas[0].Salida.MovimientoPadreId, "EstadoMovimientoId"); err != nil {
-		panic(err.Error())
+		panic(err)
 	}
 
 	for _, m := range n.Salidas {
-		if idSalida, err := o.Insert(m.Salida); err == nil {
-			mov := Movimiento{Id: int(idSalida)}
-			for _, elemento := range m.Elementos {
-				elemento.MovimientoId = &mov
-				if _, err := o.Insert(elemento); err != nil {
-					panic(err.Error())
-				}
+		idSalida, err := o.Insert(m.Salida)
+		if err != nil {
+			panic(err)
+		}
+
+		mov := Movimiento{Id: int(idSalida)}
+		for _, elemento := range m.Elementos {
+			elemento.MovimientoId = &mov
+			_, err = o.Insert(elemento)
+			if err != nil {
+				panic(err)
 			}
-		} else {
-			panic(err.Error())
 		}
 	}
 
@@ -89,8 +96,8 @@ func GetTransaccionSalida(id int) (salida map[string]interface{}, err error) {
 
 // PutTransaccionSalida Transacción para registrar todas las salidas asociadas a una entrada
 func PutTransaccionSalida(n *SalidaGeneral) (err error) {
+
 	o := orm.NewOrm()
-	err = o.Begin()
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -101,34 +108,39 @@ func PutTransaccionSalida(n *SalidaGeneral) (err error) {
 		}
 	}()
 
+	err = o.Begin()
 	if err != nil {
-		logs.Error(err)
 		return
 	}
 
 	for _, m := range n.Salidas {
 		// Se actualiza la salida con el id y consecutivo original
 		if m.Salida.Id > 0 {
-			if _, err = o.Update(m.Salida); err != nil {
-				panic(err.Error())
+			_, err = o.Update(m.Salida)
+			if err != nil {
+				panic(err)
 			}
+
 			for _, elemento := range m.Elementos {
-				if _, err := o.Update(elemento, "VidaUtil", "ValorResidual"); err != nil {
-					panic(err.Error())
+				_, err := o.Update(elemento, "VidaUtil", "ValorResidual")
+				if err != nil {
+					panic(err)
 				}
 			}
 		} else {
 			// Las demás salidas se insertan como un movimiento adicional y este Id se asigna a los elementos
-			if idSalida, err := o.Insert(m.Salida); err == nil {
-				mov := Movimiento{Id: int(idSalida)}
-				for _, elemento := range m.Elementos {
-					elemento.MovimientoId = &mov
-					if _, err := o.Update(elemento, "MovimientoId", "VidaUtil", "ValorResidual"); err != nil {
-						panic(err.Error())
-					}
+			idSalida, err := o.Insert(m.Salida)
+			if err != nil {
+				panic(err)
+			}
+
+			mov := Movimiento{Id: int(idSalida)}
+			for _, elemento := range m.Elementos {
+				elemento.MovimientoId = &mov
+				_, err = o.Update(elemento, "MovimientoId", "VidaUtil", "ValorResidual")
+				if err != nil {
+					panic(err)
 				}
-			} else {
-				panic(err.Error())
 			}
 		}
 	}
