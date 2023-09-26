@@ -8,8 +8,8 @@ import (
 )
 
 type TrSalida struct {
-	Salida    Movimiento
-	Elementos []ElementosMovimiento
+	Salida    *Movimiento
+	Elementos []*ElementosMovimiento
 }
 type SalidaGeneral struct {
 	Salidas []TrSalida
@@ -48,7 +48,7 @@ func AddTransaccionSalida(n *SalidaGeneral) (err error) {
 	}
 
 	for _, m := range n.Salidas {
-		idSalida, err := o.Insert(&m.Salida)
+		idSalida, err := o.Insert(m.Salida)
 		if err != nil {
 			panic(err)
 		}
@@ -56,7 +56,7 @@ func AddTransaccionSalida(n *SalidaGeneral) (err error) {
 		mov := Movimiento{Id: int(idSalida)}
 		for _, elemento := range m.Elementos {
 			elemento.MovimientoId = &mov
-			_, err = o.Insert(&elemento)
+			_, err = o.Insert(elemento)
 			if err != nil {
 				panic(err)
 			}
@@ -116,20 +116,20 @@ func PutTransaccionSalida(n *SalidaGeneral) (err error) {
 	for _, m := range n.Salidas {
 		// Se actualiza la salida con el id y consecutivo original
 		if m.Salida.Id > 0 {
-			_, err = o.Update(&m.Salida)
+			_, err = o.Update(m.Salida)
 			if err != nil {
 				panic(err)
 			}
 
 			for _, elemento := range m.Elementos {
-				_, err := o.Update(&elemento, "VidaUtil", "ValorResidual")
+				_, err := o.Update(elemento, "VidaUtil", "ValorResidual")
 				if err != nil {
 					panic(err)
 				}
 			}
 		} else {
 			// Las demás salidas se insertan como un movimiento adicional y este Id se asigna a los elementos
-			idSalida, err := o.Insert(&m.Salida)
+			idSalida, err := o.Insert(m.Salida)
 			if err != nil {
 				panic(err)
 			}
@@ -137,7 +137,7 @@ func PutTransaccionSalida(n *SalidaGeneral) (err error) {
 			mov := Movimiento{Id: int(idSalida)}
 			for _, elemento := range m.Elementos {
 				elemento.MovimientoId = &mov
-				_, err = o.Update(&elemento, "MovimientoId", "VidaUtil", "ValorResidual")
+				_, err = o.Update(elemento, "MovimientoId", "VidaUtil", "ValorResidual")
 				if err != nil {
 					panic(err)
 				}
