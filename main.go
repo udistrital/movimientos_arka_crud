@@ -8,7 +8,6 @@ import (
 	"github.com/astaxie/beego/plugins/cors"
 	_ "github.com/lib/pq"
 	apistatus "github.com/udistrital/utils_oas/apiStatusLib"
-	"github.com/udistrital/utils_oas/auditoria"
 	"github.com/udistrital/utils_oas/customerror"
 )
 
@@ -23,7 +22,7 @@ func main() {
 	AllowedOrigins := []string{"*.udistrital.edu.co"}
 	if beego.BConfig.RunMode == "dev" {
 		AllowedOrigins = []string{"*"}
-		orm.Debug = true
+		// orm.Debug = true
 		beego.BConfig.WebConfig.DirectoryIndex = true
 		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
 	}
@@ -42,7 +41,7 @@ func main() {
 
 	//logs.SetLogger(logs.AdapterFile, `{"filename":"/var/log/beego/catalogo_elementos_crud/catalogo_elementos_crud.log"}`)
 	apistatus.Init()
-	auditoria.InitMiddleware()
+	// auditoria.InitMiddleware()
 	beego.ErrorController(&customerror.CustomErrorController{})
 	beego.Run()
 }
