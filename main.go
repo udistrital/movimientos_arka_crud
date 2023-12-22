@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "github.com/udistrital/movimientos_arka_crud/routers"
+	"github.com/udistrital/utils_oas/auditoria"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
@@ -41,7 +42,7 @@ func main() {
 
 	//logs.SetLogger(logs.AdapterFile, `{"filename":"/var/log/beego/catalogo_elementos_crud/catalogo_elementos_crud.log"}`)
 	apistatus.Init()
-	// auditoria.InitMiddleware()
+	auditoria.InitMiddleware()
 	beego.ErrorController(&customerror.CustomErrorController{})
 	beego.Run()
 }
