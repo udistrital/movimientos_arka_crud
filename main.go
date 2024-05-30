@@ -10,6 +10,7 @@ import (
 	_ "github.com/lib/pq"
 	apistatus "github.com/udistrital/utils_oas/apiStatusLib"
 	"github.com/udistrital/utils_oas/customerror"
+	"github.com/udistrital/utils_oas/xray"
 )
 
 func main() {
@@ -41,6 +42,7 @@ func main() {
 	}))
 
 	//logs.SetLogger(logs.AdapterFile, `{"filename":"/var/log/beego/catalogo_elementos_crud/catalogo_elementos_crud.log"}`)
+	xray.InitXRay()
 	apistatus.Init()
 	auditoria.InitMiddleware()
 	beego.ErrorController(&customerror.CustomErrorController{})
