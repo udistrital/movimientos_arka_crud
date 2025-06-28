@@ -80,7 +80,7 @@ steps:
       from_secret: SONAR_TOKEN
 
 - name: go_build
-  image: golang:1.18
+  image: golang:1.22
   commands:
   - go get -t
   - GOOS=linux GOARCH=amd64 go build -o main
