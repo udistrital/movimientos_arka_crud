@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"strings"
 
-
 	"github.com/astaxie/beego/migration"
 )
 
@@ -40,7 +39,7 @@ func (m *FuncionalidadTraslados_20211118_122319) Up() {
 	}
 
 	// use m.SQL("CREATE TABLE ...") to make schema update
-	
+
 }
 
 // Reverse the migrations
@@ -59,7 +58,6 @@ func (m *FuncionalidadTraslados_20211118_122319) Down() {
 		m.SQL(request)
 		// do whatever you need with result and error
 	}
-
 
 	// use m.SQL("DROP TABLE ...") to reverse schema update
 

@@ -1,12 +1,12 @@
 module github.com/udistrital/movimientos_arka_crud
 
-go 1.24.0
+go 1.24.2
 
 require (
 	github.com/astaxie/beego v1.12.3
-	github.com/cucumber/godog v0.15.0
+	github.com/cucumber/godog v0.15.1
 	github.com/lib/pq v1.10.9
-	github.com/udistrital/utils_oas v0.0.0-20250618194922-b7eea7a9bf62
+	github.com/udistrital/utils_oas v0.0.0-20251106203309-c6f4d157fdb6
 	github.com/xeipuuv/gojsonschema v1.2.0
 )
 
@@ -37,7 +37,7 @@ require (
 	github.com/prometheus/common v0.21.0 // indirect
 	github.com/prometheus/procfs v0.6.0 // indirect
 	github.com/shiena/ansicolor v0.0.0-20200904210342-c7312218db18 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/spf13/pflag v1.0.7 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.34.0 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
