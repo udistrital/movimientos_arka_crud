@@ -21,7 +21,7 @@ import (
 	"github.com/udistrital/utils_oas/request"
 )
 
-//@opt opciones de godog
+// @opt opciones de godog
 var opt = godog.Options{Output: colors.Colored(os.Stdout)}
 
 // @resStatus codigo de respuesta a las solicitudes a la api
@@ -30,10 +30,10 @@ var resStatus string
 // @resBody JSON repuesta Delete
 var resDelete string
 
-//@resBody JSON de respuesta a las solicitudesde la api
+// @resBody JSON de respuesta a las solicitudesde la api
 var resBody []byte
 
-//@especificacion estructura de la fecha
+// @especificacion estructura de la fecha
 const especificacion = "Jan 2, 2006 at 3:04pm (MST)"
 
 var savepostres map[string]interface{}
@@ -53,7 +53,7 @@ type Parametrica struct {
 	FechaModificacion time.Time
 }
 
-//@exe_cmd ejecuta comandos en la terminal
+// @exe_cmd ejecuta comandos en la terminal
 func exe_cmd(cmd string, wg *sync.WaitGroup) {
 
 	parts := strings.Fields(cmd)
@@ -77,7 +77,7 @@ func deleteFile(path string) {
 
 }
 
-//@run_bee activa el servicio de la api para realizar los test
+// @run_bee activa el servicio de la api para realizar los test
 func run_bee() {
 	var resultado map[string]interface{}
 
@@ -116,7 +116,7 @@ func run_bee() {
 	wg.Done()
 }
 
-//@init inicia la aplicacion para realizar los test
+// @init inicia la aplicacion para realizar los test
 func init() {
 	fmt.Println("Inicio de pruebas Unitarias al API")
 
@@ -127,7 +127,7 @@ func init() {
 
 }
 
-//@TestMain para realizar la ejecucion con el comando go test ./test
+// @TestMain para realizar la ejecucion con el comando go test ./test
 func TestMain(m *testing.M) {
 	// init()
 	status := godog.RunWithOptions("godogs", func(s *godog.Suite) {
@@ -145,7 +145,7 @@ func TestMain(m *testing.M) {
 
 }
 
-//@gen_files genera los archivos de ejemplos
+// @gen_files genera los archivos de ejemplos
 func gen_files() {
 	fmt.Println("Genera los archivos")
 	t := time.Now()
