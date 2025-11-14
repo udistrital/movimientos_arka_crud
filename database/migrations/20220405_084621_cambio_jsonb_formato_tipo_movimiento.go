@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/astaxie/beego/migration"
@@ -23,7 +23,7 @@ func init() {
 
 // Run the migrations
 func (m *CambioJsonbFormatoTipoMovimiento_20220405_084621) Up() {
-	file, err := ioutil.ReadFile("../scripts/20220405_084621_cambio_jsonb_formato_tipo_movimiento.up.sql")
+	file, err := os.ReadFile("../scripts/20220405_084621_cambio_jsonb_formato_tipo_movimiento.up.sql")
 
 	if err != nil {
 		fmt.Println(err)
@@ -39,7 +39,7 @@ func (m *CambioJsonbFormatoTipoMovimiento_20220405_084621) Up() {
 
 // Reverse the migrations
 func (m *CambioJsonbFormatoTipoMovimiento_20220405_084621) Down() {
-	file, err := ioutil.ReadFile("../scripts/20220405_084621_cambio_jsonb_formato_tipo_movimiento.down.sql")
+	file, err := os.ReadFile("../scripts/20220405_084621_cambio_jsonb_formato_tipo_movimiento.down.sql")
 
 	if err != nil {
 		fmt.Println(err)

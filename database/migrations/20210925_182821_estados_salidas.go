@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/astaxie/beego/migration"
@@ -23,7 +23,7 @@ func init() {
 
 // Run the migrations
 func (m *EstadosSalidas_20210925_182821) Up() {
-	file, err := ioutil.ReadFile("../scripts/20210925_182821_estados_salidas_up.sql")
+	file, err := os.ReadFile("../scripts/20210925_182821_estados_salidas_up.sql")
 
 	if err != nil {
 		// handle error
@@ -42,7 +42,7 @@ func (m *EstadosSalidas_20210925_182821) Up() {
 
 // Reverse the migrations
 func (m *EstadosSalidas_20210925_182821) Down() {
-	file, err := ioutil.ReadFile("../scripts/20210925_182821_estados_salidas_down.sql")
+	file, err := os.ReadFile("../scripts/20210925_182821_estados_salidas_down.sql")
 
 	if err != nil {
 		// handle error

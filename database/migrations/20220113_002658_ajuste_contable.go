@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/astaxie/beego/migration"
@@ -23,7 +23,7 @@ func init() {
 
 // Run the migrations
 func (m *AjusteContable_20220113_002658) Up() {
-	file, err := ioutil.ReadFile("../scripts/20220113_002658_ajuste_contable_up.sql")
+	file, err := os.ReadFile("../scripts/20220113_002658_ajuste_contable_up.sql")
 
 	if err != nil {
 		fmt.Println(err)
@@ -39,7 +39,7 @@ func (m *AjusteContable_20220113_002658) Up() {
 
 // Reverse the migrations
 func (m *AjusteContable_20220113_002658) Down() {
-	file, err := ioutil.ReadFile("../scripts/20220113_002658_ajuste_contable_down.sql")
+	file, err := os.ReadFile("../scripts/20220113_002658_ajuste_contable_down.sql")
 
 	if err != nil {
 		fmt.Println(err)

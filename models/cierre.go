@@ -3,7 +3,6 @@ package models
 import (
 	"strings"
 
-	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 )
@@ -388,6 +387,5 @@ func getScriptAprobacion() string {
 }
 
 func replaceSquema(script string) string {
-	Esquema = beego.AppConfig.String("PGschemas")
-	return strings.ReplaceAll(script, "ESQUEMA", Esquema)
+	return strings.ReplaceAll(script, "ESQUEMA", esquema)
 }

@@ -72,7 +72,7 @@ func deleteFile(path string) {
 	// delete file
 	err := os.Remove(path)
 	if err != nil {
-		fmt.Errorf("no se pudo eliminar el archivo")
+		fmt.Printf("no se pudo eliminar el archivo")
 	}
 
 }
@@ -129,14 +129,16 @@ func init() {
 
 // @TestMain para realizar la ejecucion con el comando go test ./test
 func TestMain(m *testing.M) {
-	// init()
-	status := godog.RunWithOptions("godogs", func(s *godog.Suite) {
-		FeatureContext(s)
-	}, godog.Options{
-		Format: "progress",
-		Paths:  []string{"features"},
-		//Randomize: time.Now().UTC().UnixNano(), // randomize scenario execution order
-	})
+	ts := godog.TestSuite{
+		Name:                "godogs",
+		ScenarioInitializer: InitializeScenario,
+		Options: &godog.Options{
+			Format: "progress",
+			Paths:  []string{"features"},
+			Output: colors.Colored(os.Stdout),
+		},
+	}
+	status := ts.Run()
 
 	if st := m.Run(); st > status {
 		status = st

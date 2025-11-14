@@ -6,10 +6,28 @@ workspace:
   path: src/github.com/${DRONE_REPO}
 
 steps:
+- name: run_sonar_scanner
+  image: sonarsource/sonar-scanner-cli:latest
+  environment:
+    SONAR_HOST_URL:
+      from_secret: SONAR_HOST
+    SONAR_TOKEN:
+      from_secret: SONAR_TOKEN
+    SONAR_SCANNER_OPTS: "-Dsonar.working.directory=/tmp/.scannerwork"
+  commands:
+    - sonar-scanner
+  when:
+    branch:
+      - feature/*
+      - develop
+      - hotfix/*
+    event:
+    - push
+
 - name: go_run_test
   image: golang:1.24
   commands:
-    # - go vet ./...
+    - go vet ./...
     - go fmt ./... && git diff --exit-code || (echo "Go fmt detected formatting issues! Please run 'go fmt' to format your code." && exit 1)
     - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
     - golangci-lint run --out-format=checkstyle --timeout=5m > lint_report.xml || true
@@ -42,14 +60,6 @@ steps:
       - master
     event:
       - push
-
-- name: run_sonar_scanner
-  image: aosapps/drone-sonar-plugin
-  settings:
-    sonar_host:
-      from_secret: SONAR_HOST
-    sonar_token:
-      from_secret: SONAR_TOKEN
 
 - name: publish_to_ecr_release
   image: plugins/ecr
