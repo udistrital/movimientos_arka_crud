@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/astaxie/beego/migration"
@@ -24,7 +24,7 @@ func init() {
 // Run the migrations
 func (m *FixEntradaAprovechamiento_20210129_003900) Up() {
 	// use m.SQL("CREATE TABLE ...") to make schema update
-	file, err := ioutil.ReadFile("../scripts/20210129_003900_fix_entrada_aprovechamiento_up.sql")
+	file, err := os.ReadFile("../scripts/20210129_003900_fix_entrada_aprovechamiento_up.sql")
 	if err != nil {
 		// handle error
 		fmt.Println(err)
@@ -43,7 +43,7 @@ func (m *FixEntradaAprovechamiento_20210129_003900) Up() {
 // Reverse the migrations
 func (m *FixEntradaAprovechamiento_20210129_003900) Down() {
 	// use m.SQL("DROP TABLE ...") to reverse schema update
-	file, err := ioutil.ReadFile("../scripts/20210129_003900_fix_entrada_aprovechamiento_down.sql")
+	file, err := os.ReadFile("../scripts/20210129_003900_fix_entrada_aprovechamiento_down.sql")
 
 	if err != nil {
 		// handle error

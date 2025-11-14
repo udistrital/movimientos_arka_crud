@@ -211,12 +211,12 @@ func GetTrasladosByTerceroId(terceroId int, porRecibir bool, traslados *[]Movimi
 
 	query :=
 		`SELECT	m.id
-	FROM ` + Esquema + `.movimiento m,` +
-			Esquema + `.formato_tipo_movimiento fm`
+	FROM ` + esquema + `.movimiento m,` +
+			esquema + `.formato_tipo_movimiento fm`
 
 	if porRecibir {
 		query += `,
-		` + Esquema + `.estado_movimiento em`
+		` + esquema + `.estado_movimiento em`
 	}
 
 	query +=
@@ -271,9 +271,9 @@ func GetBajasByTerceroId(terceroId int, bajas *[]interface{}) (err error) {
 	query :=
 		`
 		SELECT	m.id
-		FROM ` + Esquema + `.movimiento m,` +
-			Esquema + `.estado_movimiento sm
-		WHERE 
+		FROM ` + esquema + `.movimiento m,` +
+			esquema + `.estado_movimiento sm
+		WHERE
 			sm.nombre LIKE 'Baja%'
 			AND m.estado_movimiento_id = sm.id
 			AND m.detalle ->> 'Funcionario' = ?;
@@ -307,9 +307,9 @@ func GetBodegaByTerceroId(terceroId int, solicitudes *[]interface{}) (err error)
 	query :=
 		`
 		SELECT	m.id
-		FROM ` + Esquema + `.movimiento m,` +
-			Esquema + `.formato_tipo_movimiento fm
-		WHERE 
+		FROM ` + esquema + `.movimiento m,` +
+			esquema + `.formato_tipo_movimiento fm
+		WHERE
 			fm.codigo_abreviacion = 'SOL_BOD'
 			AND m.formato_tipo_movimiento_id = fm.id
 			AND m.detalle ->> 'Funcionario' = ?;

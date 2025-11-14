@@ -55,14 +55,13 @@ func toJson(p interface{}) string {
 // @getPages convierte en un tipo el json
 func getPages(ruta string) []byte {
 
-	raw, err := ioutil.ReadFile(ruta)
+	raw, err := os.ReadFile(ruta)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 
-	var c []byte
-	c = raw
+	c := raw
 	return c
 }
 
@@ -102,6 +101,10 @@ func iSendRequestToWhereBodyIsJson(arg1, arg2, arg3 string) error {
 	pages := getPages(arg3)
 
 	req, err := http.NewRequest(arg1, url, bytes.NewBuffer(pages))
+	if err != nil {
+		return err
+	}
+
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
@@ -166,8 +169,8 @@ func theResponseShouldMatchJson(arg1 string) error {
 	return nil
 }
 
-func FeatureContext(s *godog.Suite) {
-	s.Step(`^I send "([^"]*)" request to "([^"]*)" where body is json "([^"]*)"$`, iSendRequestToWhereBodyIsJson)
-	s.Step(`^the response code should be "([^"]*)"$`, theResponseCodeShouldBe)
-	s.Step(`^the response should match json "([^"]*)"$`, theResponseShouldMatchJson)
+func InitializeScenario(ctx *godog.ScenarioContext) {
+	ctx.Step(`^I send "([^"]*)" request to "([^"]*)" where body is json "([^"]*)"$`, iSendRequestToWhereBodyIsJson)
+	ctx.Step(`^the response code should be "([^"]*)"$`, theResponseCodeShouldBe)
+	ctx.Step(`^the response should match json "([^"]*)"$`, theResponseShouldMatchJson)
 }

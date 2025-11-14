@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/astaxie/beego/migration"
@@ -23,7 +23,7 @@ func init() {
 
 // Run the migrations
 func (m *AjusteAuto_20220313_233306) Up() {
-	file, err := ioutil.ReadFile("../scripts/20220313_233306_ajuste_auto_up.sql")
+	file, err := os.ReadFile("../scripts/20220313_233306_ajuste_auto_up.sql")
 
 	if err != nil {
 		fmt.Println(err)
@@ -39,7 +39,7 @@ func (m *AjusteAuto_20220313_233306) Up() {
 
 // Reverse the migrations
 func (m *AjusteAuto_20220313_233306) Down() {
-	file, err := ioutil.ReadFile("../scripts/20220313_233306_ajuste_auto_down.sql")
+	file, err := os.ReadFile("../scripts/20220313_233306_ajuste_auto_down.sql")
 
 	if err != nil {
 		fmt.Println(err)
