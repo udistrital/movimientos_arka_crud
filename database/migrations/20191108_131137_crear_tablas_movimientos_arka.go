@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/astaxie/beego/migration"
@@ -24,7 +24,7 @@ func init() {
 // Run the migrations
 func (m *CrearTablasMovimientosArka_20191108_131137) Up() {
 	// use m.SQL("CREATE TABLE ...") to make schema update
-	file, err := ioutil.ReadFile("../scripts/20191108_131137_crear_tablas_movimientos_arka.up.sql")
+	file, err := os.ReadFile("../scripts/20191108_131137_crear_tablas_movimientos_arka.up.sql")
 
 	if err != nil {
 		// handle error
@@ -43,7 +43,7 @@ func (m *CrearTablasMovimientosArka_20191108_131137) Up() {
 // Reverse the migrations
 func (m *CrearTablasMovimientosArka_20191108_131137) Down() {
 	// use m.SQL("DROP TABLE ...") to reverse schema update
-	file, err := ioutil.ReadFile("../scripts/20191108_131137_crear_tablas_movimientos_arka.down.sql")
+	file, err := os.ReadFile("../scripts/20191108_131137_crear_tablas_movimientos_arka.down.sql")
 
 	if err != nil {
 		// handle error

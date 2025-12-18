@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/astaxie/beego/migration"
@@ -23,7 +23,7 @@ func init() {
 
 // Run the migrations
 func (m *VidaUtilElementos_20221121_110038) Up() {
-	file, err := ioutil.ReadFile("../scripts/20221121_110038_vida_util_elementos_up.sql")
+	file, err := os.ReadFile("../scripts/20221121_110038_vida_util_elementos_up.sql")
 
 	if err != nil {
 		fmt.Println(err)
@@ -39,7 +39,7 @@ func (m *VidaUtilElementos_20221121_110038) Up() {
 
 // Reverse the migrations
 func (m *VidaUtilElementos_20221121_110038) Down() {
-	file, err := ioutil.ReadFile("../scripts/20221121_110038_vida_util_elementos_down.sql")
+	file, err := os.ReadFile("../scripts/20221121_110038_vida_util_elementos_down.sql")
 
 	if err != nil {
 		fmt.Println(err)

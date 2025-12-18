@@ -21,7 +21,7 @@ type apiFeature struct {
 	resp *httptest.ResponseRecorder
 }
 
-//@AreEqualJSON comparar dos JSON si son iguales retorna true de lo contrario false
+// @AreEqualJSON comparar dos JSON si son iguales retorna true de lo contrario false
 func AreEqualJSON(s1, s2 string) (bool, error) {
 
 	var o1 interface{}
@@ -40,7 +40,7 @@ func AreEqualJSON(s1, s2 string) (bool, error) {
 	return reflect.DeepEqual(o1, o2), nil
 }
 
-//@toJson convierte string en JSON
+// @toJson convierte string en JSON
 func toJson(p interface{}) string {
 
 	bytes, err := json.Marshal(p)
@@ -52,17 +52,16 @@ func toJson(p interface{}) string {
 	return string(bytes)
 }
 
-//@getPages convierte en un tipo el json
+// @getPages convierte en un tipo el json
 func getPages(ruta string) []byte {
 
-	raw, err := ioutil.ReadFile(ruta)
+	raw, err := os.ReadFile(ruta)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 
-	var c []byte
-	c = raw
+	c := raw
 	return c
 }
 
@@ -70,7 +69,7 @@ func (a *apiFeature) resetResponse(interface{}) {
 	a.resp = httptest.NewRecorder()
 }
 
-//@iSendRequestToWhereBodyIsJson realiza la solicitud a la API
+// @iSendRequestToWhereBodyIsJson realiza la solicitud a la API
 func iSendRequestToWhereBodyIsJson(arg1, arg2, arg3 string) error {
 
 	var url string
@@ -102,6 +101,10 @@ func iSendRequestToWhereBodyIsJson(arg1, arg2, arg3 string) error {
 	pages := getPages(arg3)
 
 	req, err := http.NewRequest(arg1, url, bytes.NewBuffer(pages))
+	if err != nil {
+		return err
+	}
+
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
@@ -126,7 +129,7 @@ func iSendRequestToWhereBodyIsJson(arg1, arg2, arg3 string) error {
 
 }
 
-//@theResponseCodeShouldBe valida el codigo de respuesta
+// @theResponseCodeShouldBe valida el codigo de respuesta
 func theResponseCodeShouldBe(arg1 string) error {
 	if resStatus != arg1 {
 		return fmt.Errorf("se esperaba el codigo de respuesta .. %s .. y se obtuvo el codigo de respuesta .. %s .. ", arg1, resStatus)
@@ -134,7 +137,7 @@ func theResponseCodeShouldBe(arg1 string) error {
 	return nil
 }
 
-//@theResponseShouldMatchJson valida el JSON de respuesta
+// @theResponseShouldMatchJson valida el JSON de respuesta
 func theResponseShouldMatchJson(arg1 string) error {
 	div := strings.Split(arg1, "")
 
@@ -166,8 +169,8 @@ func theResponseShouldMatchJson(arg1 string) error {
 	return nil
 }
 
-func FeatureContext(s *godog.Suite) {
-	s.Step(`^I send "([^"]*)" request to "([^"]*)" where body is json "([^"]*)"$`, iSendRequestToWhereBodyIsJson)
-	s.Step(`^the response code should be "([^"]*)"$`, theResponseCodeShouldBe)
-	s.Step(`^the response should match json "([^"]*)"$`, theResponseShouldMatchJson)
+func InitializeScenario(ctx *godog.ScenarioContext) {
+	ctx.Step(`^I send "([^"]*)" request to "([^"]*)" where body is json "([^"]*)"$`, iSendRequestToWhereBodyIsJson)
+	ctx.Step(`^the response code should be "([^"]*)"$`, theResponseCodeShouldBe)
+	ctx.Step(`^the response should match json "([^"]*)"$`, theResponseShouldMatchJson)
 }
