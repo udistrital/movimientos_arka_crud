@@ -1,19 +1,19 @@
 package main
 
 import (
-	"github.com/astaxie/beego/logs"
 	_ "github.com/udistrital/movimientos_arka_crud/routers"
-	"github.com/udistrital/utils_oas/auditoria"
-	"github.com/udistrital/utils_oas/database"
-	"github.com/udistrital/utils_oas/security"
-	"github.com/udistrital/utils_oas/xray"
 
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 	"github.com/astaxie/beego/plugins/cors"
 	_ "github.com/lib/pq"
 	apistatus "github.com/udistrital/utils_oas/apiStatusLib"
-	"github.com/udistrital/utils_oas/customerror"
+	"github.com/udistrital/utils_oas/auditoria"
+	"github.com/udistrital/utils_oas/customerrorv2"
+	"github.com/udistrital/utils_oas/database"
+	"github.com/udistrital/utils_oas/security"
+	"github.com/udistrital/utils_oas/xray"
 )
 
 func main() {
@@ -57,6 +57,6 @@ func main() {
 	apistatus.Init()
 	auditoria.InitMiddleware()
 	security.SetSecurityHeaders()
-	beego.ErrorController(&customerror.CustomErrorController{})
+	beego.ErrorController(&customerrorv2.CustomErrorController{})
 	beego.Run()
 }
