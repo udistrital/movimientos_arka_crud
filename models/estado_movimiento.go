@@ -30,6 +30,9 @@ func init() {
 // AddEstadoMovimiento insert a new EstadoMovimiento into database and returns
 // last inserted Id on success.
 func AddEstadoMovimiento(m *EstadoMovimiento) (id int64, err error) {
+	now := time.Now()
+	m.FechaCreacion = now
+	m.FechaModificacion = now
 	o := orm.NewOrm()
 	id, err = o.Insert(m)
 	return

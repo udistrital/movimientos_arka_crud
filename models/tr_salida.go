@@ -2,6 +2,7 @@ package models
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
@@ -48,6 +49,9 @@ func AddTransaccionSalida(n *SalidaGeneral) (err error) {
 	}
 
 	for _, m := range n.Salidas {
+		now := time.Now()
+		m.Salida.FechaCreacion = now
+		m.Salida.FechaModificacion = now
 		idSalida, err := o.Insert(m.Salida)
 		if err != nil {
 			panic(err)
@@ -56,6 +60,8 @@ func AddTransaccionSalida(n *SalidaGeneral) (err error) {
 		mov := Movimiento{Id: int(idSalida)}
 		for _, elemento := range m.Elementos {
 			elemento.MovimientoId = &mov
+			elemento.FechaCreacion = now
+			elemento.FechaModificacion = now
 			_, err = o.Insert(elemento)
 			if err != nil {
 				panic(err)
@@ -129,6 +135,9 @@ func PutTransaccionSalida(n *SalidaGeneral) (err error) {
 			}
 		} else {
 			// Las demás salidas se insertan como un movimiento adicional y este Id se asigna a los elementos
+			now := time.Now()
+			m.Salida.FechaCreacion = now
+			m.Salida.FechaModificacion = now
 			idSalida, err := o.Insert(m.Salida)
 			if err != nil {
 				panic(err)

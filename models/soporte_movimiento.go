@@ -30,6 +30,9 @@ func init() {
 // AddSoporteMovimiento insert a new SoporteMovimiento into database and returns
 // last inserted Id on success.
 func AddSoporteMovimiento(m *SoporteMovimiento) (id int64, err error) {
+	now := time.Now()
+	m.FechaCreacion = now
+	m.FechaModificacion = now
 	o := orm.NewOrm()
 	id, err = o.Insert(m)
 	return

@@ -49,6 +49,9 @@ func init() {
 // AddElementosMovimiento insert a new ElementosMovimiento into database and returns
 // last inserted Id on success.
 func AddElementosMovimiento(m *ElementosMovimiento) (id int64, err error) {
+	now := time.Now()
+	m.FechaCreacion = now
+	m.FechaModificacion = now
 	o := orm.NewOrm()
 	id, err = o.Insert(m)
 	return
