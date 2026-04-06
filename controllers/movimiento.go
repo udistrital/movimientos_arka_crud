@@ -18,7 +18,7 @@ type MovimientoController struct {
 	beego.Controller
 }
 
-// URLMapping ...
+// URLMapping ..
 func (c *MovimientoController) URLMapping() {
 	c.Mapping("Post", c.Post)
 	c.Mapping("GetOne", c.GetOne)
@@ -30,7 +30,7 @@ func (c *MovimientoController) URLMapping() {
 	c.Mapping("Delete", c.Delete)
 }
 
-// Post ...
+// Post ..
 // @Title Post
 // @Description create Movimiento
 // @Param	body		body 	models.Movimiento	true		"body for Movimiento content"
@@ -38,27 +38,94 @@ func (c *MovimientoController) URLMapping() {
 // @Failure 400 the request contains incorrect syntax
 // @router / [post]
 func (c *MovimientoController) Post() {
+	logs.Info("[controller:Post] ===== POST /v1/movimiento INICIO =====")
+	logs.Info("[controller:Post] Method=%s URL=%s RemoteAddr=%s", c.Ctx.Request.Method, c.Ctx.Request.URL.String(), c.Ctx.Request.RemoteAddr)
+	logs.Info("[controller:Post] Content-Type=%s Body.len=%d", c.Ctx.Request.Header.Get("Content-Type"), len(c.Ctx.Input.RequestBody))
+	logs.Info("[controller:Post] Body crudo:\n%s", string(c.Ctx.Input.RequestBody))
+
 	var v models.Movimiento
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
-		if _, err := models.AddMovimiento(&v); err == nil {
+		logs.Info("[controller:Post] Unmarshal OK")
+		logs.Info("[controller:Post] v.Id=%d (debe ser 0 para insert nuevo)", v.Id)
+		logs.Info("[controller:Post] v.Observacion=%q", v.Observacion)
+		logs.Info("[controller:Post] v.Detalle=%q", v.Detalle)
+		logs.Info("[controller:Post] v.Activo=%v", v.Activo)
+		logs.Info("[controller:Post] v.FechaCorte=%v", v.FechaCorte)
+
+		if v.ConsecutivoId != nil {
+			logs.Info("[controller:Post] v.ConsecutivoId=%d", *v.ConsecutivoId)
+		} else {
+			logs.Info("[controller:Post] v.ConsecutivoId=nil")
+		}
+		if v.Consecutivo != nil {
+			logs.Info("[controller:Post] v.Consecutivo=%q", *v.Consecutivo)
+		} else {
+			logs.Info("[controller:Post] v.Consecutivo=nil")
+		}
+
+		if v.FormatoTipoMovimientoId != nil {
+			logs.Info("[controller:Post] v.FormatoTipoMovimientoId.Id=%d", v.FormatoTipoMovimientoId.Id)
+		} else {
+			logs.Error("[controller:Post] v.FormatoTipoMovimientoId=NIL — FK vacío, el insert probablemente fallará o usará 0")
+		}
+
+		if v.EstadoMovimientoId != nil {
+			logs.Info("[controller:Post] v.EstadoMovimientoId.Id=%d", v.EstadoMovimientoId.Id)
+		} else {
+			logs.Error("[controller:Post] v.EstadoMovimientoId=NIL — FK vacío, el insert probablemente fallará o usará 0")
+		}
+
+		if v.MovimientoPadreId != nil {
+			logs.Info("[controller:Post] v.MovimientoPadreId.Id=%d", v.MovimientoPadreId.Id)
+		} else {
+			logs.Info("[controller:Post] v.MovimientoPadreId=nil")
+		}
+
+		reser, _ := json.MarshalIndent(v, "", "  ")
+		logs.Info("[controller:Post] Struct completo re-serializado:\n%s", string(reser))
+
+		logs.Info("[controller:Post] Invocando models.AddMovimiento...")
+		if id, err := models.AddMovimiento(&v); err == nil {
+			logs.Info("[controller:Post] INSERT OK — id retornado por ORM: %d, v.Id después del insert: %d", id, v.Id)
+
+			respJSON, _ := json.MarshalIndent(v, "", "  ")
+			logs.Info("[controller:Post] JSON que se retornará al cliente:\n%s", string(respJSON))
+
 			c.Ctx.Output.SetStatus(201)
 			c.Data["json"] = v
 		} else {
-			logs.Error(err)
-			//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
+			logs.Error("[controller:Post] INSERT FALLÓ — error: %v", err)
+			logs.Error("[controller:Post] Struct que falló: %+v", v)
 			c.Data["system"] = err
 			c.Abort("400")
 		}
 	} else {
-		logs.Error(err)
-		//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
+		logs.Error("[controller:Post] Unmarshal FALLÓ — error: %v", err)
+		logs.Error("[controller:Post] Body que causó el error: %s", string(c.Ctx.Input.RequestBody))
+
+		// Intentar unmarshal genérico para ver qué campos llegan
+		var raw map[string]interface{}
+		if json.Unmarshal(c.Ctx.Input.RequestBody, &raw) == nil {
+			logs.Error("[controller:Post] Campos presentes en el body: %v", keysOf(raw))
+		}
+
 		c.Data["system"] = err
 		c.Abort("400")
 	}
+
+	logs.Info("[controller:Post] ===== POST /v1/movimiento FIN =====")
 	c.ServeJSON()
 }
 
-// GetOne ...
+func keysOf(m map[string]interface{}) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
+// GetOne ..
 // @Title Get One
 // @Description get Movimiento by id
 // @Param	id		path 	string	true		"The key for staticblock"
@@ -71,7 +138,6 @@ func (c *MovimientoController) GetOne() {
 	v, err := models.GetMovimientoById(id)
 	if err != nil {
 		logs.Error(err)
-		//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
 		c.Data["system"] = err
 		c.Abort("404")
 	} else {
@@ -80,7 +146,7 @@ func (c *MovimientoController) GetOne() {
 	c.ServeJSON()
 }
 
-// GetAll ...
+// GetAll ..
 // @Title Get All
 // @Description get Movimiento
 // @Param	query	query	string	false	"Filter. e.g. col1:v1,col2:v2 ..."
@@ -100,27 +166,21 @@ func (c *MovimientoController) GetAll() {
 	var limit int64 = 10
 	var offset int64
 
-	// fields: col1,col2,entity.col3
 	if v := c.GetString("fields"); v != "" {
 		fields = strings.Split(v, ",")
 	}
-	// limit: 10 (default is 10)
 	if v, err := c.GetInt64("limit"); err == nil {
 		limit = v
 	}
-	// offset: 0 (default is 0)
 	if v, err := c.GetInt64("offset"); err == nil {
 		offset = v
 	}
-	// sortby: col1,col2
 	if v := c.GetString("sortby"); v != "" {
 		sortby = strings.Split(v, ",")
 	}
-	// order: desc,asc
 	if v := c.GetString("order"); v != "" {
 		order = strings.Split(v, ",")
 	}
-	// query: k:v,k:v
 	if v := c.GetString("query"); v != "" {
 		for _, cond := range strings.Split(v, ",") {
 			kv := strings.SplitN(cond, ":", 2)
@@ -137,7 +197,6 @@ func (c *MovimientoController) GetAll() {
 	l, count, err := models.GetAllMovimiento(query, fields, sortby, order, offset, limit)
 	if err != nil {
 		logs.Error(err)
-		//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
 		c.Data["system"] = err
 		c.Abort("404")
 	} else {
@@ -150,7 +209,7 @@ func (c *MovimientoController) GetAll() {
 	c.ServeJSON()
 }
 
-// Put ...
+// Put ..
 // @Title Put
 // @Description update the Movimiento
 // @Param	id		path 	string	true		"The id you want to update"
@@ -167,20 +226,18 @@ func (c *MovimientoController) Put() {
 			c.Data["json"] = v
 		} else {
 			logs.Error(err)
-			//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
 			c.Data["system"] = err
 			c.Abort("400")
 		}
 	} else {
 		logs.Error(err)
-		//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
 		c.Data["system"] = err
 		c.Abort("400")
 	}
 	c.ServeJSON()
 }
 
-// Delete ...
+// Delete ..
 // @Title Delete
 // @Description delete the Movimiento
 // @Param	id		path 	string	true		"The id you want to delete"
@@ -194,14 +251,13 @@ func (c *MovimientoController) Delete() {
 		c.Data["json"] = map[string]interface{}{"Id": id}
 	} else {
 		logs.Error(err)
-		//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
 		c.Data["system"] = err
 		c.Abort("404")
 	}
 	c.ServeJSON()
 }
 
-// GetEntradaByActa ...
+// GetEntradaByActa ..
 // @Title Get By Acta
 // @Description get Movimiento by acta_recibido_id
 // @Param	acta_recibido_id path string true "id del acta asociada a la entrada"
@@ -214,7 +270,6 @@ func (c *MovimientoController) GetMovimientoByActa() {
 	v, err := models.GetEntradaByActa(ActaRecibidoId)
 	if err != nil {
 		logs.Error(err)
-		//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
 		c.Data["system"] = err
 		c.Abort("404")
 	} else {
@@ -223,7 +278,7 @@ func (c *MovimientoController) GetMovimientoByActa() {
 	c.ServeJSON()
 }
 
-// GetAllTrasladoByTerceroId ...
+// GetAllTrasladoByTerceroId ..
 // @Title Get Traslados By Tercero
 // @Description Consulta traslados asociados a un tercero determinado.
 // @Param	tercero_id	path	string	true	"TerceroId de quien solicita los traslados"
@@ -264,7 +319,7 @@ func (c *MovimientoController) GetAllTrasladoByTerceroId() {
 	c.ServeJSON()
 }
 
-// GetAllBajasByTerceroId ...
+// GetAllBajasByTerceroId ..
 // @Title Get Bajas Solicitadas By Tercero
 // @Description Consulta las bajas solicitadas por un tercero determinado.
 // @Param	tercero_id	path	string	true	"TerceroId de quien consulta la lista de bajas"
@@ -295,7 +350,7 @@ func (c *MovimientoController) GetAllBajasByTerceroId() {
 	c.ServeJSON()
 }
 
-// GetAllBodegaByTerceroId ...
+// GetAllBodegaByTerceroId ..
 // @Title Get Solicitudes de bodega By Tercero
 // @Description Consulta las solicitudes de bodega de consumo solicitadas por un tercero determinado.
 // @Param	tercero_id	path	string	true	"TerceroId de quien consulta la lista de solicitudes"
