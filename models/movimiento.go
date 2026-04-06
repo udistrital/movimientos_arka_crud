@@ -84,6 +84,11 @@ func AddMovimiento(m *Movimiento) (id int64, err error) {
 	mJSON, _ := json.MarshalIndent(m, "", "  ")
 	logs.Info("[model:AddMovimiento] Struct completo serializado:\n%s", string(mJSON))
 
+	now := time.Now()
+	m.FechaCreacion = now
+	m.FechaModificacion = now
+	logs.Info("[model:AddMovimiento] Fechas forzadas — FechaCreacion=%v FechaModificacion=%v", m.FechaCreacion, m.FechaModificacion)
+
 	o := orm.NewOrm()
 	logs.Info("[model:AddMovimiento] Ejecutando o.Insert(m)...")
 	id, err = o.Insert(m)
