@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
@@ -83,10 +84,13 @@ func PostRevisionComite(n *TrRevisionBaja) (ids []int, err error) {
 			detalle.DependenciaId = n.DependenciaId
 
 			for _, el := range detalle.Elementos {
+				now := time.Now()
 				novedad := NovedadElemento{
 					MovimientoId:         &Movimiento{Id: id},
 					ElementoMovimientoId: &ElementosMovimiento{Id: el},
 					Activo:               true,
+					FechaCreacion:        now,
+					FechaModificacion:    now,
 				}
 
 				_, err = o.Insert(&novedad)

@@ -34,6 +34,9 @@ func init() {
 // AddNovedadElemento insert a new NovedadElemento into database and returns
 // last inserted Id on success.
 func AddNovedadElemento(m *NovedadElemento) (id int64, err error) {
+	now := time.Now()
+	m.FechaCreacion = now
+	m.FechaModificacion = now
 	o := orm.NewOrm()
 	id, err = o.Insert(m)
 	return

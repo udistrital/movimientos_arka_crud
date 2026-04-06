@@ -49,6 +49,9 @@ func AddTransaccionKardex(n *KardexGeneral) (err error) {
 
 	for _, m := range n.Movimiento {
 
+		now := time.Now()
+		m.Kardex.FechaCreacion = now
+		m.Kardex.FechaModificacion = now
 		idSalida, err_ := o.Insert(m.Kardex)
 		if err_ != nil {
 			return err_
@@ -60,6 +63,8 @@ func AddTransaccionKardex(n *KardexGeneral) (err error) {
 			var elemento__ ElementosMovimiento
 			id__ := elemento.Id
 			elemento.Id = 0
+			elemento.FechaCreacion = now
+			elemento.FechaModificacion = now
 
 			_, err = o.Insert(elemento)
 			if err != nil {
