@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
@@ -8,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 	"github.com/udistrital/utils_oas/formatdata"
 )
@@ -38,8 +40,73 @@ func init() {
 // AddMovimiento insert a new Movimiento into database and returns
 // last inserted Id on success.
 func AddMovimiento(m *Movimiento) (id int64, err error) {
+	logs.Info("[model:AddMovimiento] ===== INICIO =====")
+	logs.Info("[model:AddMovimiento] Struct recibido ANTES del insert:")
+	logs.Info("[model:AddMovimiento]   Id=%d (debe ser 0 para auto-increment)", m.Id)
+	logs.Info("[model:AddMovimiento]   Observacion=%q", m.Observacion)
+	logs.Info("[model:AddMovimiento]   Activo=%v", m.Activo)
+	logs.Info("[model:AddMovimiento]   Detalle=%q", m.Detalle)
+
+	if m.FechaCorte != nil {
+		logs.Info("[model:AddMovimiento]   FechaCorte=%v", *m.FechaCorte)
+	} else {
+		logs.Info("[model:AddMovimiento]   FechaCorte=nil")
+	}
+	if m.ConsecutivoId != nil {
+		logs.Info("[model:AddMovimiento]   ConsecutivoId=%d", *m.ConsecutivoId)
+	} else {
+		logs.Info("[model:AddMovimiento]   ConsecutivoId=nil")
+	}
+	if m.Consecutivo != nil {
+		logs.Info("[model:AddMovimiento]   Consecutivo=%q", *m.Consecutivo)
+	} else {
+		logs.Info("[model:AddMovimiento]   Consecutivo=nil")
+	}
+
+	if m.FormatoTipoMovimientoId != nil {
+		logs.Info("[model:AddMovimiento]   FormatoTipoMovimientoId.Id=%d (este es el FK que se insertará)", m.FormatoTipoMovimientoId.Id)
+	} else {
+		logs.Error("[model:AddMovimiento]   FormatoTipoMovimientoId=NIL — esto causará error o insertará 0")
+	}
+
+	if m.EstadoMovimientoId != nil {
+		logs.Info("[model:AddMovimiento]   EstadoMovimientoId.Id=%d (este es el FK que se insertará)", m.EstadoMovimientoId.Id)
+	} else {
+		logs.Error("[model:AddMovimiento]   EstadoMovimientoId=NIL — esto causará error o insertará 0")
+	}
+
+	if m.MovimientoPadreId != nil {
+		logs.Info("[model:AddMovimiento]   MovimientoPadreId.Id=%d", m.MovimientoPadreId.Id)
+	} else {
+		logs.Info("[model:AddMovimiento]   MovimientoPadreId=nil")
+	}
+
+	mJSON, _ := json.MarshalIndent(m, "", "  ")
+	logs.Info("[model:AddMovimiento] Struct completo serializado:\n%s", string(mJSON))
+
 	o := orm.NewOrm()
+	logs.Info("[model:AddMovimiento] Ejecutando o.Insert(m)...")
 	id, err = o.Insert(m)
+
+	if err != nil {
+		logs.Error("[model:AddMovimiento] INSERT FALLÓ — error: %v", err)
+		logs.Error("[model:AddMovimiento] Tipo de error: %T", err)
+		logs.Error("[model:AddMovimiento] m.Id después del insert fallido: %d", m.Id)
+	} else {
+		logs.Info("[model:AddMovimiento] INSERT OK")
+		logs.Info("[model:AddMovimiento]   id retornado por o.Insert: %d", id)
+		logs.Info("[model:AddMovimiento]   m.Id después del insert: %d", m.Id)
+		logs.Info("[model:AddMovimiento]   (ambos deben coincidir y ser > 0)")
+
+		if id <= 0 {
+			logs.Error("[model:AddMovimiento] ALERTA: id retornado es <= 0, posible insert fantasma")
+		}
+		if m.Id <= 0 {
+			logs.Error("[model:AddMovimiento] ALERTA: m.Id es <= 0 después del insert, el ORM no asignó el auto-increment")
+		}
+	}
+
+	logs.Info("[model:AddMovimiento] ===== FIN =====")
 	return
 }
 
@@ -202,7 +269,7 @@ func GetEntradaByActa(acta_recibido_id int) (entrada *Movimiento, err error) {
 	return entrada, nil
 }
 
-// GetEntradaByActa Retorna la entrada asociada a un acta determinada
+// GetTrasladosByTerceroId Retorna la entrada asociada a un acta determinada
 func GetTrasladosByTerceroId(terceroId int, porRecibir bool, traslados *[]Movimiento) (err error) {
 
 	o := orm.NewOrm()
