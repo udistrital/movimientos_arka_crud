@@ -32,6 +32,9 @@ func init() {
 // AddCentroCostos insert a new CentroCostos into database and returns
 // last inserted Id on success.
 func AddCentroCostos(m *CentroCostos) (id int64, err error) {
+	now := time.Now()
+	m.FechaCreacion = now
+	m.FechaModificacion = now
 	o := orm.NewOrm()
 	id, err = o.Insert(m)
 	return
