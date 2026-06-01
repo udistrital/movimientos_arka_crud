@@ -1,7 +1,9 @@
 package models
 
 import (
+	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/astaxie/beego/logs"
@@ -16,6 +18,13 @@ type SalidaGeneral struct {
 	Salidas []TrSalida
 }
 
+type accionPersistenciaElementoSalida int
+
+const (
+	insertarElementoSalida accionPersistenciaElementoSalida = iota
+	reutilizarElementoSalida
+)
+
 // AddTransaccionSalida Transacción para registrar todas las salidas asociadas a una entrada
 func AddTransaccionSalida(n *SalidaGeneral) (err error) {
 
@@ -27,6 +36,8 @@ func AddTransaccionSalida(n *SalidaGeneral) (err error) {
 			err = r.(error)
 			o.Rollback()
 			logs.Error(r)
+		} else if err != nil {
+			o.Rollback()
 		} else {
 			o.Commit()
 		}
@@ -34,6 +45,10 @@ func AddTransaccionSalida(n *SalidaGeneral) (err error) {
 
 	err = o.Begin()
 	if err != nil {
+		return
+	}
+
+	if err = validarTransaccionSalida(n); err != nil {
 		return
 	}
 
@@ -59,17 +74,133 @@ func AddTransaccionSalida(n *SalidaGeneral) (err error) {
 
 		mov := Movimiento{Id: int(idSalida)}
 		for _, elemento := range m.Elementos {
-			elemento.MovimientoId = &mov
-			elemento.FechaCreacion = now
-			elemento.FechaModificacion = now
-			_, err = o.Insert(elemento)
-			if err != nil {
+			if err = persistirElementoSalida(o, &mov, elemento, now); err != nil {
 				panic(err)
 			}
 		}
 	}
 
 	return
+}
+
+func validarTransaccionSalida(n *SalidaGeneral) error {
+	if n == nil || len(n.Salidas) == 0 {
+		return fmt.Errorf("no se recibieron salidas para registrar")
+	}
+
+	if n.Salidas[0].Salida == nil || n.Salidas[0].Salida.MovimientoPadreId == nil || n.Salidas[0].Salida.MovimientoPadreId.Id <= 0 {
+		return fmt.Errorf("la salida debe incluir un movimiento padre valido")
+	}
+
+	return nil
+}
+
+func persistirElementoSalida(o orm.Ormer, mov *Movimiento, elemento *ElementosMovimiento, now time.Time) error {
+	if elemento == nil {
+		return fmt.Errorf("se recibio un elemento de salida vacio")
+	}
+
+	elemento.MovimientoId = mov
+	elemento.FechaModificacion = now
+
+	existente, err := buscarElementoMovimientoPorActa(o, elemento.ElementoActaId)
+	if err != nil {
+		return err
+	}
+
+	accion, err := resolverAccionElementoSalida(existente)
+	if err != nil {
+		return err
+	}
+
+	switch accion {
+	case reutilizarElementoSalida:
+		elemento.Id = existente.Id
+		elemento.ElementoActaId = existente.ElementoActaId
+		elemento.FechaCreacion = existente.FechaCreacion
+		_, err = o.Update(
+			elemento,
+			"MovimientoId",
+			"Unidad",
+			"ValorUnitario",
+			"ValorTotal",
+			"SaldoCantidad",
+			"SaldoValor",
+			"VidaUtil",
+			"ValorResidual",
+			"Activo",
+			"FechaModificacion",
+		)
+		return err
+	default:
+		elemento.FechaCreacion = now
+		_, err = o.Insert(elemento)
+		return err
+	}
+}
+
+func buscarElementoMovimientoPorActa(o orm.Ormer, elementoActaID *int) (*ElementosMovimiento, error) {
+	if elementoActaID == nil || *elementoActaID <= 0 {
+		return nil, nil
+	}
+
+	var elemento ElementosMovimiento
+	err := o.QueryTable(new(ElementosMovimiento)).RelatedSel().Filter("ElementoActaId", *elementoActaID).One(&elemento)
+	if err == orm.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	if elemento.MovimientoId != nil && elemento.MovimientoId.Id > 0 {
+		movimiento := Movimiento{Id: elemento.MovimientoId.Id}
+		if err = o.QueryTable(new(Movimiento)).RelatedSel().Filter("Id", elemento.MovimientoId.Id).One(&movimiento); err != nil {
+			return nil, err
+		}
+		elemento.MovimientoId = &movimiento
+	}
+
+	return &elemento, nil
+}
+
+func resolverAccionElementoSalida(existente *ElementosMovimiento) (accionPersistenciaElementoSalida, error) {
+	if existente == nil {
+		return insertarElementoSalida, nil
+	}
+
+	if existente.MovimientoId == nil {
+		return reutilizarElementoSalida, nil
+	}
+
+	estado := ""
+	movimientoID := existente.MovimientoId.Id
+	if existente.MovimientoId.EstadoMovimientoId != nil {
+		estado = existente.MovimientoId.EstadoMovimientoId.Nombre
+	}
+
+	if estadoSalidaPermiteReuso(estado) {
+		return reutilizarElementoSalida, nil
+	}
+
+	return insertarElementoSalida, fmt.Errorf(
+		"el elemento de acta %d ya tiene una salida asociada (movimiento %d, estado %q) y no puede registrarse nuevamente",
+		valorElementoActa(existente.ElementoActaId),
+		movimientoID,
+		estado,
+	)
+}
+
+func estadoSalidaPermiteReuso(nombre string) bool {
+	estado := strings.ToLower(strings.TrimSpace(nombre))
+	return estado == "salida rechazada" || estado == "salida anulada"
+}
+
+func valorElementoActa(elementoActaID *int) int {
+	if elementoActaID == nil {
+		return 0
+	}
+	return *elementoActaID
 }
 
 // AddTransaccionProduccionAcademica Transacción para registrar toda la información de un grupo asociándolo a un catálogo
@@ -107,8 +238,11 @@ func PutTransaccionSalida(n *SalidaGeneral) (err error) {
 
 	defer func() {
 		if r := recover(); r != nil {
+			err = r.(error)
 			o.Rollback()
 			logs.Error(r)
+		} else if err != nil {
+			o.Rollback()
 		} else {
 			o.Commit()
 		}
