@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"net/http"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -59,15 +60,11 @@ func (c *TrSalidaController) Post() {
 			c.Data["json"] = v
 		} else {
 			logs.Error(err)
-			//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
-			c.Data["system"] = err
-			c.Abort("400")
+			responderErrorTrSalida(c, http.StatusBadRequest, "No fue posible registrar la salida", err)
 		}
 	} else {
 		logs.Error(err)
-		//c.Data["development"] = map[string]interface{}{"Code": "000", "Body": err.Error(), "Type": "error"}
-		c.Data["system"] = err
-		c.Abort("400")
+		responderErrorTrSalida(c, http.StatusBadRequest, "El body de la salida es invalido", err)
 	}
 	c.ServeJSON()
 }
@@ -88,13 +85,21 @@ func (c *TrSalidaController) Put() {
 			c.Data["json"] = v
 		} else {
 			logs.Error(err)
-			c.Data["system"] = err
-			c.Abort("400")
+			responderErrorTrSalida(c, http.StatusBadRequest, "No fue posible actualizar la salida", err)
 		}
 	} else {
 		logs.Error(err)
-		c.Data["system"] = err
-		c.Abort("400")
+		responderErrorTrSalida(c, http.StatusBadRequest, "El body de la salida es invalido", err)
 	}
 	c.ServeJSON()
+}
+
+func responderErrorTrSalida(c *TrSalidaController, status int, message string, err error) {
+	c.Ctx.Output.SetStatus(status)
+	c.Data["json"] = map[string]interface{}{
+		"Data":    err.Error(),
+		"Message": message,
+		"Status":  strconv.Itoa(status),
+		"Success": false,
+	}
 }
